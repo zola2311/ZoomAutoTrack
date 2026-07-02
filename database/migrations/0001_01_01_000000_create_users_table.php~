@@ -24,8 +24,8 @@ return new class extends Migration
                 ->nullOnDelete();
 
             $table->string('phone')->nullable()->after('email');
-            $table->string('role')->default('admin');
-            $table->boolean('is_active')->default(true);
+            $table->string('role')->default('admin')->after('password');
+            $table->boolean('is_active')->default(true)->after('role');
             $table->rememberToken();
             $table->timestamps();
         });

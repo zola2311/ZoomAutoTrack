@@ -1,0 +1,60 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('inventory_supplier_prices', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('inventory_item_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->foreignId('supplier_id')
+                ->constrained()
+                ->cascadeOnDelete();
+
+            $table->string('supplier_part_number')->nullable();
+
+            $table->decimal('last_price', 12, 2)->nullable();
+            $table->string('currency')->default('ETB');
+
+            $table->integer('available_quantity')->nullable();
+
+            $table->string('condition')->default('new');
+            $table->string('quality_grade')->nullable();
+
+            $table->timestamp('quoted_at')->nullable();
+            $table->timestamp('last_checked_at')->nullable();
+
+            $table->foreignId('checked_by')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
+
+            $table->text('notes')->nullable();
+
+            $table->timestamps();
+
+            $table->unique(
+                ['inventory_item_id', 'supplier_id', 'supplier_part_number'],
+                'item_supplier_part_unique'
+            );
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('inventory_supplier_prices');
+    }
+};
