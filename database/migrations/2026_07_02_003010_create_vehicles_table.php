@@ -33,6 +33,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['branch_id', 'plate_number']);
+            $table->softDeletes();
         });
     }
 

@@ -34,6 +34,7 @@ return new class extends Migration
             $table->timestamps();
 
             $table->unique(['branch_id', 'part_number']);
+            $table->softDeletes();
 
         });
     }

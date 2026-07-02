@@ -30,6 +30,7 @@ return new class extends Migration
             $table->string('preferred_language')->default('en');
             $table->unsignedInteger('loyalty_points')->default(0);
             $table->text('notes')->nullable();
+            $table->softDeletes();
             $table->timestamps();
         });
     }
