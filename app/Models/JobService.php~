@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class JobService extends Model
+{
+    protected $guarded = ['id'];
+
+    protected $casts = [
+        'labor_cost' => 'decimal:2',
+        'is_completed' => 'boolean',
+        'completed_at' => 'datetime',
+    ];
+
+    public function jobCard() { return $this->belongsTo(JobCard::class); }
+    public function assignedMechanic() { return $this->belongsTo(User::class, 'assigned_mechanic_id'); }
+}

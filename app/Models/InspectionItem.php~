@@ -1,0 +1,19 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class InspectionItem extends Model
+{
+    protected $guarded = ['id'];
+
+    protected $casts = [
+        'requires_photo' => 'boolean',
+        'requires_voice_note' => 'boolean',
+        'sort_order' => 'integer',
+        'is_active' => 'boolean',
+    ];
+
+    public function answers() { return $this->hasMany(VehicleInspectionAnswer::class); }
+}
