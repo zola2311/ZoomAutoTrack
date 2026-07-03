@@ -59,7 +59,7 @@ class CustomerForm
                             ->label('Phone Number')
                             ->tel()
                             ->required()
-                            ->maxLength(20),
+                            ->maxLength(20)->unique(table: 'customers', column: 'phone', ignoreRecord: true),
 
                         TextInput::make('secondary_phone')
                             ->label('Secondary Phone')

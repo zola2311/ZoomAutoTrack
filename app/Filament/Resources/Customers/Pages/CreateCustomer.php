@@ -8,12 +8,20 @@ use Filament\Facades\Filament;
 class CreateCustomer extends CreateRecord
 {
     protected static string $resource = CustomerResource::class;
-    protected function mutateFormDataBeforeCreate(array $data): array
+    protected function mutateFormDataBeforeFill(array $data): array
     {
-        $user = Filament::auth()->user();
-
-        $data['branch_id'] = $user->branch_id ?? 1;
-
+        if (! auth()->user()->hasRole(['admin', 'manager'])) {
+            $data['branch_id'] = auth()->user()->branch_id ?? 1;
+        }
         return $data;
     }
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (empty($data['branch_id'])) {
+            $data['branch_id'] = auth()->user()->branch_id ?? 1;
+        }
+        return $data;
+    }
+
+
 }
