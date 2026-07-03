@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Str;
 class Customer extends Model
 {
     use SoftDeletes;
@@ -30,4 +30,13 @@ class Customer extends Model
     public function vehicles() { return $this->hasMany(Vehicle::class); }
     public function jobCards() { return $this->hasMany(JobCard::class); }
     public function invoices() { return $this->hasMany(Invoice::class); }
+    protected static function booted(): void
+    {
+        static::creating(function (Customer $customer) {
+            $customer->customer_code = 'CUST-' . str_pad(
+                    Customer::withTrashed()->count() + 1,
+                    4, '0', STR_PAD_LEFT
+                );
+        });
+    }
 }

@@ -6,30 +6,122 @@ use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
+use Spatie\Permission\Models\Role;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // Branch
-        $branchId = DB::table('branches')->insertGetId([
-            'name'       => 'AutoTrack Bole',
-            'phone'      => '+251 11 123 4567',
-            'address'    => 'Bole Road, Addis Ababa',
-            'is_active'  => true,
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        // 1. Define ALL unique permissions across all roles
+        $permissions = [
+            // Core original permissions
+            'manage users',
+            'manage branches',
+            'manage customers',
+            'manage vehicles',
+            'manage job cards',
+            'assign mechanics',
+            'manage inspections',
+            'manage inventory',
+            'manage suppliers',
+            'manage purchase orders',
+            'manage invoices',
+            'receive payments',
+            'view reports',
+            'manage settings',
 
-        // Admin user
-        User::create([
-            'branch_id'  => $branchId,
-            'name'       => 'AutoTrack Admin',
-            'email'      => 'admin@autotrack.et',
-            'password'   => Hash::make('password'),
-            'phone'      => '+251 91 000 0000',
-            'role'       => 'admin',
-            'is_active'  => true,
-        ]);
+            // New fine-grained permissions requested for mechanic/receptionist roles
+            'view assigned job cards',
+            'update assigned job cards',
+            'use job parts',
+            'complete services',
+            'create job cards',
+            'view job cards',
+            'view invoices',
+            'create invoices',
+            'manage invoices',
+            'void invoices',
+
+        ];
+
+        // Bulk insert or find permissions
+        foreach ($permissions as $permission) {
+            Permission::firstOrCreate(['name' => $permission]);
+        }
+
+        // 2. Define Roles and map their specific permissions
+        $rolePermissions = [
+            'admin' => $permissions, // Gets everything
+
+            'manager' => [
+                'manage customers', 'manage vehicles', 'manage job cards', 'assign mechanics',
+                'manage inspections', 'manage inventory', 'manage suppliers', 'manage purchase orders',
+                'manage invoices', 'receive payments', 'view reports'
+            ],
+
+            'service_advisor' => [
+                'manage customers', 'manage vehicles', 'manage job cards',
+                'assign mechanics', 'manage inspections', 'manage invoices'
+            ],
+
+            'mechanic' => [
+                'view assigned job cards', 'update assigned job cards',
+                'manage inspections', 'use job parts', 'complete services'
+            ],
+
+            'receptionist' => [
+                'manage customers', 'manage vehicles', 'create job cards', 'view job cards'
+            ],
+
+            'cashier' => [
+                // Invoice permissions
+                'view invoices',
+                'create invoices',
+                'manage invoices',
+                'void invoices',
+                'receive payments',
+            ],
+
+            'inventory_manager' => [
+                'manage inventory', 'manage suppliers', 'manage purchase orders'
+            ],
+        ];
+
+        // Create roles and sync their assigned permissions
+        foreach ($rolePermissions as $roleName => $assignedPermissions) {
+            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role->syncPermissions($assignedPermissions);
+        }
+
+        // 3. Ensure a base branch exists
+        DB::table('branches')->updateOrInsert(
+            ['name' => 'AutoTrack Bole'],
+            [
+                'phone'      => '+251 11 123 4567',
+                'address'    => 'Bole Road, Addis Ababa',
+                'is_active'  => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]
+        );
+
+        $branchId = DB::table('branches')->where('name', 'AutoTrack Bole')->value('id');
+
+        // 4. Create or Update the Admin user safely
+        $admin = User::updateOrCreate(
+            ['email' => 'admin@autotrack.et'],
+            [
+                'branch_id'  => $branchId,
+                'name'       => 'AutoTrack Admin',
+                'password'   => Hash::make('password'), // Change in production!
+                'phone'      => '+251 91 000 0000',
+                'role'       => 'admin',
+                'is_active'  => true,
+            ]
+        );
+
+        // Assign the admin role to this user
+        $admin->assignRole('admin');
     }
 }
