@@ -1,0 +1,183 @@
+<?php
+
+namespace App\Filament\Resources\JobCards\RelationManagers;
+
+use App\Models\InspectionItem;
+use App\Models\User;
+use Filament\Facades\Filament;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+use Filament\Resources\RelationManagers\RelationManager;
+use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+class VehicleInspectionsRelationManager extends RelationManager
+{
+    protected static string $relationship = 'inspections';
+
+    protected static ?string $recordTitleAttribute = 'type';
+
+    protected static ?string $title = 'Vehicle Inspections';
+
+    public function form(Schema $schema): Schema
+    {
+        return $schema
+            ->schema([
+                Section::make()
+                    ->schema([
+                        Select::make('type')
+                            ->label('Inspection Type')
+                            ->options([
+                                'checkin' => 'Check-in Inspection',
+                                'checkout' => 'Check-out Inspection',
+                                'periodic' => 'Periodic Inspection',
+                            ])
+                            ->required()
+                            ->default('checkin'),
+
+                        Select::make('inspected_by')
+                            ->label('Inspected By')
+                            ->options(fn () => User::query()
+                                ->whereHas('roles', fn ($q) => $q->whereIn('name', ['mechanic', 'service_advisor']))
+                                ->orWhereIn('role', ['mechanic', 'service_advisor'])
+                                ->orderBy('name')
+                                ->pluck('name', 'id')
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->nullable(),
+
+                        DateTimePicker::make('inspected_at')
+                            ->label('Inspection Date')
+                            ->default(now()),
+
+                        Textarea::make('notes')
+                            ->label('General Notes')
+                            ->rows(2)
+                            ->nullable(),
+
+                        Repeater::make('answers')
+                            ->label('Inspection Checklist')
+                            ->relationship('answers')
+                            ->schema([
+                                Select::make('inspection_item_id')
+                                    ->label('Item')
+                                    ->options(fn () => InspectionItem::query()
+                                        ->where('is_active', true)
+                                        ->orderBy('sort_order')
+                                        ->orderBy('name')
+                                        ->pluck('name', 'id')
+                                    )
+                                    ->searchable()
+                                    ->preload()
+                                    ->required(),
+
+                                Select::make('result')
+                                    ->label('Result')
+                                    ->options([
+                                        'pass' => '✅ Pass',
+                                        'fail' => '❌ Fail',
+                                        'warning' => '⚠️ Warning',
+                                        'n/a' => 'N/A',
+                                    ])
+                                    ->required(),
+
+                                Textarea::make('notes')
+                                    ->label('Notes')
+                                    ->rows(2)
+                                    ->nullable(),
+
+                                TextInput::make('value')
+                                    ->label('Value (if numeric)')
+                                    ->numeric()
+                                    ->nullable()
+                                    ->placeholder('e.g. 32 PSI, 5mm'),
+                            ])
+                            ->columns(2)
+                            ->addActionLabel('Add Inspection Item')
+                            ->defaultItems(0)
+                            ->columnSpanFull(),
+                    ]),
+            ]);
+    }
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('type')
+                    ->label('Type')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'checkin' => 'info',
+                        'checkout' => 'success',
+                        'periodic' => 'warning',
+                        default => 'gray',
+                    })
+                    ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
+
+                TextColumn::make('inspector.name')
+                    ->label('Inspector')
+                    ->searchable()
+                    ->placeholder('—'),
+
+                TextColumn::make('inspected_at')
+                    ->label('Date')
+                    ->dateTime()
+                    ->sortable(),
+
+                TextColumn::make('answers_count')
+                    ->label('Items Checked')
+                    ->counts('answers')
+                    ->badge()
+                    ->color('gray'),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('inspected_at', 'desc')
+            ->filters([
+                Tables\Filters\SelectFilter::make('type')
+                    ->options([
+                        'checkin' => 'Check-in',
+                        'checkout' => 'Check-out',
+                        'periodic' => 'Periodic',
+                    ]),
+
+                Tables\Filters\SelectFilter::make('inspected_by')
+                    ->label('Inspector')
+                    ->options(fn () => User::query()
+                        ->whereHas('roles', fn ($q) => $q->whereIn('name', ['mechanic', 'service_advisor']))
+                        ->orWhereIn('role', ['mechanic', 'service_advisor'])
+                        ->orderBy('name')
+                        ->pluck('name', 'id')
+                    ),
+            ])
+            // ✅ FIXED: Filament 4.x action namespace
+            ->recordActions([
+                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                \Filament\Actions\CreateAction::make(),
+                \Filament\Actions\BulkActionGroup::make([
+                    \Filament\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+    public function isReadOnly(): bool
+    {
+        return false;
+    }
+}

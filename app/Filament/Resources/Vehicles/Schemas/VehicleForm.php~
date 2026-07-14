@@ -38,10 +38,7 @@ class VehicleForm
                         TextInput::make('plate_number')
                             ->label('Plate Number')
                             ->required()
-                            ->maxLength(20)
-                            ->unique(table: 'vehicles', column: 'plate_number', ignoreRecord: true)
-                            ->placeholder('AA 3-45678')
-                            ->hint('Ethiopian format: AA 3-45678'),
+                            ->maxLength(50),
 
                         TextInput::make('make')
                             ->required()

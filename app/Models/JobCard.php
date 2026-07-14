@@ -48,4 +48,14 @@ class JobCard extends Model
     public function inspections() { return $this->hasMany(VehicleInspection::class); }
     public function invoice() { return $this->hasOne(Invoice::class); }
     public function media() { return $this->morphMany(Media::class, 'model'); }
+    protected static function booted(): void
+    {
+        static::creating(function (JobCard $jobCard) {
+            $jobCard->job_number = 'JOB-' . str_pad(
+                    JobCard::withTrashed()->count() + 1,
+                    5, '0', STR_PAD_LEFT
+                );
+            $jobCard->checked_in_at = now(); // ← add this line
+        });
+    }
 }

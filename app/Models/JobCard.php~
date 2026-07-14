@@ -17,6 +17,26 @@ class JobCard extends Model
         'completed_at' => 'datetime',
         'delivered_at' => 'datetime',
     ];
+    protected $fillable = [
+        'branch_id',
+        'customer_id',
+        'vehicle_id',
+        'service_advisor_id',
+        'mechanic_id',
+        'job_number',
+        'mileage_at_checkin',
+        'fuel_level',
+        'customer_complaint',
+        'customer_complaint_voice_id',
+        'mechanic_notes',
+        'mechanic_notes_voice_id',
+        'status',
+        'priority',
+        'checked_in_at',
+        'estimated_completion_at',
+        'completed_at',
+        'delivered_at',
+    ];
 
     public function branch() { return $this->belongsTo(Branch::class); }
     public function customer() { return $this->belongsTo(Customer::class); }
@@ -28,4 +48,13 @@ class JobCard extends Model
     public function inspections() { return $this->hasMany(VehicleInspection::class); }
     public function invoice() { return $this->hasOne(Invoice::class); }
     public function media() { return $this->morphMany(Media::class, 'model'); }
+    protected static function booted(): void
+    {
+        static::creating(function (JobCard $jobCard) {
+            $jobCard->job_number = 'JOB-' . str_pad(
+                    JobCard::withTrashed()->count() + 1,
+                    5, '0', STR_PAD_LEFT
+                );
+        });
+    }
 }

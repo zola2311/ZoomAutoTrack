@@ -1,0 +1,145 @@
+<?php
+
+namespace App\Filament\Resources\InventoryItems\Tables;
+
+use App\Models\InventoryItem;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+class InventoryItemsTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                Tables\Columns\TextColumn::make('part_number')
+                    ->label('Part #')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
+
+                Tables\Columns\TextColumn::make('name')
+                    ->label('Part Name')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium'),
+
+                Tables\Columns\TextColumn::make('category')
+                    ->label('Category')
+                    ->badge()
+                    ->color('gray'),
+
+                Tables\Columns\TextColumn::make('brand')
+                    ->label('Brand')
+                    ->searchable()
+                    ->toggleable()
+                    ->placeholder('-'),
+
+                Tables\Columns\TextColumn::make('quantity_on_hand')
+                    ->label('Stock')
+                    ->numeric()
+                    ->sortable()
+                    ->color(fn ($state): string => match(true) {
+                        $state <= 0 => 'danger',
+                        $state <= 5 => 'warning',
+                        default => 'success',
+                    }),
+
+                Tables\Columns\TextColumn::make('selling_price')
+                    ->label('Price')
+                    ->money('ETB')
+                    ->sortable(),
+
+                Tables\Columns\IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean()
+                    ->toggleable(),
+            ])
+            ->filters([
+                Tables\Filters\SelectFilter::make('category')
+                    ->options([
+                        'engine' => 'Engine',
+                        'brakes' => 'Brakes',
+                        'suspension' => 'Suspension',
+                        'electrical' => 'Electrical',
+                        'body' => 'Body',
+                        'interior' => 'Interior',
+                        'exterior' => 'Exterior',
+                        'lighting' => 'Lighting',
+                        'cooling' => 'Cooling',
+                        'exhaust' => 'Exhaust',
+                        'transmission' => 'Transmission',
+                        'steering' => 'Steering',
+                        'tires' => 'Tires & Wheels',
+                        'battery' => 'Battery',
+                        'fluids' => 'Fluids & Lubricants',
+                        'other' => 'Other',
+                    ]),
+
+                Tables\Filters\Filter::make('low_stock')
+                    ->label('Low Stock Items')
+                    ->query(fn (Builder $query) =>
+                    $query->where('quantity_on_hand', '<=', 'minimum_stock')
+                        ->where('is_active', true)
+                    ),
+            ])
+            ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('adjust_stock')
+                    ->label('Adjust Stock')
+                    ->icon('heroicon-o-arrows-up-down')
+                    ->color('warning')
+                    ->form([
+                        Tables\Forms\Components\Select::make('adjustment_type')
+                            ->label('Adjustment Type')
+                            ->options([
+                                'add' => 'Add Stock (+1)',
+                                'subtract' => 'Remove Stock (-1)',
+                                'set' => 'Set Exact Quantity',
+                            ])
+                            ->required(),
+
+                        Tables\Forms\Components\TextInput::make('quantity')
+                            ->label('Quantity')
+                            ->numeric()
+                            ->required()
+                            ->minValue(1),
+
+                        Tables\Forms\Components\Textarea::make('notes')
+                            ->label('Reason for Adjustment')
+                            ->rows(2),
+                    ])
+                    ->action(function (InventoryItem $record, array $data) {
+                        $currentStock = $record->quantity_on_hand;
+                        $quantity = (int) $data['quantity'];
+
+                        switch ($data['adjustment_type']) {
+                            case 'add':
+                                $newStock = $currentStock + $quantity;
+                                break;
+                            case 'subtract':
+                                $newStock = max(0, $currentStock - $quantity);
+                                break;
+                            case 'set':
+                                $newStock = $quantity;
+                                break;
+                        }
+
+                        $record->update(['quantity_on_hand' => $newStock]);
+
+                        \Filament\Notifications\Notification::make()
+                            ->title('Stock Updated')
+                            ->body("Quantity changed from {$currentStock} to {$newStock}")
+                            ->success()
+                            ->send();
+                    }),
+            ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

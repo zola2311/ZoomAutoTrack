@@ -1,0 +1,203 @@
+<?php
+
+namespace App\Filament\Resources\Invoices\Schemas;
+
+use App\Models\JobCard;
+use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Select;
+use Filament\Forms\Components\TextInput;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Components\Utilities\Set;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Schema;
+
+class InvoiceForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Invoice Details')
+                    ->columns(2)
+                    ->schema([
+                        Select::make('job_card_id')
+                            ->label('Job Card')
+                            ->relationship('jobCard', 'job_number')
+                            ->searchable()
+                            ->preload()
+                            ->required()
+                            ->disabledOn('edit')
+                            ->live()
+                            ->afterStateUpdated(function ($state, Set $set) {
+                                if (! $state) {
+                                    return;
+                                }
+
+                                $jobCard = JobCard::with(['services', 'partsUsed.inventoryItem'])
+                                    ->find($state);
+
+                                if (! $jobCard) {
+                                    return;
+                                }
+
+                                $items = [];
+
+                                foreach ($jobCard->services as $service) {
+                                    $items[] = [
+                                        'item_type'   => 'labor',
+                                        'description' => $service->description,
+                                        'quantity'    => 1,
+                                        'unit_price'  => $service->labor_cost,
+                                        'discount'    => 0,
+                                        'tax'         => 0,
+                                        'total'       => $service->labor_cost,
+                                    ];
+                                }
+
+                                foreach ($jobCard->partsUsed as $part) {
+                                    $items[] = [
+                                        'item_type'   => 'part',
+                                        'description' => optional($part->inventoryItem)->name ?? 'Part',
+                                        'quantity'    => $part->quantity,
+                                        'unit_price'  => $part->unit_price,
+                                        'discount'    => $part->discount,
+                                        'tax'         => 0,
+                                        'total'       => $part->total,
+                                    ];
+                                }
+
+                                $set('items', $items);
+                            }),
+
+                        Select::make('status')
+                            ->required()
+                            ->default('unpaid')
+                            ->options([
+                                'unpaid'  => 'Unpaid',
+                                'partial' => 'Partially Paid',
+                                'paid'    => 'Paid',
+                                'void'    => 'Void',
+                            ]),
+
+                        DateTimePicker::make('issued_at')->default(now()),
+                        DateTimePicker::make('due_at'),
+                    ]),
+
+                Section::make('Line Items')
+                    ->schema([
+                        Repeater::make('items')
+                            ->relationship()
+                            ->itemLabel(fn (array $state): ?string => $state['description'] ?? 'New item')
+                            ->collapsible()
+                            ->collapsed(false)
+                            ->schema([
+                                Select::make('item_type')
+                                    ->options([
+                                        'labor' => 'Labor',
+                                        'part'  => 'Part',
+                                        'other' => 'Other',
+                                    ])
+                                    ->required()
+                                    ->columnSpan(1),
+
+                                TextInput::make('description')
+                                    ->required()
+                                    ->columnSpan(3),
+
+                                TextInput::make('quantity')
+                                    ->numeric()
+                                    ->default(1)
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, Get $get) {
+                                        $set('total', round(
+                                            ($get('quantity') ?? 0) * ($get('unit_price') ?? 0)
+                                            - ($get('discount') ?? 0) + ($get('tax') ?? 0),
+                                            2
+                                        ));
+                                    }),
+
+                                TextInput::make('unit_price')
+                                    ->numeric()
+                                    ->required()
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, Get $get) {
+                                        $set('total', round(
+                                            ($get('quantity') ?? 0) * ($get('unit_price') ?? 0)
+                                            - ($get('discount') ?? 0) + ($get('tax') ?? 0),
+                                            2
+                                        ));
+                                    }),
+
+                                TextInput::make('discount')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, Get $get) {
+                                        $set('total', round(
+                                            ($get('quantity') ?? 0) * ($get('unit_price') ?? 0)
+                                            - ($get('discount') ?? 0) + ($get('tax') ?? 0),
+                                            2
+                                        ));
+                                    }),
+
+                                TextInput::make('tax')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, Get $get) {
+                                        $set('total', round(
+                                            ($get('quantity') ?? 0) * ($get('unit_price') ?? 0)
+                                            - ($get('discount') ?? 0) + ($get('tax') ?? 0),
+                                            2
+                                        ));
+                                    }),
+
+                                TextInput::make('total')
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated(),
+                            ])
+                            ->columns(4)
+                            ->addActionLabel('Add Item')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Totals')
+                    ->columns(3)
+                    ->schema([
+                        TextInput::make('subtotal')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(),
+
+                        TextInput::make('discount')
+                            ->label('Invoice Discount')
+                            ->numeric()
+                            ->default(0),
+
+                        TextInput::make('tax')
+                            ->label('Invoice Tax')
+                            ->numeric()
+                            ->default(0),
+
+                        TextInput::make('total')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(),
+
+                        TextInput::make('paid_amount')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated()
+                            ->helperText('Updates automatically when payments are recorded'),
+
+                        TextInput::make('balance')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(),
+                    ]),
+            ]);
+    }
+}

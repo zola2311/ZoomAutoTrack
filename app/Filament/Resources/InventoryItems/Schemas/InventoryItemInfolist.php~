@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Filament\Resources\InventoryItems\Schemas;
+
+use App\Models\InventoryItem;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Schema;
+
+class InventoryItemInfolist
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('branch_id')
+                    ->numeric(),
+                TextEntry::make('name'),
+                TextEntry::make('part_number')
+                    ->placeholder('-'),
+                TextEntry::make('category')
+                    ->placeholder('-'),
+                TextEntry::make('brand')
+                    ->placeholder('-'),
+                TextEntry::make('unit_cost')
+                    ->money(),
+                TextEntry::make('selling_price')
+                    ->money(),
+                TextEntry::make('quantity_on_hand')
+                    ->numeric(),
+                TextEntry::make('minimum_stock')
+                    ->numeric(),
+                TextEntry::make('location')
+                    ->placeholder('-'),
+                IconEntry::make('is_active')
+                    ->boolean(),
+                TextEntry::make('created_at')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('updated_at')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('deleted_at')
+                    ->dateTime()
+                    ->visible(fn (InventoryItem $record): bool => $record->trashed()),
+            ]);
+    }
+}

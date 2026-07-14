@@ -1,0 +1,83 @@
+<?php
+
+namespace App\Observers;
+
+use App\Models\Invoice;
+use App\Models\InvoiceItem;
+use App\Models\JobCard;
+
+class JobCardObserver
+{
+    public function updated(JobCard $jobCard): void
+    {
+        // Only trigger when status changes to completed
+        if (! $jobCard->wasChanged('status')) {
+            return;
+        }
+
+        if ($jobCard->status !== 'completed') {
+            return;
+        }
+
+        // Don't create a duplicate invoice if one already exists
+        if (Invoice::where('job_card_id', $jobCard->id)->exists()) {
+            return;
+        }
+
+        $jobCard->loadMissing(['services', 'partsUsed.inventoryItem']);
+
+        // Build invoice items from services (labor)
+        $items = [];
+
+        foreach ($jobCard->services as $service) {
+            $items[] = [
+                'item_type'   => 'labor',
+                'description' => $service->description,
+                'quantity'    => 1,
+                'unit_price'  => $service->labor_cost,
+                'discount'    => 0,
+                'tax'         => 0,
+                'total'       => $service->labor_cost,
+            ];
+        }
+
+        // Build invoice items from parts used
+        foreach ($jobCard->partsUsed as $part) {
+            $items[] = [
+                'item_type'   => 'part',
+                'description' => optional($part->inventoryItem)->name ?? 'Part',
+                'quantity'    => $part->quantity,
+                'unit_price'  => $part->unit_price,
+                'discount'    => $part->discount,
+                'tax'         => 0,
+                'total'       => $part->total,
+            ];
+        }
+
+        // Calculate totals
+        $subtotal = collect($items)->sum('total');
+        $total    = $subtotal; // no invoice-level tax/discount at creation
+
+        // Create the invoice
+        $invoice = Invoice::create([
+            'branch_id'      => $jobCard->branch_id,
+            'job_card_id'    => $jobCard->id,
+            'customer_id'    => $jobCard->customer_id,
+            'subtotal'       => $subtotal,
+            'discount'       => 0,
+            'tax'            => 0,
+            'total'          => $total,
+            'paid_amount'    => 0,
+            'balance'        => $total,
+            'status'         => 'unpaid',
+            'issued_at'      => now(),
+        ]);
+
+        // Create line items
+        foreach ($items as $item) {
+            InvoiceItem::create(array_merge($item, [
+                'invoice_id' => $invoice->id,
+            ]));
+        }
+    }
+}

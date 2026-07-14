@@ -3,8 +3,7 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use App\Models\JobCard;
-use App\Observers\JobCardObserver;
+
 class AppServiceProvider extends ServiceProvider
 {
     /**

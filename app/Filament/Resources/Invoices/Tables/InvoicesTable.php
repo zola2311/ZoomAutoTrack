@@ -1,0 +1,100 @@
+<?php
+
+namespace App\Filament\Resources\Invoices\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ForceDeleteBulkAction;
+use Filament\Actions\RestoreBulkAction;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TrashedFilter;
+use Filament\Tables\Table;
+
+class InvoicesTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+
+                TextColumn::make('invoice_number')
+                    ->label('Invoice #')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
+
+                TextColumn::make('jobCard.job_number')
+                    ->label('Job #')
+                    ->searchable(),
+
+                TextColumn::make('customer.full_name')
+                    ->label('Customer')
+                    ->searchable()
+                    ->sortable(),
+
+                TextColumn::make('total')
+                    ->money('ETB')
+                    ->sortable(),
+
+                TextColumn::make('paid_amount')
+                    ->label('Paid')
+                    ->money('ETB')
+                    ->sortable(),
+
+                TextColumn::make('balance')
+                    ->money('ETB')
+                    ->sortable()
+                    ->color(fn ($state) => $state > 0 ? 'danger' : 'success'),
+
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'unpaid'  => 'danger',
+                        'partial' => 'warning',
+                        'paid'    => 'success',
+                        'void'    => 'gray',
+                        default   => 'gray',
+                    }),
+
+                TextColumn::make('issued_at')
+                    ->label('Issued')
+                    ->dateTime('d M Y')
+                    ->sortable(),
+
+                TextColumn::make('due_at')
+                    ->label('Due')
+                    ->dateTime('d M Y')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+            ])
+            ->defaultSort('issued_at', 'desc')
+            ->filters([
+
+                SelectFilter::make('status')
+                    ->options([
+                        'unpaid'  => 'Unpaid',
+                        'partial' => 'Partially Paid',
+                        'paid'    => 'Paid',
+                        'void'    => 'Void',
+                    ]),
+
+                TrashedFilter::make(),
+
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                    ForceDeleteBulkAction::make(),
+                    RestoreBulkAction::make(),
+                ]),
+            ]);
+    }
+}

@@ -1,0 +1,48 @@
+<?php
+
+namespace App\Observers;
+
+use App\Models\JobCard;
+
+class JobCardObserver
+{
+    /**
+     * Handle the JobCard "created" event.
+     */
+    public function created(JobCard $jobCard): void
+    {
+        //
+    }
+
+    /**
+     * Handle the JobCard "updated" event.
+     */
+    public function updated(JobCard $jobCard): void
+    {
+        //
+    }
+
+    /**
+     * Handle the JobCard "deleted" event.
+     */
+    public function deleted(JobCard $jobCard): void
+    {
+        //
+    }
+
+    /**
+     * Handle the JobCard "restored" event.
+     */
+    public function restored(JobCard $jobCard): void
+    {
+        //
+    }
+
+    /**
+     * Handle the JobCard "force deleted" event.
+     */
+    public function forceDeleted(JobCard $jobCard): void
+    {
+        //
+    }
+}

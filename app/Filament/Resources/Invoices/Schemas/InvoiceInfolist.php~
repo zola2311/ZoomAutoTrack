@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Filament\Resources\Invoices\Schemas;
+
+use App\Models\Invoice;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Schema;
+
+class InvoiceInfolist
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('branch_id')
+                    ->numeric(),
+                TextEntry::make('job_card_id')
+                    ->numeric(),
+                TextEntry::make('customer_id')
+                    ->numeric(),
+                TextEntry::make('invoice_number'),
+                TextEntry::make('subtotal')
+                    ->numeric(),
+                TextEntry::make('discount')
+                    ->numeric(),
+                TextEntry::make('tax')
+                    ->numeric(),
+                TextEntry::make('total')
+                    ->numeric(),
+                TextEntry::make('paid_amount')
+                    ->numeric(),
+                TextEntry::make('balance')
+                    ->numeric(),
+                TextEntry::make('status'),
+                TextEntry::make('issued_at')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('due_at')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('created_at')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('updated_at')
+                    ->dateTime()
+                    ->placeholder('-'),
+                TextEntry::make('deleted_at')
+                    ->dateTime()
+                    ->visible(fn (Invoice $record): bool => $record->trashed()),
+            ]);
+    }
+}

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Facades\DB;
 class Invoice extends Model
 {
     use SoftDeletes;
@@ -41,4 +41,79 @@ class Invoice extends Model
     public function customer() { return $this->belongsTo(Customer::class); }
     public function items() { return $this->hasMany(InvoiceItem::class); }
     public function payments() { return $this->hasMany(Payment::class); }
+
+
+
+
+
+    protected static function booted(): void
+    {
+        static::creating(function (Invoice $invoice) {
+            $invoice->invoice_number = 'INV-' . str_pad(
+                    static::withTrashed()->count() + 1,
+                    5, '0', STR_PAD_LEFT
+                );
+        });
+    }
+
+
+    public static function createFromJobCard(JobCard $jobCard): self
+    {
+        return DB::transaction(function () use ($jobCard) {
+            $subtotal = 0;
+            $lineItems = [];
+
+            foreach ($jobCard->services as $service) {
+                $lineItems[] = [
+                    'item_type'   => 'labor',
+                    'description' => $service->description,
+                    'quantity'    => 1,
+                    'unit_price'  => $service->labor_cost,
+                    'discount'    => 0,
+                    'tax'         => 0,
+                    'total'       => $service->labor_cost,
+                ];
+                $subtotal += $service->labor_cost;
+            }
+
+            foreach ($jobCard->partsUsed as $part) {
+                $lineItems[] = [
+                    'item_type'   => 'part',
+                    'description' => optional($part->inventoryItem)->name ?? 'Part',
+                    'quantity'    => $part->quantity,
+                    'unit_price'  => $part->unit_price,
+                    'discount'    => $part->discount,
+                    'tax'         => 0,
+                    'total'       => $part->total,
+                ];
+                $subtotal += $part->total;
+            }
+
+            $invoice = static::create([
+                'branch_id'   => $jobCard->branch_id,
+                'job_card_id' => $jobCard->id,
+                'customer_id' => $jobCard->customer_id,
+                'subtotal'    => $subtotal,
+                'discount'    => 0,
+                'tax'         => 0,
+                'total'       => $subtotal,
+                'paid_amount' => 0,
+                'balance'     => $subtotal,
+                'status'      => 'unpaid',
+                'issued_at'   => now(),
+            ]);
+
+            foreach ($lineItems as $item) {
+                $invoice->items()->create($item);
+            }
+
+            return $invoice;
+        });
+    }
+
+
+
 }
+
+
+
