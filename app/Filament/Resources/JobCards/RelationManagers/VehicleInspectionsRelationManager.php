@@ -30,7 +30,9 @@ class VehicleInspectionsRelationManager extends RelationManager
     {
         return $schema
             ->schema([
-                Section::make()
+                Section::make('Add Vehicle Inspection')
+                    ->columnSpanFull()
+                    ->columns(2)
                     ->schema([
                         Select::make('type')
                             ->label('Inspection Type')
@@ -40,7 +42,8 @@ class VehicleInspectionsRelationManager extends RelationManager
                                 'periodic' => 'Periodic Inspection',
                             ])
                             ->required()
-                            ->default('checkin'),
+                            ->default('checkin')
+                            ->columnSpan(1),
 
                         Select::make('inspected_by')
                             ->label('Inspected By')
@@ -52,16 +55,21 @@ class VehicleInspectionsRelationManager extends RelationManager
                             )
                             ->searchable()
                             ->preload()
-                            ->nullable(),
+                            ->nullable()
+                            ->placeholder('Select inspector')
+                            ->columnSpan(1),
 
                         DateTimePicker::make('inspected_at')
                             ->label('Inspection Date')
-                            ->default(now()),
+                            ->default(now())
+                            ->columnSpan(2),
 
                         Textarea::make('notes')
                             ->label('General Notes')
                             ->rows(2)
-                            ->nullable(),
+                            ->nullable()
+                            ->placeholder('Any general observations...')
+                            ->columnSpan(2),
 
                         Repeater::make('answers')
                             ->label('Inspection Checklist')
@@ -77,7 +85,8 @@ class VehicleInspectionsRelationManager extends RelationManager
                                     )
                                     ->searchable()
                                     ->preload()
-                                    ->required(),
+                                    ->required()
+                                    ->columnSpan(2),
 
                                 Select::make('result')
                                     ->label('Result')
@@ -87,24 +96,30 @@ class VehicleInspectionsRelationManager extends RelationManager
                                         'warning' => '⚠️ Warning',
                                         'n/a' => 'N/A',
                                     ])
-                                    ->required(),
-
-                                Textarea::make('notes')
-                                    ->label('Notes')
-                                    ->rows(2)
-                                    ->nullable(),
+                                    ->required()
+                                    ->columnSpan(1),
 
                                 TextInput::make('value')
                                     ->label('Value (if numeric)')
                                     ->numeric()
                                     ->nullable()
-                                    ->placeholder('e.g. 32 PSI, 5mm'),
+                                    ->placeholder('e.g. 32 PSI, 5mm')
+                                    ->columnSpan(1),
+
+                                Textarea::make('notes')
+                                    ->label('Notes')
+                                    ->rows(2)
+                                    ->nullable()
+                                    ->placeholder('Additional details...')
+                                    ->columnSpan(2),
                             ])
                             ->columns(2)
                             ->addActionLabel('Add Inspection Item')
                             ->defaultItems(0)
                             ->columnSpanFull(),
-                    ]),
+                    ])
+                    ->compact()
+                    ->collapsible(false),
             ]);
     }
 
@@ -163,7 +178,6 @@ class VehicleInspectionsRelationManager extends RelationManager
                         ->pluck('name', 'id')
                     ),
             ])
-            // ✅ FIXED: Filament 4.x action namespace
             ->recordActions([
                 \Filament\Actions\ViewAction::make(),
                 \Filament\Actions\EditAction::make(),
@@ -176,6 +190,26 @@ class VehicleInspectionsRelationManager extends RelationManager
                 ]),
             ]);
     }
+
+    // ✅ FIX 1: Set vehicle_id when creating
+    public function create($data): void
+    {
+        $data['vehicle_id'] = $this->getOwnerRecord()->vehicle_id;
+
+        parent::create($data);
+    }
+
+    // ✅ FIX 2: Also handle update if needed
+    public function update($record, $data): void
+    {
+        // Ensure vehicle_id is set (though it shouldn't change)
+        if (empty($data['vehicle_id'])) {
+            $data['vehicle_id'] = $this->getOwnerRecord()->vehicle_id;
+        }
+
+        parent::update($record, $data);
+    }
+
     public function isReadOnly(): bool
     {
         return false;

@@ -20,11 +20,10 @@ class CustomerForm
             ->components([
 
                 Section::make('Create Customer')
-                    ->columnSpanFull() // 🌟 FIX: Spans the section across the entire modal width
-                    ->columns(2)       // Keeps your form fields structured nicely inside
+                    ->columns(2)
                     ->schema([
 
-                        // Row 1: Customer Type + Full Name / Company Name
+                        // Row 1: Customer Type + Full Name
                         Select::make('type')
                             ->label('Customer Type')
                             ->options([

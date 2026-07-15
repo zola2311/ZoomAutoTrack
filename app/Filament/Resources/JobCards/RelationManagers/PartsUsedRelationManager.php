@@ -27,8 +27,9 @@ class PartsUsedRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->schema([
+            ->components([ // 🌟 FIXED: Changed from ->schema() to ->components()
                 Section::make()
+                    ->columnSpanFull() // 🌟 FIXED: Ensures the section stretches full width
                     ->schema([
                         Select::make('inventory_item_id')
                             ->label('Part')
@@ -171,7 +172,6 @@ class PartsUsedRelationManager extends RelationManager
                     )
                     ->searchable(),
             ])
-            // ✅ FIXED: Filament 4.x action namespace
             ->recordActions([
                 \Filament\Actions\ViewAction::make(),
                 \Filament\Actions\EditAction::make(),

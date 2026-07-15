@@ -16,9 +16,7 @@ class SupplierForm
     {
         return $schema
             ->components([
-                // --- Section 1: Supplier Information ---
                 Section::make('Supplier Information')
-                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
@@ -53,9 +51,7 @@ class SupplierForm
                             ->placeholder('contact@supplier.com'),
                     ]),
 
-                // --- Section 2: Address & Location ---
                 Section::make('Address & Location')
-                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->columns(2)
                     ->schema([
                         TextInput::make('city')
@@ -80,9 +76,7 @@ class SupplierForm
                             ->helperText('Paste Google Maps URL for location'),
                     ]),
 
-                // --- Section 3: Business Details ---
                 Section::make('Business Details')
-                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->columns(2)
                     ->schema([
                         TextInput::make('tin_number')
@@ -97,9 +91,7 @@ class SupplierForm
                             ->columnSpan(2),
                     ]),
 
-                // --- Section 4: Status ---
                 Section::make('Status')
-                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->schema([
                         Toggle::make('is_active')
                             ->label('Active')

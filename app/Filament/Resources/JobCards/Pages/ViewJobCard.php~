@@ -64,5 +64,5 @@ class ViewJobCard extends ViewRecord
             EditAction::make(),
         ];
     }
-
+    
 }

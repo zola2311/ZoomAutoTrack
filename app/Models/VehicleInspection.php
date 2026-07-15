@@ -21,4 +21,16 @@ class VehicleInspection extends Model
     public function vehicle() { return $this->belongsTo(Vehicle::class); }
     public function inspector() { return $this->belongsTo(User::class, 'inspected_by'); }
     public function answers() { return $this->hasMany(VehicleInspectionAnswer::class); }
+
+    protected static function booted(): void
+    {
+        static::creating(function (VehicleInspection $inspection) {
+            if (empty($inspection->vehicle_id) && $inspection->job_card_id) {
+                $jobCard = JobCard::find($inspection->job_card_id);
+                if ($jobCard) {
+                    $inspection->vehicle_id = $jobCard->vehicle_id;
+                }
+            }
+        });
+    }
 }

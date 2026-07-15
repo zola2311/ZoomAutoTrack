@@ -40,7 +40,7 @@ class InventoryItemForm
                                 'tires'       => 'Tires',
                                 'other'       => 'Other',
                             ])
-                            ->searchable(),
+                            ->searchable()->required(),
 
                         TextInput::make('location')
                             ->helperText('Shelf / bin location in the store'),

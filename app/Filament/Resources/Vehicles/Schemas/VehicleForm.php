@@ -14,9 +14,11 @@ class VehicleForm
     {
         return $schema
             ->components([
-                Section::make('Owner')
-                    ->columns(2)
+                Section::make('Add Vehicle')
+                    ->columnSpanFull() // 🌟 FIX: Forces the section to stretch full width
+                    ->columns(2)       // Keeps your form fields structured nicely inside
                     ->schema([
+                        // Row 1: Customer - FULL WIDTH
                         Select::make('customer_id')
                             ->label('Customer')
                             ->options(fn () => Customer::query()
@@ -29,69 +31,93 @@ class VehicleForm
                             )
                             ->searchable()
                             ->preload()
-                            ->required(),
-                    ]),
+                            ->required()
+                            ->columnSpan(2),
 
-                Section::make('Vehicle Information')
-                    ->columns(2)
-                    ->schema([
+                        // Row 2: Plate Number + Make
                         TextInput::make('plate_number')
                             ->label('Plate Number')
                             ->required()
                             ->maxLength(20)
                             ->unique(table: 'vehicles', column: 'plate_number', ignoreRecord: true)
                             ->placeholder('AA 3-45678')
-                            ->hint('Ethiopian format: AA 3-45678'),
+                            ->helperText('Ethiopian format: AA 3-45678')
+                            ->columnSpan(1),
 
                         TextInput::make('make')
+                            ->label('Make')
                             ->required()
-                            ->maxLength(100),
+                            ->maxLength(100)
+                            ->placeholder('e.g. Toyota, Nissan, BMW')
+                            ->columnSpan(1),
 
+                        // Row 3: Model + Year
                         TextInput::make('model')
+                            ->label('Model')
                             ->required()
-                            ->maxLength(100),
+                            ->maxLength(100)
+                            ->placeholder('e.g. Corolla, Patrol, X5')
+                            ->columnSpan(1),
 
                         TextInput::make('year')
+                            ->label('Year')
                             ->numeric()
                             ->minValue(1900)
-                            ->maxValue((int) date('Y') + 1),
+                            ->maxValue((int) date('Y') + 1)
+                            ->placeholder('e.g. 2020')
+                            ->columnSpan(1),
 
+                        // Row 4: Color + Current Mileage
                         TextInput::make('color')
-                            ->maxLength(50),
+                            ->label('Color')
+                            ->maxLength(50)
+                            ->placeholder('e.g. White, Black, Silver')
+                            ->columnSpan(1),
 
                         TextInput::make('current_mileage')
-                            ->label('Current Mileage')
+                            ->label('Current Mileage (km)')
                             ->numeric()
-                            ->minValue(0),
-                    ]),
+                            ->minValue(0)
+                            ->placeholder('e.g. 45000')
+                            ->columnSpan(1),
 
-                Section::make('Identifiers')
-                    ->columns(2)
-                    ->schema([
+                        // Row 5: Chassis Number + Engine Number
                         TextInput::make('chassis_number')
                             ->label('Chassis Number')
-                            ->maxLength(100),
+                            ->maxLength(100)
+                            ->placeholder('e.g. JTDBR32E5R0123456')
+                            ->columnSpan(1),
 
                         TextInput::make('engine_number')
                             ->label('Engine Number')
-                            ->maxLength(100),
+                            ->maxLength(100)
+                            ->placeholder('e.g. 2ZR-FE123456')
+                            ->columnSpan(1),
 
+                        // Row 6: Fuel Type + Transmission
                         Select::make('fuel_type')
+                            ->label('Fuel Type')
                             ->options([
                                 'petrol' => 'Petrol',
                                 'diesel' => 'Diesel',
                                 'hybrid' => 'Hybrid',
                                 'electric' => 'Electric',
                             ])
-                            ->searchable(),
+                            ->searchable()
+                            ->placeholder('Select fuel type')
+                            ->columnSpan(1),
 
                         Select::make('transmission')
+                            ->label('Transmission')
                             ->options([
                                 'manual' => 'Manual',
                                 'automatic' => 'Automatic',
                             ])
-                            ->searchable(),
-                    ]),
+                            ->searchable()
+                            ->placeholder('Select transmission type')
+                            ->columnSpan(1),
+                    ])
+                    ->compact(),
             ]);
     }
 }

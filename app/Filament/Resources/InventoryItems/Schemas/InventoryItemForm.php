@@ -14,7 +14,9 @@ class InventoryItemForm
     {
         return $schema
             ->components([
+                // --- Section 1: Item Details ---
                 Section::make('Item Details')
+                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->columns(2)
                     ->schema([
                         TextInput::make('name')
@@ -46,7 +48,9 @@ class InventoryItemForm
                             ->helperText('Shelf / bin location in the store'),
                     ]),
 
+                // --- Section 2: Pricing ---
                 Section::make('Pricing')
+                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->columns(2)
                     ->schema([
                         TextInput::make('unit_cost')
@@ -64,7 +68,9 @@ class InventoryItemForm
                             ->required(),
                     ]),
 
+                // --- Section 3: Stock ---
                 Section::make('Stock')
+                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->columns(2)
                     ->schema([
                         TextInput::make('quantity_on_hand')
@@ -82,7 +88,9 @@ class InventoryItemForm
                             ->required(),
                     ]),
 
+                // --- Section 4: Status ---
                 Section::make('Status')
+                    ->columnSpanFull() // 🌟 FIX: Stretches section full width
                     ->schema([
                         Toggle::make('is_active')
                             ->label('Active')

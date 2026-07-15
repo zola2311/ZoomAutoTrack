@@ -19,4 +19,8 @@ class EditSupplier extends EditRecord  // ← MUST be EditSupplier, NOT ViewSupp
             Actions\RestoreAction::make(),
         ];
     }
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
+    }
 }
