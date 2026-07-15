@@ -19,7 +19,8 @@ class InvoiceForm
         return $schema
             ->components([
                 Section::make('Invoice Details')
-                    ->columns(2)
+                    ->columns(4)
+                    ->columnSpanFull()
                     ->schema([
                         Select::make('job_card_id')
                             ->label('Job Card')

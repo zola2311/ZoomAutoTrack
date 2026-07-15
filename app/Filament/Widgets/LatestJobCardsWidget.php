@@ -1,0 +1,84 @@
+<?php
+
+namespace App\Filament\Widgets;
+
+use App\Filament\Resources\JobCards\JobCardResource;
+use App\Models\JobCard;
+use Filament\Tables\Columns\BadgeColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Filament\Widgets\TableWidget as BaseTableWidget;
+use Illuminate\Database\Eloquent\Builder;
+
+class LatestJobCardsWidget extends BaseTableWidget
+{
+    protected static ?string $heading = 'Active Job Cards';
+
+    protected int|string|array $columnSpan = 'full';
+
+    protected static ?int $sort = 2;
+
+    public function table(Table $table): Table
+    {
+        return $table
+            ->query(
+                JobCard::query()
+                    ->whereNotIn('status', ['completed', 'cancelled'])
+                    ->latest('checked_in_at')
+                    ->limit(10)
+            )
+            ->columns([
+                TextColumn::make('job_number')
+                    ->label('Job #')
+                    ->searchable()
+                    ->copyable()
+                    ->weight('medium'),
+
+                TextColumn::make('customer.full_name')
+                    ->label('Customer')
+                    ->searchable(),
+
+                TextColumn::make('vehicle.plate_number')
+                    ->label('Plate')
+                    ->badge()
+                    ->color('success'),
+
+                TextColumn::make('vehicle.make')
+                    ->label('Vehicle')
+                    ->formatStateUsing(fn ($record) => $record->vehicle?->make . ' ' . $record->vehicle?->model),
+
+                TextColumn::make('mechanic.name')
+                    ->label('Mechanic')
+                    ->placeholder('—'),
+
+                TextColumn::make('status')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'pending'       => 'gray',
+                        'in_progress'   => 'info',
+                        'quality_check' => 'warning',
+                        'completed'     => 'success',
+                        'cancelled'     => 'danger',
+                        default         => 'gray',
+                    }),
+
+                TextColumn::make('priority')
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'normal' => 'gray',
+                        'urgent' => 'warning',
+                        'vip'    => 'danger',
+                        default  => 'gray',
+                    }),
+
+                TextColumn::make('checked_in_at')
+                    ->label('Checked In')
+                    ->dateTime('d M, H:i')
+                    ->sortable(),
+            ])
+            ->recordUrl(
+                fn (JobCard $record): string => JobCardResource::getUrl('view', ['record' => $record])
+            )
+            ->paginated(false);
+    }
+}

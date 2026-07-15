@@ -26,8 +26,10 @@ class JobCardResource extends Resource
 {
     protected static ?string $model = JobCard::class;
 
+    // JobCardResource nav side bar
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
     protected static string|UnitEnum|null $navigationGroup = 'Workshop';
+
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'job_number';

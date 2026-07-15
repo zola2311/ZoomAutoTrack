@@ -11,6 +11,7 @@ use App\Filament\Resources\JobCards\Schemas\JobCardInfolist;
 use App\Filament\Resources\JobCards\Tables\JobCardsTable;
 use App\Models\JobCard;
 use BackedEnum;
+use Filament\Facades\Filament;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -73,5 +74,23 @@ class JobCardResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+    public static function getEloquentQuery(): Builder
+    {
+        $query = parent::getEloquentQuery()
+            ->withoutGlobalScopes([
+                SoftDeletingScope::class,
+            ]);
+
+        $user = Filament::auth()->user();
+
+        if ($user && ! $user->hasRole(['admin', 'manager'])) {
+            if ($user->branch_id) {
+                $query->where('branch_id', $user->branch_id);
+            }
+        }
+
+        return $query;
+    }
+
 
 }

@@ -19,7 +19,7 @@ class InvoiceForm
         return $schema
             ->components([
                 Section::make('Invoice Details')
-                    ->columns(2)
+                    ->columns(4)
                     ->schema([
                         Select::make('job_card_id')
                             ->label('Job Card')
@@ -138,3 +138,66 @@ class InvoiceForm
                                         $set('total', round(
                                             ($get('quantity') ?? 0) * ($get('unit_price') ?? 0)
                                             - ($get('discount') ?? 0) + ($get('tax') ?? 0),
+                                            2
+                                        ));
+                                    }),
+
+                                TextInput::make('tax')
+                                    ->numeric()
+                                    ->default(0)
+                                    ->live(onBlur: true)
+                                    ->afterStateUpdated(function (Set $set, Get $get) {
+                                        $set('total', round(
+                                            ($get('quantity') ?? 0) * ($get('unit_price') ?? 0)
+                                            - ($get('discount') ?? 0) + ($get('tax') ?? 0),
+                                            2
+                                        ));
+                                    }),
+
+                                TextInput::make('total')
+                                    ->numeric()
+                                    ->disabled()
+                                    ->dehydrated(),
+                            ])
+                            ->columns(4)
+                            ->addActionLabel('Add Item')
+                            ->columnSpanFull(),
+                    ]),
+
+                Section::make('Totals')
+                    ->columns(3)
+                    ->schema([
+                        TextInput::make('subtotal')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(),
+
+                        TextInput::make('discount')
+                            ->label('Invoice Discount')
+                            ->numeric()
+                            ->default(0),
+
+                        TextInput::make('tax')
+                            ->label('Invoice Tax')
+                            ->numeric()
+                            ->default(0),
+
+                        TextInput::make('total')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(),
+
+                        TextInput::make('paid_amount')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated()
+                            ->helperText('Updates automatically when payments are recorded'),
+
+                        TextInput::make('balance')
+                            ->numeric()
+                            ->disabled()
+                            ->dehydrated(),
+                    ]),
+            ]);
+    }
+}

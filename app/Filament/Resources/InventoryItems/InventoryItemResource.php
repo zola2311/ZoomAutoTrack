@@ -24,9 +24,10 @@ class InventoryItemResource extends Resource
 {
     protected static ?string $model = InventoryItem::class;
 
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCube;
-
-    protected static string|UnitEnum|null $navigationGroup = 'Garage Management';
+    // InventoryItemResource
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedArchiveBox;
+    protected static string|UnitEnum|null $navigationGroup = 'Inventory';
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'name';
 

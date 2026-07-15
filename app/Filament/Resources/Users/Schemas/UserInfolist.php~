@@ -1,0 +1,71 @@
+<?php
+
+namespace App\Filament\Resources\Users\Schemas;
+
+use App\Models\User;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Schemas\Components\Section;
+use Filament\Schemas\Schema;
+
+class UserInfolist
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('User Details')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('name')
+                            ->label('Full Name')
+                            ->weight('bold'),
+
+                        TextEntry::make('email')
+                            ->label('Email')
+                            ->copyable(),
+
+                        TextEntry::make('phone')
+                            ->label('Phone')
+                            ->placeholder('-'),
+
+                        TextEntry::make('branch.name')
+                            ->label('Branch')
+                            ->placeholder('-'),
+
+                        TextEntry::make('role_names')
+                            ->label('Role')
+                            ->badge()
+                            ->formatStateUsing(fn ($state) => $state ?? 'No Role Assigned')
+                            ->color(fn ($record) => $record->primary_role_color ?? 'gray'),
+
+                        TextEntry::make('is_active')
+                            ->label('Status')
+                            ->badge()
+                            ->formatStateUsing(fn ($state) => $state ? 'Active' : 'Inactive')
+                            ->color(fn ($state) => $state ? 'success' : 'danger'),
+                    ]),
+
+                Section::make('Activity')
+                    ->columns(2)
+                    ->schema([
+                        TextEntry::make('last_login_at')
+                            ->label('Last Login')
+                            ->dateTime()
+                            ->placeholder('Never'),
+
+                        TextEntry::make('last_login_ip')
+                            ->label('Last IP')
+                            ->placeholder('-'),
+
+                        TextEntry::make('created_at')
+                            ->label('Created At')
+                            ->dateTime(),
+
+                        TextEntry::make('updated_at')
+                            ->label('Updated At')
+                            ->dateTime(),
+                    ])
+                    ->collapsed(),
+            ]);
+    }
+}

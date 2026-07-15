@@ -23,11 +23,8 @@ use UnitEnum;
 class SupplierResource extends Resource
 {
     protected static ?string $model = Supplier::class;
-
-    // ✅ CORRECT union type for navigation icon
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
-
-    // ✅ CORRECT union type for navigation group
+// SupplierResource
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
     protected static string|UnitEnum|null $navigationGroup = 'Inventory';
 
     protected static ?int $navigationSort = 2;

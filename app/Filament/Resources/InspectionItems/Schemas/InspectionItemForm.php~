@@ -1,0 +1,33 @@
+<?php
+
+namespace App\Filament\Resources\InspectionItems\Schemas;
+
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Schema;
+
+class InspectionItemForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('name')
+                    ->required(),
+                TextInput::make('category'),
+                TextInput::make('input_type')
+                    ->required()
+                    ->default('pass_fail'),
+                Toggle::make('requires_photo')
+                    ->required(),
+                Toggle::make('requires_voice_note')
+                    ->required(),
+                TextInput::make('sort_order')
+                    ->required()
+                    ->numeric()
+                    ->default(0),
+                Toggle::make('is_active')
+                    ->required(),
+            ]);
+    }
+}

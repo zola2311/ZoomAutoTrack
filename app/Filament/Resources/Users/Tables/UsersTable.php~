@@ -1,0 +1,104 @@
+<?php
+
+namespace App\Filament\Resources\Users\Tables;
+
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
+use Filament\Tables\Filters\TernaryFilter;
+use Filament\Tables\Table;
+
+class UsersTable
+{
+    public static function configure(Table $table): Table
+    {
+        return $table
+            ->columns([
+                TextColumn::make('name')
+                    ->label('Name')
+                    ->searchable()
+                    ->sortable()
+                    ->weight('medium'),
+
+                TextColumn::make('email')
+                    ->label('Email')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
+
+                TextColumn::make('phone')
+                    ->label('Phone')
+                    ->searchable()
+                    ->placeholder('—'),
+
+                TextColumn::make('branch.name')
+                    ->label('Branch')
+                    ->searchable()
+                    ->sortable()
+                    ->placeholder('—')
+                    ->toggleable(),
+
+                TextColumn::make('role_names')
+                    ->label('Role')
+                    ->badge()
+                    ->color(fn ($record) => $record->primary_role_color ?? 'gray')
+                    ->formatStateUsing(fn ($state) => $state ?: 'No Role'),
+
+                IconColumn::make('is_active')
+                    ->label('Active')
+                    ->boolean(),
+
+                TextColumn::make('last_login_at')
+                    ->label('Last Login')
+                    ->dateTime()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+
+                TextColumn::make('created_at')
+                    ->label('Created')
+                    ->date()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+            ])
+            ->defaultSort('name')
+            ->filters([
+                SelectFilter::make('roles')
+                    ->label('Role')
+                    ->options([
+                        'admin' => 'Admin',
+                        'manager' => 'Manager',
+                        'service_advisor' => 'Service Advisor',
+                        'mechanic' => 'Mechanic',
+                        'receptionist' => 'Receptionist',
+                        'cashier' => 'Cashier',
+                        'inventory_manager' => 'Inventory Manager',
+                    ])
+                    ->relationship('roles', 'name')
+                    ->multiple()
+                    ->preload(),
+
+                SelectFilter::make('branch_id')
+                    ->label('Branch')
+                    ->relationship('branch', 'name')
+                    ->searchable()
+                    ->preload(),
+
+                TernaryFilter::make('is_active')
+                    ->label('Active'),
+            ])
+            ->recordActions([
+                ViewAction::make(),
+                EditAction::make(),
+                \Filament\Actions\DeleteAction::make(),
+            ])
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
+                ]),
+            ]);
+    }
+}

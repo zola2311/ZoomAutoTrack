@@ -72,14 +72,12 @@ class JobServicesRelationManager extends RelationManager
                         Textarea::make('notes')
                             ->label('Notes')
                             ->rows(2)
-                            ->nullable()
-                            ->columnSpanFull(),
+                            ->nullable(),
 
                         Toggle::make('is_completed')
                             ->label('Completed')
                             ->default(false)
-                            ->helperText('Mark as completed when the service is done')
-                            ->columnSpanFull(),
+                            ->helperText('Mark as completed when the service is done'),
                     ])
                     ->columns(2),
             ]);

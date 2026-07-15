@@ -23,13 +23,10 @@ use UnitEnum;
 class SupplierResource extends Resource
 {
     protected static ?string $model = Supplier::class;
-
-    // ✅ CORRECT union type for navigation icon
-    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTruck;
-
-    // ✅ CORRECT union type for navigation group
+// SupplierResource
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingStorefront;
     protected static string|UnitEnum|null $navigationGroup = 'Inventory';
-
+   
     protected static ?int $navigationSort = 2;
 
     protected static ?string $recordTitleAttribute = 'name';
@@ -80,14 +77,9 @@ class SupplierResource extends Resource
 
         $user = Filament::auth()->user();
 
-        if ($user) {
-            $userColumnRole = strtolower($user->role ?? '');
-            $hasSpatieRole = $user->hasRole(['admin', 'manager']);
-
-            if (! $hasSpatieRole && ! in_array($userColumnRole, ['admin', 'manager'])) {
-                if ($user->branch_id) {
-                    $query->where('branch_id', $user->branch_id);
-                }
+        if ($user && ! $user->hasRole(['admin', 'manager'])) {
+            if ($user->branch_id) {
+                $query->where('branch_id', $user->branch_id);
             }
         }
 

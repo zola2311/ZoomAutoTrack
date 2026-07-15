@@ -63,6 +63,31 @@ class User extends Authenticatable
     public function paymentsReceived() { return $this->hasMany(Payment::class, 'received_by'); }
     public function uploadedMedia() { return $this->hasMany(Media::class, 'uploaded_by'); }
     public function activityLogs() { return $this->hasMany(ActivityLog::class); }
+// app/Models/User.php
+
+    public function getRoleNamesAttribute(): string
+    {
+        return $this->roles->pluck('name')->map(fn ($name) => ucfirst(str_replace('_', ' ', $name)))->join(', ');
+    }
+
+    public function getPrimaryRoleNameAttribute(): ?string
+    {
+        return $this->roles->first()?->name;
+    }
+
+    public function getPrimaryRoleColorAttribute(): string
+    {
+        return match ($this->roles->first()?->name) {
+            'admin' => 'danger',
+            'manager' => 'warning',
+            'mechanic' => 'info',
+            'service_advisor' => 'success',
+            'receptionist' => 'primary',
+            'cashier' => 'gray',
+            'inventory_manager' => 'purple',
+            default => 'gray',
+        };
+    }
 
 }
 
