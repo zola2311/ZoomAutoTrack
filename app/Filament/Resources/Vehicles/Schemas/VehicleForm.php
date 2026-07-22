@@ -22,10 +22,10 @@ class VehicleForm
                         Select::make('customer_id')
                             ->label('Customer')
                             ->options(fn () => Customer::query()
-                                ->orderBy('full_name')
+                                ->orderByRaw('COALESCE(company_name, full_name)')
                                 ->get()
                                 ->mapWithKeys(fn ($customer) => [
-                                    $customer->id => $customer->full_name . ' - ' . $customer->phone,
+                                    $customer->id => $customer->display_name . ' - ' . $customer->phone,
                                 ])
                                 ->toArray()
                             )
@@ -86,12 +86,14 @@ class VehicleForm
                             ->label('Chassis Number')
                             ->maxLength(100)
                             ->placeholder('e.g. JTDBR32E5R0123456')
+                            ->unique(table: 'vehicles', column: 'chassis_number', ignoreRecord: true)
                             ->columnSpan(1),
 
                         TextInput::make('engine_number')
                             ->label('Engine Number')
                             ->maxLength(100)
                             ->placeholder('e.g. 2ZR-FE123456')
+                            ->unique(table: 'vehicles', column: 'engine_number', ignoreRecord: true)
                             ->columnSpan(1),
 
                         // Row 6: Fuel Type + Transmission

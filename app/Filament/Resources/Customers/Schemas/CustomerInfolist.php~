@@ -31,19 +31,12 @@ class CustomerInfolist
                                 default      => 'gray',
                             }),
 
-                        TextEntry::make('display_name')
-                            ->label('Name')
-                            ->weight('bold')
-                            ->size('lg'),
-
                         TextEntry::make('full_name')
-                            ->label('Contact Person')
-                            ->placeholder('—'),
+                            ->label('Full Name'),
 
                         TextEntry::make('company_name')
                             ->label('Company Name')
-                            ->placeholder('—')
-                            ->visible(fn ($record) => $record->type === 'company'),
+                            ->placeholder('—'),
 
                         TextEntry::make('branch.name')
                             ->label('Branch'),

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 
 class JobCard extends Model
 {
@@ -57,5 +58,12 @@ class JobCard extends Model
                 );
             $jobCard->checked_in_at = now(); // ← add this line
         });
+    }
+    public function hasIncompleteServices(): bool
+    {
+        return $this->services()
+            ->where('is_completed', false)
+            ->where('status', '!=', 'cancelled')
+            ->exists();
     }
 }

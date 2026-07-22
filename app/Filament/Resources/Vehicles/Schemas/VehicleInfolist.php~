@@ -11,7 +11,7 @@ class VehicleInfolist
 {
     public static function configure(Schema $schema): Schema
     {
-        return $schema
+        return $schema  
             ->components([
                 Section::make('Owner')
                     ->columns(2)

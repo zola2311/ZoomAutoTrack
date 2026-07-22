@@ -18,7 +18,7 @@ return new class extends Migration
             $table->decimal('amount', 12, 2);
             $table->string('method')->index();
             $table->string('reference_number')->nullable();
-
+            $table->string('proof_path')->nullable();
             $table->text('notes')->nullable();
 
             $table->foreignId('received_by')

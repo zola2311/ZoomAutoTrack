@@ -28,19 +28,14 @@ class CustomersTable
                     ->copyable()
                     ->toggleable(),
 
-                TextColumn::make('display_name') // Using a virtual name so Filament doesn't auto-resolve 'full_name'
-                ->label('Name')
-                    ->state(fn ($record) => $record->type === 'company'
+                TextColumn::make('full_name')
+                    ->label('Name')
+                    ->searchable(['full_name', 'company_name'])
+                    ->sortable()
+                    ->formatStateUsing(fn ($state, $record) => $record->type === 'company'
                         ? $record->company_name
                         : $record->full_name
                     )
-                    ->searchable(['full_name', 'company_name'])
-                    ->sortable(query: function ($query, $direction) {
-                        // Keeps sorting functional across both fields
-                        return $query->orderByRaw(
-                            "COALESCE(company_name, full_name) {$direction}"
-                        );
-                    })
                     ->toggleable(),
 
                 TextColumn::make('type')

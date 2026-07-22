@@ -70,6 +70,7 @@ class CustomerForm
                             ->label('Email Address')
                             ->email()
                             ->maxLength(150)
+                            ->unique(table: 'customers', column: 'email', ignoreRecord: true)
                             ->columnSpan(1),
 
                         TextInput::make('tin_number')

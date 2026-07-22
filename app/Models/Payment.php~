@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 class Payment extends Model
 {
     protected $guarded = ['id'];
-
+    protected $fillable = [
+        'invoice_id',
+        'amount',
+        'method',
+        'reference_number',
+        'notes',
+        'received_by',
+        'paid_at',
+    ];
     protected $casts = [
         'amount' => 'decimal:2',
         'paid_at' => 'datetime',

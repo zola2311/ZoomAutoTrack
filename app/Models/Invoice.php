@@ -42,7 +42,44 @@ class Invoice extends Model
     public function items() { return $this->hasMany(InvoiceItem::class); }
     public function payments() { return $this->hasMany(Payment::class); }
 
+    public function recalculateFromPayments(): void
+    {
+        $totalPaid = $this->payments()->sum('amount');
+        $balance = max(0, $this->total - $totalPaid);
 
+        $this->update([
+            'paid_amount' => $totalPaid,
+            'balance'     => $balance,
+            'status'      => $this->determineStatus($totalPaid, $this->total),
+        ]);
+    }
+
+    protected function determineStatus(float $paidAmount, float $total): string
+    {
+        if ($this->status === 'void') {
+            return 'void';
+        }
+
+        if ($paidAmount <= 0) {
+            return 'unpaid';
+        }
+
+        if ($paidAmount >= $total) {
+            return 'paid';
+        }
+
+        return 'partial';
+    }
+
+    public function isFullyPaid(): bool
+    {
+        return $this->status === 'paid' || $this->paid_amount >= $this->total;
+    }
+
+    public function isOverdue(): bool
+    {
+        return $this->status !== 'paid' && $this->due_at && $this->due_at->isPast();
+    }
 
 
 
@@ -111,7 +148,49 @@ class Invoice extends Model
         });
     }
 
+    public function resyncFromJobCard(): void
+    {
+        $jobCard = $this->jobCard()->with(['services', 'partsUsed.inventoryItem'])->first();
+        if (! $jobCard) return;
 
+        $this->items()->delete();
+        $subtotal = 0;
+
+        foreach ($jobCard->services as $service) {
+            $this->items()->create([
+                'item_type' => 'labor',
+                'description' => $service->description,
+                'quantity' => 1,
+                'unit_price' => $service->labor_cost,
+                'discount' => 0,
+                'tax' => 0,
+                'total' => $service->labor_cost,
+            ]);
+            $subtotal += $service->labor_cost;
+        }
+
+        foreach ($jobCard->partsUsed as $part) {
+            $this->items()->create([
+                'item_type' => 'part',
+                'description' => optional($part->inventoryItem)->name ?? 'Part',
+                'quantity' => $part->quantity,
+                'unit_price' => $part->unit_price,
+                'discount' => $part->discount,
+                'tax' => 0,
+                'total' => $part->total,
+            ]);
+            $subtotal += $part->total;
+        }
+
+        $newTotal = $subtotal - $this->discount + $this->tax;
+
+        $this->update([
+            'subtotal' => $subtotal,
+            'total' => $newTotal,
+            'balance' => max(0, $newTotal - $this->paid_amount),
+            'status' => $this->paid_amount >= $newTotal ? 'paid' : ($this->paid_amount > 0 ? 'partial' : 'unpaid'),
+        ]);
+    }
 
 }
 

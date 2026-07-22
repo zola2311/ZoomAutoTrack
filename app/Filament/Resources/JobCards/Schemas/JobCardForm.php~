@@ -24,16 +24,14 @@ class JobCardForm
                     ->schema([
                         Select::make('customer_id')
                             ->label('Customer')
-                            ->searchable()
-                            ->getSearchResultsUsing(fn (string $search) => Customer::query()
-                                ->where('full_name', 'like', "%{$search}%")
-                                ->orWhere('company_name', 'like', "%{$search}%")
-                                ->orWhere('phone', 'like', "%{$search}%")
-                                ->limit(50)
+                            ->options(fn () => Customer::query()
+                                ->orderByRaw('COALESCE(company_name, full_name)')
                                 ->get()
                                 ->mapWithKeys(fn ($c) => [$c->id => $c->display_name . ' - ' . $c->phone])
+                                ->toArray()
                             )
-                            ->getOptionLabelUsing(fn ($value) => Customer::find($value)?->display_name)
+                            ->searchable()
+                            ->preload()
                             ->required()
                             ->live(),
 

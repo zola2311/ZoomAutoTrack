@@ -5,6 +5,7 @@ namespace App\Filament\Widgets;
 use App\Models\InventoryItem;
 use App\Models\Invoice;
 use App\Models\JobCard;
+use App\Models\Payment;
 use Filament\Widgets\StatsOverviewWidget as BaseStatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
 
@@ -16,13 +17,30 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
 
         $inProgress = JobCard::whereIn('status', ['pending', 'in_progress', 'quality_check'])->count();
 
-        $todayRevenue = Invoice::whereDate('created_at', today())
-            ->where('status', '!=', 'void')
-            ->sum('total');
+        $todayRevenue = Payment::whereDate('paid_at', today())->sum('amount');
 
         $lowStock = InventoryItem::where('is_active', true)
             ->whereColumn('quantity_on_hand', '<=', 'minimum_stock')
             ->count();
+
+        $outOfStock = InventoryItem::where('is_active', true)
+            ->where('quantity_on_hand', '<=', 0)
+            ->count();
+
+        $totalUnpaid = Invoice::whereIn('status', ['unpaid', 'partial'])->sum('balance');
+
+        $overdueCount = Invoice::whereIn('status', ['unpaid', 'partial'])
+            ->whereNotNull('due_at')
+            ->where('due_at', '<', now())
+            ->count();
+
+        $readyForPickup = JobCard::where('status', 'completed')
+            ->whereNull('delivered_at')
+            ->count();
+
+        $monthRevenue = Payment::whereMonth('paid_at', now()->month)
+            ->whereYear('paid_at', now()->year)
+            ->sum('amount');
 
         return [
             Stat::make('Vehicles Today', $todayJobs)
@@ -36,14 +54,34 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
                 ->color('warning'),
 
             Stat::make('Revenue Today', number_format($todayRevenue, 2) . ' ETB')
-                ->description('From invoices today')
+                ->description('Payments received today')
                 ->descriptionIcon('heroicon-o-banknotes')
                 ->color('success'),
+
+            Stat::make('Revenue This Month', number_format($monthRevenue, 2) . ' ETB')
+                ->description(now()->format('F Y'))
+                ->descriptionIcon('heroicon-o-calendar')
+                ->color('success'),
+
+            Stat::make('Total Unpaid', number_format($totalUnpaid, 2) . ' ETB')
+                ->description($overdueCount > 0 ? "{$overdueCount} overdue invoice(s)" : 'No overdue invoices')
+                ->descriptionIcon('heroicon-o-exclamation-circle')
+                ->color($overdueCount > 0 ? 'danger' : ($totalUnpaid > 0 ? 'warning' : 'success')),
+
+            Stat::make('Ready for Pickup', $readyForPickup)
+                ->description('Completed, not delivered')
+                ->descriptionIcon('heroicon-o-clipboard-document-check')
+                ->color($readyForPickup > 0 ? 'warning' : 'success'),
 
             Stat::make('Low Stock Alerts', $lowStock)
                 ->description('Parts below minimum')
                 ->descriptionIcon('heroicon-o-exclamation-triangle')
                 ->color($lowStock > 0 ? 'danger' : 'success'),
+
+            Stat::make('Out of Stock', $outOfStock)
+                ->description('Zero quantity remaining')
+                ->descriptionIcon('heroicon-o-x-circle')
+                ->color($outOfStock > 0 ? 'danger' : 'success'),
         ];
     }
 }

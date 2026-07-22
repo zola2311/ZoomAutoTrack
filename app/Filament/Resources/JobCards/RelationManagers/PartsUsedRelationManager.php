@@ -27,9 +27,10 @@ class PartsUsedRelationManager extends RelationManager
     public function form(Schema $schema): Schema
     {
         return $schema
-            ->components([ // 🌟 FIXED: Changed from ->schema() to ->components()
-                Section::make()
-                    ->columnSpanFull() // 🌟 FIXED: Ensures the section stretches full width
+            ->components([
+                Section::make('Add Part')
+                    ->columnSpanFull()
+                    ->columns(2)
                     ->schema([
                         Select::make('inventory_item_id')
                             ->label('Part')
@@ -47,9 +48,12 @@ class PartsUsedRelationManager extends RelationManager
                                     if ($item) {
                                         $set('unit_cost', $item->unit_cost);
                                         $set('unit_price', $item->selling_price);
+                                        // ✅ Calculate total immediately
+                                        $set('total', $item->selling_price);
                                     }
                                 }
-                            }),
+                            })
+                            ->columnSpan(2),
 
                         TextInput::make('quantity')
                             ->label('Quantity')
@@ -63,19 +67,9 @@ class PartsUsedRelationManager extends RelationManager
                                 $unitPrice = $get('unit_price') ?? 0;
                                 $discount = $get('discount') ?? 0;
                                 $total = ($state * $unitPrice) - $discount;
-                                $set('total', max(0, $total));
-                            }),
-
-                        TextInput::make('unit_cost')
-                            ->label('Unit Cost (ETB)')
-                            ->numeric()
-                            ->required()
-                            ->default(0)
-                            ->minValue(0)
-                            ->prefix('ETB')
-                            ->step(0.01)
-                            ->disabled()
-                            ->dehydrated(),
+                                $set('total', round(max(0, $total), 2));
+                            })
+                            ->columnSpan(1),
 
                         TextInput::make('unit_price')
                             ->label('Selling Price (ETB)')
@@ -90,8 +84,20 @@ class PartsUsedRelationManager extends RelationManager
                                 $quantity = $get('quantity') ?? 1;
                                 $discount = $get('discount') ?? 0;
                                 $total = ($quantity * $state) - $discount;
-                                $set('total', max(0, $total));
-                            }),
+                                $set('total', round(max(0, $total), 2));
+                            })
+                            ->columnSpan(1),
+
+                        TextInput::make('unit_cost')
+                            ->label('Unit Cost (ETB)')
+                            ->numeric()
+                            ->default(0)
+                            ->minValue(0)
+                            ->prefix('ETB')
+                            ->step(0.01)
+                            ->disabled()
+                            ->dehydrated()
+                            ->columnSpan(1),
 
                         TextInput::make('discount')
                             ->label('Discount (ETB)')
@@ -105,18 +111,57 @@ class PartsUsedRelationManager extends RelationManager
                                 $quantity = $get('quantity') ?? 1;
                                 $unitPrice = $get('unit_price') ?? 0;
                                 $total = ($quantity * $unitPrice) - $state;
-                                $set('total', max(0, $total));
-                            }),
+                                $set('total', round(max(0, $total), 2));
+                            })
+                            ->columnSpan(1),
 
+                        // ✅ FIXED: Total field with default value and proper hydration
                         TextInput::make('total')
                             ->label('Total (ETB)')
                             ->numeric()
                             ->disabled()
                             ->dehydrated()
-                            ->prefix('ETB'),
+                            ->prefix('ETB')
+                            ->default(0)
+                            ->afterStateHydrated(function ($state, Set $set) {
+                                // Ensure total is never null
+                                if ($state === null) {
+                                    $set('total', 0);
+                                }
+                            })
+                            ->columnSpan(2),
                     ])
-                    ->columns(2),
+                    ->compact()
+                    ->collapsible(false),
             ]);
+    }
+
+    // ✅ ADD THIS: Mutate form data before create to ensure total is set
+    public function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Ensure total is set
+        if (!isset($data['total']) || $data['total'] === null || $data['total'] === '') {
+            $quantity = $data['quantity'] ?? 1;
+            $unitPrice = $data['unit_price'] ?? 0;
+            $discount = $data['discount'] ?? 0;
+            $data['total'] = round(max(0, ($quantity * $unitPrice) - $discount), 2);
+        }
+
+        return $data;
+    }
+
+    // ✅ ADD THIS: Mutate form data before update to ensure total is set
+    public function mutateFormDataBeforeUpdate(array $data): array
+    {
+        // Ensure total is set
+        if (!isset($data['total']) || $data['total'] === null || $data['total'] === '') {
+            $quantity = $data['quantity'] ?? 1;
+            $unitPrice = $data['unit_price'] ?? 0;
+            $discount = $data['discount'] ?? 0;
+            $data['total'] = round(max(0, ($quantity * $unitPrice) - $discount), 2);
+        }
+
+        return $data;
     }
 
     public function table(Table $table): Table
@@ -178,12 +223,29 @@ class PartsUsedRelationManager extends RelationManager
                 \Filament\Actions\DeleteAction::make(),
             ])
             ->toolbarActions([
-                \Filament\Actions\CreateAction::make(),
+                \Filament\Actions\CreateAction::make()
+                    ->label('Add Part'),
                 \Filament\Actions\BulkActionGroup::make([
                     \Filament\Actions\DeleteBulkAction::make(),
-
                 ]),
             ]);
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        $query = $this->getRelationship()->getQuery();
+
+        $user = Filament::auth()->user();
+
+        if ($user && ! $user->hasRole(['admin', 'manager'])) {
+            if ($user->branch_id) {
+                $query->whereHas('inventoryItem', function ($q) use ($user) {
+                    $q->where('branch_id', $user->branch_id);
+                });
+            }
+        }
+
+        return $query;
     }
 
     public function isReadOnly(): bool

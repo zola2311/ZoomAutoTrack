@@ -20,10 +20,11 @@ class CustomerForm
             ->components([
 
                 Section::make('Create Customer')
-                    ->columns(2)
+                    ->columnSpanFull() // 🌟 FIX: Spans the section across the entire modal width
+                    ->columns(2)       // Keeps your form fields structured nicely inside
                     ->schema([
 
-                        // Row 1: Customer Type + Full Name
+                        // Row 1: Customer Type + Full Name / Company Name
                         Select::make('type')
                             ->label('Customer Type')
                             ->options([
@@ -69,6 +70,7 @@ class CustomerForm
                             ->label('Email Address')
                             ->email()
                             ->maxLength(150)
+                            ->unique(table: 'customers', column: 'email', ignoreRecord: true)
                             ->columnSpan(1),
 
                         TextInput::make('tin_number')

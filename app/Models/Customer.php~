@@ -39,10 +39,4 @@ class Customer extends Model
                 );
         });
     }
-    public function getDisplayNameAttribute(): string
-    {
-        return $this->type === 'company'
-            ? ($this->company_name ?: $this->full_name ?: 'Unnamed')
-            : ($this->full_name ?: $this->company_name ?: 'Unnamed');
-    }
 }

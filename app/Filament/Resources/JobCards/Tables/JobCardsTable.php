@@ -10,9 +10,11 @@ use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class JobCardsTable
 {
@@ -25,27 +27,32 @@ class JobCardsTable
                     ->label('Job #')
                     ->searchable()
                     ->sortable()
-                    ->copyable(),
+                    ->copyable()
+                    ->toggleable(),
 
                 TextColumn::make('customer.full_name')
                     ->label('Customer')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('vehicle.plate_number')
                     ->label('Plate')
                     ->searchable()
                     ->badge()
-                    ->color('success'),
+                    ->color('success')
+                    ->toggleable(),
 
                 TextColumn::make('vehicle.make')
                     ->label('Vehicle')
                     ->formatStateUsing(fn ($record) => $record->vehicle?->make . ' ' . $record->vehicle?->model)
-                    ->searchable(),
+                    ->searchable()
+                    ->toggleable(),
 
                 TextColumn::make('mechanic.name')
                     ->label('Mechanic')
-                    ->placeholder('—'),
+                    ->placeholder('—')
+                    ->toggleable(),
 
                 TextColumn::make('status')
                     ->badge()
@@ -56,7 +63,8 @@ class JobCardsTable
                         'completed'     => 'success',
                         'cancelled'     => 'danger',
                         default         => 'gray',
-                    }),
+                    })
+                    ->toggleable(),
 
                 TextColumn::make('priority')
                     ->badge()
@@ -65,18 +73,21 @@ class JobCardsTable
                         'urgent' => 'warning',
                         'vip'    => 'danger',
                         default  => 'gray',
-                    }),
+                    })
+                    ->toggleable(),
 
                 TextColumn::make('mileage_at_checkin')
                     ->label('Mileage')
                     ->numeric()
                     ->suffix(' km')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('checked_in_at')
                     ->label('Checked In')
                     ->dateTime('d M Y, H:i')
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(),
 
                 TextColumn::make('estimated_completion_at')
                     ->label('Est. Completion')
@@ -108,9 +119,25 @@ class JobCardsTable
                     ->label('Mechanic')
                     ->relationship('mechanic', 'name'),
 
+                Filter::make('ready_for_pickup')
+                    ->label('Ready for pickup')
+                    ->query(fn (Builder $query) => $query->where('status', 'completed')->whereNull('delivered_at')),
+
+                Filter::make('priority_active')
+                    ->label('VIP/Urgent (active)')
+                    ->query(fn (Builder $query) => $query
+                        ->whereIn('priority', ['vip', 'urgent'])
+                        ->whereNotIn('status', ['completed', 'cancelled'])
+                    ),
+
+                Filter::make('completed_today')
+                    ->label('Completed today')
+                    ->query(fn (Builder $query) => $query->where('status', 'completed')->whereDate('completed_at', today())),
+
                 TrashedFilter::make(),
 
             ])
+            ->deferFilters(false)
             ->recordActions([
                 ViewAction::make(),
                 EditAction::make(),
@@ -124,4 +151,3 @@ class JobCardsTable
             ]);
     }
 }
-

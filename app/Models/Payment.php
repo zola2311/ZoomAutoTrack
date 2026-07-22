@@ -23,4 +23,6 @@ class Payment extends Model
 
     public function invoice() { return $this->belongsTo(Invoice::class); }
     public function receiver() { return $this->belongsTo(User::class, 'received_by'); }
+
 }
+

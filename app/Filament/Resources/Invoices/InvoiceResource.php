@@ -44,12 +44,7 @@ class InvoiceResource extends Resource
         return InvoicesTable::configure($table);
     }
 
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
-    }
+
 
     public static function getPages(): array
     {
@@ -84,5 +79,11 @@ class InvoiceResource extends Resource
         }
 
         return $query;
+    }
+    public static function getRelations(): array
+    {
+        return [
+            \App\Filament\Resources\Invoices\RelationManagers\PaymentsRelationManager::class,
+        ];
     }
 }

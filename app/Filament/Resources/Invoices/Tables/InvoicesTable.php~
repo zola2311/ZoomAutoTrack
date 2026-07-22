@@ -9,8 +9,10 @@ use Filament\Actions\ForceDeleteBulkAction;
 use Filament\Actions\RestoreBulkAction;
 use Filament\Actions\ViewAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
+use Filament\Tables\Columns\ImageColumn;
 
 class InvoicesTable
 {
@@ -18,58 +20,71 @@ class InvoicesTable
     {
         return $table
             ->columns([
-                TextColumn::make('branch_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('job_card_id')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('customer_id')
-                    ->numeric()
-                    ->sortable(),
+
                 TextColumn::make('invoice_number')
+                    ->label('Invoice #')
+                    ->searchable()
+                    ->sortable()
+                    ->copyable(),
+
+                TextColumn::make('jobCard.job_number')
+                    ->label('Job #')
                     ->searchable(),
-                TextColumn::make('subtotal')
-                    ->numeric()
+
+                TextColumn::make('customer.full_name')
+                    ->label('Customer')
+                    ->searchable()
                     ->sortable(),
-                TextColumn::make('discount')
-                    ->numeric()
-                    ->sortable(),
-                TextColumn::make('tax')
-                    ->numeric()
-                    ->sortable(),
+
                 TextColumn::make('total')
-                    ->numeric()
+                    ->money('ETB')
                     ->sortable(),
+
                 TextColumn::make('paid_amount')
-                    ->numeric()
+                    ->label('Paid')
+                    ->money('ETB')
                     ->sortable(),
+
                 TextColumn::make('balance')
-                    ->numeric()
-                    ->sortable(),
+                    ->money('ETB')
+                    ->sortable()
+                    ->color(fn ($state) => $state > 0 ? 'danger' : 'success'),
+
                 TextColumn::make('status')
-                    ->searchable(),
+                    ->badge()
+                    ->color(fn (string $state): string => match ($state) {
+                        'unpaid'  => 'danger',
+                        'partial' => 'warning',
+                        'paid'    => 'success',
+                        'void'    => 'gray',
+                        default   => 'gray',
+                    }),
+
                 TextColumn::make('issued_at')
-                    ->dateTime()
+                    ->label('Issued')
+                    ->dateTime('d M Y')
                     ->sortable(),
+
                 TextColumn::make('due_at')
-                    ->dateTime()
-                    ->sortable(),
-                TextColumn::make('created_at')
-                    ->dateTime()
+                    ->label('Due')
+                    ->dateTime('d M Y')
                     ->sortable()
                     ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('updated_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('deleted_at')
-                    ->dateTime()
-                    ->sortable()
-                    ->toggleable(isToggledHiddenByDefault: true),
+
             ])
+            ->defaultSort('issued_at', 'desc')
             ->filters([
+
+                SelectFilter::make('status')
+                    ->options([
+                        'unpaid'  => 'Unpaid',
+                        'partial' => 'Partially Paid',
+                        'paid'    => 'Paid',
+                        'void'    => 'Void',
+                    ]),
+
                 TrashedFilter::make(),
+
             ])
             ->recordActions([
                 ViewAction::make(),
