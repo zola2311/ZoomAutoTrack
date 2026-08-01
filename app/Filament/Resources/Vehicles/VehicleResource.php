@@ -81,6 +81,13 @@ class VehicleResource extends Resource
     {
         return VehicleInfolist::configure($schema);
     }
+    public static function getRelations(): array
+    {
+        return [
+            \App\Filament\Resources\Vehicles\RelationManagers\JobCardsRelationManager::class,
+        ];
+    }
+
     public static function getRecordRouteBindingEloquentQuery(): Builder
     {
         return parent::getRecordRouteBindingEloquentQuery()

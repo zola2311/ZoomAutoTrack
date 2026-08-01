@@ -13,6 +13,7 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
 {
     protected function getStats(): array
     {
+
         $todayJobs = JobCard::whereDate('checked_in_at', today())->count();
 
         $inProgress = JobCard::whereIn('status', ['pending', 'in_progress', 'quality_check'])->count();
@@ -83,5 +84,9 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
                 ->descriptionIcon('heroicon-o-x-circle')
                 ->color($outOfStock > 0 ? 'danger' : 'success'),
         ];
+    }
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;
     }
 }

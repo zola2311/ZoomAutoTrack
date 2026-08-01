@@ -18,10 +18,10 @@ class InvoiceStatsWidget extends BaseStatsOverviewWidget
             ->where('due_at', '<', now())
             ->count();
 
-        $paidThisMonth = Invoice::where('status', 'paid')
-            ->whereMonth('updated_at', now()->month)
-            ->whereYear('updated_at', now()->year)
-            ->sum('total');
+        // Now consistently based on payments.paid_at, not invoices.updated_at
+        $paidThisMonth = Payment::whereMonth('paid_at', now()->month)
+            ->whereYear('paid_at', now()->year)
+            ->sum('amount');
 
         $unpaidCount = Invoice::whereIn('status', ['unpaid', 'partial'])->count();
 
@@ -47,7 +47,7 @@ class InvoiceStatsWidget extends BaseStatsOverviewWidget
                 ->color($overdueCount > 0 ? 'danger' : 'success'),
 
             Stat::make('Paid This Month', number_format($paidThisMonth, 2) . ' ETB')
-                ->description(now()->format('F Y'))
+                ->description(now()->format('F Y') . ' — based on payment date')
                 ->descriptionIcon('heroicon-o-check-circle')
                 ->color('success'),
 
@@ -73,6 +73,8 @@ class InvoiceStatsWidget extends BaseStatsOverviewWidget
         ];
     }
 
-
-
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager', 'cashier']) ?? false;
+    }
 }

@@ -2,6 +2,8 @@
 
 namespace App\Filament\Resources\Invoices\Schemas;
 
+use App\Models\Customer;
+use App\Models\InventoryItem;
 use App\Models\JobCard;
 use Filament\Forms\Components\DateTimePicker;
 use Filament\Forms\Components\Repeater;
@@ -23,15 +25,17 @@ class InvoiceForm
                     ->columnSpanFull()
                     ->schema([
                         Select::make('job_card_id')
-                            ->label('Job Card')
+                            ->label('Job Card (optional)')
                             ->relationship('jobCard', 'job_number')
                             ->searchable()
                             ->preload()
-                            ->required()
+                            ->nullable()
                             ->disabledOn('edit')
                             ->live()
+                            ->helperText('Leave empty for a direct product sale with no repair job')
                             ->afterStateUpdated(function ($state, Set $set) {
                                 if (! $state) {
+                                    $set('customer_id', null);
                                     return;
                                 }
 
@@ -41,6 +45,9 @@ class InvoiceForm
                                 if (! $jobCard) {
                                     return;
                                 }
+
+                                // auto-fill the customer from the job card too
+                                $set('customer_id', $jobCard->customer_id);
 
                                 $items = [];
 
@@ -58,18 +65,50 @@ class InvoiceForm
 
                                 foreach ($jobCard->partsUsed as $part) {
                                     $items[] = [
-                                        'item_type'   => 'part',
-                                        'description' => optional($part->inventoryItem)->name ?? 'Part',
-                                        'quantity'    => $part->quantity,
-                                        'unit_price'  => $part->unit_price,
-                                        'discount'    => $part->discount,
-                                        'tax'         => 0,
-                                        'total'       => $part->total,
+                                        'item_type'          => 'part',
+                                        'description'        => optional($part->inventoryItem)->name ?? 'Part',
+                                        'inventory_item_id'   => $part->inventory_item_id,
+                                        'quantity'            => $part->quantity,
+                                        'unit_price'          => $part->unit_price,
+                                        'discount'            => $part->discount,
+                                        'tax'                 => 0,
+                                        'total'               => $part->total,
                                     ];
                                 }
 
                                 $set('items', $items);
                             }),
+
+                        Select::make('customer_id')
+                            ->label('Customer')
+                            ->relationship('customer', 'full_name')
+                            ->getOptionLabelFromRecordUsing(fn (Customer $record) => $record->display_name)
+                            ->searchable(['full_name', 'company_name', 'phone'])
+                            ->preload()
+                            ->required()
+                            ->disabled(fn (Get $get) => (bool) $get('job_card_id'))
+                            ->dehydrated()
+                            ->createOptionForm([
+                                \Filament\Forms\Components\TextInput::make('full_name')
+                                    ->label('Full Name')
+                                    ->required(),
+                                \Filament\Forms\Components\TextInput::make('phone')
+                                    ->label('Phone Number')
+                                    ->required()
+                                    ->unique('customers', 'phone'),
+                            ])
+                            ->createOptionUsing(function (array $data) {
+                                return Customer::create([
+                                    'full_name'  => $data['full_name'],
+                                    'phone'      => $data['phone'],
+                                    'type'       => 'individual',
+                                    'branch_id'  => auth()->user()->branch_id ?? 1,
+                                ])->id;
+                            })
+                            ->helperText(fn (Get $get) => $get('job_card_id')
+                                ? 'Auto-filled from the selected job card'
+                                : 'Select an existing customer or create a new one'
+                            ),
 
                         Select::make('status')
                             ->required()
@@ -100,7 +139,29 @@ class InvoiceForm
                                         'other' => 'Other',
                                     ])
                                     ->required()
+                                    ->live()
                                     ->columnSpan(1),
+
+                                Select::make('inventory_item_id')
+                                    ->label('Part')
+                                    ->options(fn () => InventoryItem::where('is_active', true)->pluck('name', 'id'))
+                                    ->searchable()
+                                    ->live()
+                                    ->visible(fn (Get $get) => $get('item_type') === 'part')
+                                    ->helperText('Selecting a part deducts it from inventory on save')
+                                    ->afterStateUpdated(function ($state, Set $set, Get $get) {
+                                        if ($item = InventoryItem::find($state)) {
+                                            $set('description', $item->name);
+                                            $set('unit_price', $item->selling_price);
+
+                                            $quantity = $get('quantity') ?? 1;
+                                            $discount = $get('discount') ?? 0;
+                                            $tax = $get('tax') ?? 0;
+                                            $total = ($quantity * $item->selling_price) - $discount + $tax;
+                                            $set('total', round(max(0, $total), 2));
+                                        }
+                                    })
+                                    ->columnSpan(3),
 
                                 TextInput::make('description')
                                     ->required()

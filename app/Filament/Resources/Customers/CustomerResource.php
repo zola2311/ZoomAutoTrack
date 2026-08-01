@@ -73,4 +73,13 @@ class CustomerResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['full_name', 'company_name', 'phone', 'customer_code'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record->display_name;
+    }
 }

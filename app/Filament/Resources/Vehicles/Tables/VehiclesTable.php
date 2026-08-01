@@ -40,7 +40,7 @@ class VehiclesTable
                     }),
                 TextColumn::make('make')
                     ->searchable()
-                    ->sortable()->toggleable(),
+                    ->sortable(),
 
                 TextColumn::make('model')
                     ->searchable()

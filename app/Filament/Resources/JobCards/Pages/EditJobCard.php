@@ -70,9 +70,10 @@ class EditJobCard extends EditRecord
                 ->label(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')
                 ->icon(fn () => $this->record->invoice ? 'heroicon-o-arrow-path' : 'heroicon-o-document-currency-dollar')
                 ->color(fn () => $this->record->invoice ? 'warning' : 'success')
-                ->visible(fn () => $this->record->invoice
-                    || $this->record->services()->exists()
-                    || $this->record->partsUsed()->exists()
+                ->visible(fn () => ! auth()->user()->hasRole('mechanic')
+                    && ($this->record->invoice
+                        || $this->record->services()->exists()
+                        || $this->record->partsUsed()->exists())
                 )
                 ->requiresConfirmation()
                 ->modalHeading(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')
@@ -124,8 +125,38 @@ class EditJobCard extends EditRecord
     {
         return $this->getResource()::getUrl('view', ['record' => $this->record]);
     }
+
     protected function afterSave(): void
     {
+
+//        $formData = $this->form->getState();
+//
+//        \Illuminate\Support\Facades\Log::info('JobCard form state on save', $formData);
+
+
+        // Sync photo collections
+        $formData = $this->form->getRawState();
+
+        foreach (['checkin_photos', 'damage_photos', 'before_photos', 'after_photos', 'checkout_photos'] as $collection) {
+            if (isset($formData[$collection])) {
+                $this->record->syncMediaCollection($formData[$collection], $collection);
+            }
+        }
+
+        // Sync voice notes (repeater-based, multiple recordings per collection)
+        foreach (['customer_complaint_voices', 'mechanic_notes_voices'] as $collection) {
+            if (isset($formData[$collection])) {
+                $paths = collect($formData[$collection])
+                    ->pluck('path')
+                    ->filter()
+                    ->values()
+                    ->toArray();
+
+                $this->record->syncMediaCollection($paths, $collection);
+            }
+        }
+
+        // Cascade-complete logic (your existing code)
         if ($this->record->status !== 'completed') {
             return;
         }
@@ -154,4 +185,5 @@ class EditJobCard extends EditRecord
                 ->send();
         }
     }
+
 }

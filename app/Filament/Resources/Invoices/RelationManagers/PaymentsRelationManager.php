@@ -5,6 +5,7 @@ namespace App\Filament\Resources\Invoices\RelationManagers;
 use App\Models\User;
 use Filament\Facades\Filament;
 use Filament\Forms\Components\DateTimePicker;
+use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
@@ -13,9 +14,9 @@ use Filament\Schemas\Schema;
 use Filament\Resources\RelationManagers\RelationManager;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Forms\Components\FileUpload;
-use Filament\Tables\Table;
 use Filament\Tables\Columns\ImageColumn;
+use Filament\Tables\Table;
+
 class PaymentsRelationManager extends RelationManager
 {
     protected static string $relationship = 'payments';
@@ -62,12 +63,31 @@ class PaymentsRelationManager extends RelationManager
                             ->placeholder('e.g. Transaction ID, Cheque No.')
                             ->helperText('Optional reference for tracking')
                             ->columnSpan(2),
+//                        FileUpload::make('proof_path')
+//                            ->label('Payment Screenshot')
+//                            ->image()
+//                            ->disk('public_uploads')
+//                            ->directory('payment-proofs')
+//                            ->visibility('public')
+//                            ->maxSize(5120)
+//                            ->imageResizeTargetWidth('800')
+//                            ->imageResizeTargetHeight('600')
+//                            ->imageResizeMode('cover')
+//                            ->openable()
+//                            ->downloadable()
+//                            ->previewable(false)
+//                            ->helperText('Upload a screenshot for bank transfer, Telebirr, or CBE Birr payments')
+//                            ->columnSpan(2),
                         FileUpload::make('proof_path')
                             ->label('Payment Screenshot')
                             ->image()
+                            ->disk('public_uploads')
                             ->directory('payment-proofs')
-                            ->visibility('private')
+                            ->visibility('public')
                             ->maxSize(5120)
+                            ->imageResizeTargetWidth('800')
+                            ->imageResizeTargetHeight('600')
+                            ->imageResizeMode('cover')
                             ->helperText('Upload a screenshot for bank transfer, Telebirr, or CBE Birr payments')
                             ->columnSpan(2),
                         DateTimePicker::make('paid_at')
@@ -123,11 +143,17 @@ class PaymentsRelationManager extends RelationManager
                     })
                     ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
 
-                ImageColumn::make('proof_path')
+                Tables\Columns\TextColumn::make('proof_path')
                     ->label('Proof')
-                    ->disk('public_uploads')
-                    ->square()
-                    ->size(40),
+                    ->state(function ($record) {
+                        if (! $record->proof_path) {
+                            return '—';
+                        }
+                        $url = route('payment-proofs.show', $record);
+                        return "<img src=\"{$url}\" style=\"width:40px;height:40px;object-fit:cover;border-radius:4px;\">";
+                    })
+                    ->html()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('reference_number')
                     ->label('Reference')
                     ->searchable()
@@ -165,8 +191,19 @@ class PaymentsRelationManager extends RelationManager
                         'cheque' => 'Cheque',
                     ]),
             ])
+//            ->recordActions([
+//                \Filament\Actions\EditAction::make(),
+//                \Filament\Actions\DeleteAction::make(),
+//            ])
             ->recordActions([
-//                \Filament\Actions\ViewAction::make(),
+                \Filament\Actions\Action::make('viewProof')
+                    ->label('View Proof')
+                    ->icon('heroicon-o-photo')
+                    ->color('info')
+                    ->visible(fn ($record) => (bool) $record->proof_path)
+                    ->url(fn ($record) => route('payment-proofs.show', $record))
+                    ->openUrlInNewTab(),
+
                 \Filament\Actions\EditAction::make(),
                 \Filament\Actions\DeleteAction::make(),
             ])

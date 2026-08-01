@@ -19,6 +19,8 @@ class CreateInvoice extends CreateRecord
                 $data['branch_id'] = $jobCard->branch_id;
                 $data['customer_id'] = $jobCard->customer_id;
             }
+        } else {
+            $data['branch_id'] ??= auth()->user()->branch_id ?? 1;
         }
 
         $data['subtotal'] ??= 0;
@@ -28,7 +30,6 @@ class CreateInvoice extends CreateRecord
 
         return $data;
     }
-
     protected function afterCreate(): void
     {
         $this->recalculateTotals();
@@ -47,4 +48,5 @@ class CreateInvoice extends CreateRecord
             'balance'  => $total - $invoice->paid_amount,
         ]);
     }
+
 }

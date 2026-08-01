@@ -9,23 +9,38 @@ use Filament\Widgets\StatsOverviewWidget\Stat;
 
 class JobCardStatsWidget extends BaseStatsOverviewWidget
 {
+    protected function baseQuery()
+    {
+        $user = auth()->user();
+        $query = JobCard::query();
+
+        if ($user->hasRole('mechanic') && ! $user->hasAnyRole(['admin', 'manager'])) {
+            $query->where('mechanic_id', $user->id);
+        }
+
+        return $query;
+    }
+
     protected function getStats(): array
     {
-        $pending = JobCard::where('status', 'pending')->count();
+        $pending = (clone $this->baseQuery())->where('status', 'pending')->count();
 
-        $inProgress = JobCard::where('status', 'in_progress')->count();
+        $inProgress = (clone $this->baseQuery())->where('status', 'in_progress')->count();
 
-        $qualityCheck = JobCard::where('status', 'quality_check')->count();
+        $qualityCheck = (clone $this->baseQuery())->where('status', 'quality_check')->count();
 
-        $readyForPickup = JobCard::where('status', 'completed')
+        $readyForPickup = (clone $this->baseQuery())
+            ->where('status', 'completed')
             ->whereNull('delivered_at')
             ->count();
 
-        $vipUrgent = JobCard::whereIn('priority', ['vip', 'urgent'])
+        $vipUrgent = (clone $this->baseQuery())
+            ->whereIn('priority', ['vip', 'urgent'])
             ->whereNotIn('status', ['completed', 'cancelled'])
             ->count();
 
-        $completedToday = JobCard::where('status', 'completed')
+        $completedToday = (clone $this->baseQuery())
+            ->where('status', 'completed')
             ->whereDate('completed_at', today())
             ->count();
 
@@ -78,5 +93,10 @@ class JobCardStatsWidget extends BaseStatsOverviewWidget
                     'tableFilters' => ['completed_today' => ['isActive' => true]],
                 ])),
         ];
+    }
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'receptionist', 'cashier']) ?? false;
     }
 }

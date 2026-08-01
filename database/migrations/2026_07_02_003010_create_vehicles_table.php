@@ -29,7 +29,8 @@ return new class extends Migration
             $table->string('fuel_type')->nullable();
             $table->string('transmission')->nullable();
             $table->string('qr_code')->nullable()->unique();
-
+            $table->unsignedInteger('service_interval_km')->default(5000);
+            $table->unsignedInteger('service_interval_months')->default(6);
             $table->timestamps();
 
             $table->unique(['branch_id', 'plate_number']);

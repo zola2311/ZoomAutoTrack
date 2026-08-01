@@ -53,8 +53,9 @@ class VehicleInspectionsRelationManager extends RelationManager
                                 ->orderBy('name')
                                 ->pluck('name', 'id')
                             )
-                            ->searchable()
-                            ->preload()
+                            ->default(fn () => auth()->id())
+                            ->disabled(fn () => auth()->user()->hasRole('mechanic'))
+                            ->dehydrated()
                             ->nullable()
                             ->placeholder('Select inspector')
                             ->columnSpan(1),

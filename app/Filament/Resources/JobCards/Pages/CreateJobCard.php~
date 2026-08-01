@@ -1,0 +1,50 @@
+<?php
+
+namespace App\Filament\Resources\JobCards\Pages;
+
+use App\Filament\Resources\JobCards\JobCardResource;
+use App\Models\Media;
+use App\Models\JobCard;
+use Filament\Resources\Pages\CreateRecord;
+
+class CreateJobCard extends CreateRecord
+{
+    protected static string $resource = JobCardResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        if (empty($data['branch_id'])) {
+            $data['branch_id'] = auth()->user()->branch_id ?? 1;
+        }
+
+        return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        $formData = $this->form->getRawState();
+
+        // Sync photo collections
+        foreach (['checkin_photos', 'damage_photos', 'before_photos', 'after_photos', 'checkout_photos'] as $collection) {
+            if (isset($formData[$collection])) {
+                $this->record->syncMediaCollection($formData[$collection], $collection);
+            }
+        }
+
+        // Sync voice notes
+        foreach (['customer_complaint_voice_upload' => 'customer_complaint_voice_id', 'mechanic_notes_voice_upload' => 'mechanic_notes_voice_id'] as $field => $column) {
+            if (! empty($formData[$field][0])) {
+                $media = Media::create([
+                    'model_type'  => JobCard::class,
+                    'model_id'    => $this->record->id,
+                    'collection'  => $field,
+                    'disk'        => 'public_uploads',
+                    'path'        => $formData[$field][0],
+                    'uploaded_by' => auth()->id(),
+                ]);
+
+                $this->record->update([$column => $media->id]);
+            }
+        }
+    }
+}

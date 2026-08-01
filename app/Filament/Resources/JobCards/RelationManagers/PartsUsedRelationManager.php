@@ -80,6 +80,8 @@ class PartsUsedRelationManager extends RelationManager
                             ->prefix('ETB')
                             ->step(0.01)
                             ->live()
+                            ->disabled(fn () => auth()->user()->hasRole('mechanic'))
+                            ->dehydrated()
                             ->afterStateUpdated(function ($state, Get $get, Set $set) {
                                 $quantity = $get('quantity') ?? 1;
                                 $discount = $get('discount') ?? 0;
@@ -95,7 +97,7 @@ class PartsUsedRelationManager extends RelationManager
                             ->minValue(0)
                             ->prefix('ETB')
                             ->step(0.01)
-                            ->disabled()
+                            ->disabled(fn () => auth()->user()->hasRole('mechanic'))
                             ->dehydrated()
                             ->columnSpan(1),
 
@@ -107,6 +109,8 @@ class PartsUsedRelationManager extends RelationManager
                             ->prefix('ETB')
                             ->step(0.01)
                             ->live()
+                            ->disabled(fn () => auth()->user()->hasRole('mechanic'))
+                            ->dehydrated()
                             ->afterStateUpdated(function ($state, Get $get, Set $set) {
                                 $quantity = $get('quantity') ?? 1;
                                 $unitPrice = $get('unit_price') ?? 0;
@@ -114,7 +118,6 @@ class PartsUsedRelationManager extends RelationManager
                                 $set('total', round(max(0, $total), 2));
                             })
                             ->columnSpan(1),
-
                         // ✅ FIXED: Total field with default value and proper hydration
                         TextInput::make('total')
                             ->label('Total (ETB)')

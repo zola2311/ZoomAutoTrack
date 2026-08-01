@@ -17,7 +17,7 @@ return new class extends Migration
 
             $table->string('item_type')->index();
             $table->text('description');
-
+            $table->foreignId('inventory_item_id')->nullable()->constrained()->nullOnDelete();
             $table->decimal('quantity', 12, 2)->default(1);
             $table->decimal('unit_price', 12, 2)->default(0);
             $table->decimal('discount', 12, 2)->default(0);

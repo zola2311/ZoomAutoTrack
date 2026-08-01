@@ -21,12 +21,19 @@ class LatestJobCardsWidget extends BaseTableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                JobCard::query()
+            ->query(function () {
+                $user = auth()->user();
+                $query = JobCard::query()
                     ->whereNotIn('status', ['completed', 'cancelled'])
                     ->latest('checked_in_at')
-                    ->limit(10)
-            )
+                    ->limit(10);
+
+                if ($user->hasRole('mechanic') && ! $user->hasAnyRole(['admin', 'manager'])) {
+                    $query->where('mechanic_id', $user->id);
+                }
+
+                return $query;
+            })
             ->columns([
                 TextColumn::make('job_number')
                     ->label('Job #')
@@ -34,9 +41,20 @@ class LatestJobCardsWidget extends BaseTableWidget
                     ->copyable()
                     ->weight('medium'),
 
-                TextColumn::make('customer.full_name')
+                TextColumn::make('customer_display_name')
                     ->label('Customer')
-                    ->searchable(),
+                    ->state(fn ($record) => $record->customer?->display_name ?? '—')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('customer', function (Builder $q) use ($search) {
+                            $q->where('full_name', 'like', "%{$search}%")
+                                ->orWhere('company_name', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->join('customers', 'vehicles.customer_id', '=', 'customers.id')
+                            ->orderByRaw("COALESCE(customers.company_name, customers.full_name) {$direction}")
+                            ->select('vehicles.*');
+                    }),
 
                 TextColumn::make('vehicle.plate_number')
                     ->label('Plate')
@@ -80,5 +98,9 @@ class LatestJobCardsWidget extends BaseTableWidget
                 fn (JobCard $record): string => JobCardResource::getUrl('view', ['record' => $record])
             )
             ->paginated(false);
+    }
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'receptionist']) ?? false;
     }
 }

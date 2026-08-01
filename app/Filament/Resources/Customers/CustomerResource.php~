@@ -28,7 +28,7 @@ class CustomerResource extends Resource
     protected static string|UnitEnum|null $navigationGroup = 'Customers';
     protected static ?int $navigationSort = 1;
 
-    protected static ?string $recordTitleAttribute = 'full_name';
+    protected static ?string $recordTitleAttribute = 'display_name';
 
     public static function form(Schema $schema): Schema
     {
@@ -73,4 +73,5 @@ class CustomerResource extends Resource
                 SoftDeletingScope::class,
             ]);
     }
+    
 }

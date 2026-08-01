@@ -12,6 +12,9 @@ use Filament\Forms\Components\Textarea;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\FileUpload;
+use App\Filament\Forms\Components\VoiceRecorder;
+use Filament\Forms\Components\Repeater;
 
 class JobCardForm
 {
@@ -24,14 +27,16 @@ class JobCardForm
                     ->schema([
                         Select::make('customer_id')
                             ->label('Customer')
-                            ->options(fn () => Customer::query()
-                                ->orderByRaw('COALESCE(company_name, full_name)')
+                            ->searchable()
+                            ->getSearchResultsUsing(fn (string $search) => Customer::query()
+                                ->where('full_name', 'like', "%{$search}%")
+                                ->orWhere('company_name', 'like', "%{$search}%")
+                                ->orWhere('phone', 'like', "%{$search}%")
+                                ->limit(50)
                                 ->get()
                                 ->mapWithKeys(fn ($c) => [$c->id => $c->display_name . ' - ' . $c->phone])
-                                ->toArray()
                             )
-                            ->searchable()
-                            ->preload()
+                            ->getOptionLabelUsing(fn ($value) => Customer::find($value)?->display_name)
                             ->required()
                             ->live(),
 
@@ -84,7 +89,30 @@ class JobCardForm
                         TextInput::make('mileage_at_checkin')
                             ->label('Mileage at Check-in')
                             ->numeric()
-                            ->minValue(0),
+                            ->minValue(function (Get $get, $record) {
+                                $vehicleId = $get('vehicle_id');
+                                if (! $vehicleId) return 0;
+
+                                $previous = \App\Models\JobCard::where('vehicle_id', $vehicleId)
+                                    ->when($record, fn ($q) => $q->where('id', '!=', $record->id))
+                                    ->orderByDesc('checked_in_at')
+                                    ->first();
+
+                                return $previous?->mileage_at_checkin ?? 0;
+                            })
+                            ->helperText(function (Get $get, $record) {
+                                $vehicleId = $get('vehicle_id');
+                                if (! $vehicleId) return null;
+
+                                $previous = \App\Models\JobCard::where('vehicle_id', $vehicleId)
+                                    ->when($record, fn ($q) => $q->where('id', '!=', $record->id))
+                                    ->orderByDesc('checked_in_at')
+                                    ->first();
+
+                                return $previous
+                                    ? "Previous visit: {$previous->mileage_at_checkin} km"
+                                    : null;
+                            }),
 
                         TextInput::make('fuel_level')
                             ->maxLength(50),
@@ -102,13 +130,151 @@ class JobCardForm
                             ->columnSpanFull(),
                     ]),
 
+                Section::make('Photos')
+                    ->description('Upload photos at each stage of the job')
+                    ->columns(1)
+                    ->schema([
+                        FileUpload::make('checkin_photos')
+                            ->label('Check-in Condition')
+                            ->helperText('Overall condition of the vehicle at intake')
+                            ->image()
+                            ->multiple()
+                            ->disk('public_uploads')
+                            ->directory('job-cards/checkin')
+                            ->visibility('public')
+                            ->previewable(false)
+                            ->maxSize(5120)
+                            ->reorderable()
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $component->state($record->getMediaCollectionPaths('checkin_photos'));
+                                }
+                            })
+                            ->dehydrated(false),
+
+                        FileUpload::make('damage_photos')
+                            ->label('Damage / Problem Area')
+                            ->helperText('Photos of the specific issue found during diagnosis')
+                            ->image()
+                            ->multiple()
+                            ->disk('public_uploads')
+                            ->directory('job-cards/damage')
+                            ->visibility('public')
+                            ->previewable(false)
+                            ->maxSize(5120)
+                            ->reorderable()
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $component->state($record->getMediaCollectionPaths('damage_photos'));
+                                }
+                            })
+                            ->dehydrated(false),
+
+                        FileUpload::make('before_photos')
+                            ->label('Before Repair')
+                            ->image()
+                            ->multiple()
+                            ->disk('public_uploads')
+                            ->directory('job-cards/before')
+                            ->visibility('public')
+                            ->previewable(false)
+                            ->maxSize(5120)
+                            ->reorderable()
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $component->state($record->getMediaCollectionPaths('before_photos'));
+                                }
+                            })
+                            ->dehydrated(false),
+
+                        FileUpload::make('after_photos')
+                            ->label('After Repair')
+                            ->helperText('Proof of completed work')
+                            ->image()
+                            ->multiple()
+                            ->disk('public_uploads')
+                            ->directory('job-cards/after')
+                            ->visibility('public')
+                            ->previewable(false)
+                            ->maxSize(5120)
+                            ->reorderable()
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $component->state($record->getMediaCollectionPaths('after_photos'));
+                                }
+                            })
+                            ->dehydrated(false),
+
+                        FileUpload::make('checkout_photos')
+                            ->label('Check-out Condition')
+                            ->helperText('Final condition before returning to customer')
+                            ->image()
+                            ->multiple()
+                            ->disk('public_uploads')
+                            ->directory('job-cards/checkout')
+                            ->visibility('public')
+                            ->previewable(false)
+                            ->maxSize(5120)
+                            ->reorderable()
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $component->state($record->getMediaCollectionPaths('checkout_photos'));
+                                }
+                            })
+                            ->dehydrated(false),
+                    ]),
+
+
+
+Section::make('Voice Notes')
+    ->description('Record one or more voice notes')
+    ->schema([
+
+        Repeater::make('customer_complaint_voices')
+            ->label('Customer Complaint (Voice Notes)')
+            ->itemLabel(fn (array $state, $rulesetIndex = null): string => 'Voice Note')
+            ->schema([
+                VoiceRecorder::make('path')
+                    ->label('Recording')
+                    ->dehydrated(),
+            ])
+            ->addActionLabel('+ Add another recording')
+            ->reorderable(false)
+            ->columnSpanFull()
+            ->afterStateHydrated(function ($component, $record) {
+                if ($record) {
+                    $paths = $record->getMediaCollectionPaths('customer_complaint_voices');
+                    $component->state(collect($paths)->map(fn ($p) => ['path' => $p])->toArray());
+                }
+            })
+            ->dehydrated(true),
+
+        Repeater::make('mechanic_notes_voices')
+            ->label('Mechanic Notes (Voice Notes)')
+            ->schema([
+                VoiceRecorder::make('path')
+                    ->label('Recording')
+                    ->dehydrated(),
+            ])
+            ->addActionLabel('+ Add another recording')
+            ->reorderable(false)
+            ->columnSpanFull()
+            ->afterStateHydrated(function ($component, $record) {
+                if ($record) {
+                    $paths = $record->getMediaCollectionPaths('mechanic_notes_voices');
+                    $component->state(collect($paths)->map(fn ($p) => ['path' => $p])->toArray());
+                }
+            })
+            ->dehydrated(true),
+
+    ]),
                 Section::make('Status & Priority')
                     ->columns(2)
                     ->schema([
                         Select::make('status')
                             ->required()
                             ->default('pending')
-                            ->live()  // ✅ ADD THIS: Make status live so completed_at can react
+                            ->live()
                             ->options([
                                 'pending'       => 'Pending',
                                 'in_progress'   => 'In Progress',
@@ -134,7 +300,6 @@ class JobCardForm
                             ->label('Estimated Completion')
                             ->helperText('When do you expect this job to be done?'),
 
-                        // ✅ FIXED: completed_at required when status is completed
                         DateTimePicker::make('completed_at')
                             ->label('Actual Completion Date')
                             ->required(fn (Get $get) => $get('status') === 'completed')

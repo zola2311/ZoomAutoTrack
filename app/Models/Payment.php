@@ -15,6 +15,7 @@ class Payment extends Model
         'notes',
         'received_by',
         'paid_at',
+        'proof_path',
     ];
     protected $casts = [
         'amount' => 'decimal:2',
@@ -24,5 +25,13 @@ class Payment extends Model
     public function invoice() { return $this->belongsTo(Invoice::class); }
     public function receiver() { return $this->belongsTo(User::class, 'received_by'); }
 
+    public function getProofUrlAttribute(): ?string
+    {
+        if ($this->proof_path) {
+            // Files are in public/uploads/payment-proofs/
+            return asset('uploads/payment-proofs/' . $this->proof_path);
+        }
+        return null;
+    }
 }
 

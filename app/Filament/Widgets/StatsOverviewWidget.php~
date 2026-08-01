@@ -13,6 +13,7 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
 {
     protected function getStats(): array
     {
+
         $todayJobs = JobCard::whereDate('checked_in_at', today())->count();
 
         $inProgress = JobCard::whereIn('status', ['pending', 'in_progress', 'quality_check'])->count();
@@ -70,7 +71,7 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
 
             Stat::make('Ready for Pickup', $readyForPickup)
                 ->description('Completed, not delivered')
-                ->descriptionIcon('heroicon-o-clipboard-check')
+                ->descriptionIcon('heroicon-o-clipboard-document-check')
                 ->color($readyForPickup > 0 ? 'warning' : 'success'),
 
             Stat::make('Low Stock Alerts', $lowStock)
@@ -84,4 +85,5 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
                 ->color($outOfStock > 0 ? 'danger' : 'success'),
         ];
     }
+
 }

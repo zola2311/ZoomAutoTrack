@@ -40,19 +40,19 @@ class VehiclesTable
                     }),
                 TextColumn::make('make')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
 
                 TextColumn::make('model')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
 
                 TextColumn::make('year')
-                    ->sortable(),
+                    ->sortable()->toggleable(),
 
                 TextColumn::make('current_mileage')
                     ->label('Mileage')
                     ->numeric()
-                    ->sortable(),
+                    ->sortable()->toggleable(),
 
                 TextColumn::make('branch.name')
                     ->label('Branch')

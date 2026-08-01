@@ -3,9 +3,12 @@
 namespace App\Filament\Resources\JobCards\Schemas;
 
 use App\Models\JobCard;
+use Filament\Infolists\Components\ImageEntry;
+use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+
 
 class JobCardInfolist
 {
@@ -97,6 +100,84 @@ class JobCardInfolist
                             ->columnSpanFull(),
                     ]),
 
+                Section::make('Photos')
+                    ->columns(1)
+                    ->schema([
+
+                        TextEntry::make('checkin_photos_label')
+                            ->label('Check-in Condition')
+                            ->state('')
+                            ->visible(fn (JobCard $record) => $record->checkinPhotos()->exists()),
+
+                        ImageEntry::make('checkin_photos')
+                            ->label('')
+                            ->state(fn (JobCard $record) => $record->checkinPhotos()->pluck('path')->map(
+                                fn ($path) => \Illuminate\Support\Facades\Storage::disk('public_uploads')->url($path)
+                            )->toArray())
+                            ->imageHeight(90)
+                            ->visible(fn (JobCard $record) => $record->checkinPhotos()->exists()),
+
+                        TextEntry::make('damage_photos_label')
+                            ->label('Damage / Problem Area')
+                            ->state('')
+                            ->visible(fn (JobCard $record) => $record->damagePhotos()->exists()),
+
+                        ImageEntry::make('damage_photos')
+                            ->label('')
+                            ->state(fn (JobCard $record) => $record->damagePhotos()->pluck('path')->map(
+                                fn ($path) => \Illuminate\Support\Facades\Storage::disk('public_uploads')->url($path)
+                            )->toArray())
+                            ->imageHeight(90)
+                            ->visible(fn (JobCard $record) => $record->damagePhotos()->exists()),
+
+                        TextEntry::make('before_photos_label')
+                            ->label('Before Repair')
+                            ->state('')
+                            ->visible(fn (JobCard $record) => $record->beforePhotos()->exists()),
+
+                        ImageEntry::make('before_photos')
+                            ->label('')
+                            ->state(fn (JobCard $record) => $record->beforePhotos()->pluck('path')->map(
+                                fn ($path) => \Illuminate\Support\Facades\Storage::disk('public_uploads')->url($path)
+                            )->toArray())
+                            ->imageHeight(90)
+                            ->visible(fn (JobCard $record) => $record->beforePhotos()->exists()),
+
+                        TextEntry::make('after_photos_label')
+                            ->label('After Repair')
+                            ->state('')
+                            ->visible(fn (JobCard $record) => $record->afterPhotos()->exists()),
+
+                        ImageEntry::make('after_photos')
+                            ->label('')
+                            ->state(fn (JobCard $record) => $record->afterPhotos()->pluck('path')->map(
+                                fn ($path) => \Illuminate\Support\Facades\Storage::disk('public_uploads')->url($path)
+                            )->toArray())
+                            ->imageHeight(90)
+                            ->visible(fn (JobCard $record) => $record->afterPhotos()->exists()),
+
+                        TextEntry::make('checkout_photos_label')
+                            ->label('Check-out Condition')
+                            ->state('')
+                            ->visible(fn (JobCard $record) => $record->checkoutPhotos()->exists()),
+
+                        ImageEntry::make('checkout_photos')
+                            ->label('')
+                            ->state(fn (JobCard $record) => $record->checkoutPhotos()->pluck('path')->map(
+                                fn ($path) => \Illuminate\Support\Facades\Storage::disk('public_uploads')->url($path)
+                            )->toArray())
+                            ->imageHeight(90)
+                            ->visible(fn (JobCard $record) => $record->checkoutPhotos()->exists()),
+
+                        TextEntry::make('no_photos')
+                            ->label('')
+                            ->state('No photos uploaded for this job card yet.')
+                            ->visible(fn (JobCard $record) => ! $record->media()->whereIn('collection', [
+                                'checkin_photos', 'damage_photos', 'before_photos', 'after_photos', 'checkout_photos',
+                            ])->exists()),
+
+                    ]),
+
                 Section::make('Timeline')
                     ->columns(2)
                     ->schema([
@@ -121,6 +202,61 @@ class JobCardInfolist
                             ->placeholder('-'),
                     ]),
 
+
+                Section::make('Voice Notes')
+                    ->schema([
+
+                        RepeatableEntry::make('complaint_voice_display')
+                            ->label('Customer Complaint Recordings')
+                            ->state(fn (JobCard $record) => $record->photosIn('customer_complaint_voices')->get()
+                                ->values()
+                                ->map(fn ($m, $i) => [
+                                    'label' => 'Voice ' . ($i + 1),
+                                    'url'   => \Illuminate\Support\Facades\Storage::disk('public_uploads')->url($m->path),
+                                ])
+                            )
+                            ->schema([
+                                TextEntry::make('label')
+                                    ->hiddenLabel()
+                                    ->weight('bold')
+                                    ->size('sm'),
+
+                                TextEntry::make('url')
+                                    ->hiddenLabel()
+                                    ->formatStateUsing(fn ($state) => new \Illuminate\Support\HtmlString(
+                                        "<audio controls src=\"{$state}\" style=\"height:36px; width:100%\"></audio>"
+                                    ))
+                                    ->html(),
+                            ])
+                            ->columns(1)
+                            ->visible(fn (JobCard $record) => $record->photosIn('customer_complaint_voices')->exists()),
+
+                        RepeatableEntry::make('mechanic_voice_display')
+                            ->label('Mechanic Notes Recordings')
+                            ->state(fn (JobCard $record) => $record->photosIn('mechanic_notes_voices')->get()
+                                ->values()
+                                ->map(fn ($m, $i) => [
+                                    'label' => 'Voice ' . ($i + 1),
+                                    'url'   => \Illuminate\Support\Facades\Storage::disk('public_uploads')->url($m->path),
+                                ])
+                            )
+                            ->schema([
+                                TextEntry::make('label')
+                                    ->hiddenLabel()
+                                    ->weight('bold')
+                                    ->size('sm'),
+
+                                TextEntry::make('url')
+                                    ->hiddenLabel()
+                                    ->formatStateUsing(fn ($state) => new \Illuminate\Support\HtmlString(
+                                        "<audio controls src=\"{$state}\" style=\"height:36px; width:100%\"></audio>"
+                                    ))
+                                    ->html(),
+                            ])
+                            ->columns(1)
+                            ->visible(fn (JobCard $record) => $record->photosIn('mechanic_notes_voices')->exists()),
+
+                    ]),
                 Section::make('Record Info')
                     ->columns(2)
                     ->collapsed()

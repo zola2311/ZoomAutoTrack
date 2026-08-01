@@ -16,6 +16,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+
 class JobCardsTable
 {
     public static function configure(Table $table): Table
@@ -29,12 +30,20 @@ class JobCardsTable
                     ->sortable()
                     ->copyable()
                     ->toggleable(),
-
-                TextColumn::make('customer.full_name')
+                TextColumn::make('customer_display_name')
                     ->label('Customer')
-                    ->searchable()
-                    ->sortable()
-                    ->toggleable(),
+                    ->state(fn ($record) => $record->customer?->display_name ?? '—')
+                    ->searchable(query: function (Builder $query, string $search): Builder {
+                        return $query->whereHas('customer', function (Builder $q) use ($search) {
+                            $q->where('full_name', 'like', "%{$search}%")
+                                ->orWhere('company_name', 'like', "%{$search}%");
+                        });
+                    })
+                    ->sortable(query: function (Builder $query, string $direction): Builder {
+                        return $query->join('customers', 'vehicles.customer_id', '=', 'customers.id')
+                            ->orderByRaw("COALESCE(customers.company_name, customers.full_name) {$direction}")
+                            ->select('vehicles.*');
+                    }),
 
                 TextColumn::make('vehicle.plate_number')
                     ->label('Plate')
@@ -137,6 +146,13 @@ class JobCardsTable
                 TrashedFilter::make(),
 
             ])
+            ->modifyQueryUsing(function (Builder $query) {
+                $user = auth()->user();
+                if ($user->hasRole('mechanic') && ! $user->hasAnyRole(['admin', 'manager'])) {
+                    $query->where('mechanic_id', $user->id);
+                }
+                return $query;
+            })
             ->deferFilters(false)
             ->recordActions([
                 ViewAction::make(),

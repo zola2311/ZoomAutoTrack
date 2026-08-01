@@ -8,8 +8,15 @@ use App\Models\JobCard;
 
 class JobCardObserver
 {
+    public function created(JobCard $jobCard): void
+    {
+        $this->syncVehicleMileage($jobCard);
+    }
     public function updated(JobCard $jobCard): void
     {
+        if ($jobCard->wasChanged('mileage_at_checkin')) {
+            $this->syncVehicleMileage($jobCard);
+        }
         // Only trigger when status changes to completed
         if (! $jobCard->wasChanged('status')) {
             return;
@@ -78,6 +85,17 @@ class JobCardObserver
             InvoiceItem::create(array_merge($item, [
                 'invoice_id' => $invoice->id,
             ]));
+        }
+    }
+    protected function syncVehicleMileage(JobCard $jobCard): void
+    {
+        $vehicle = $jobCard->vehicle;
+
+        if ($vehicle && $jobCard->mileage_at_checkin > $vehicle->current_mileage) {
+            $vehicle->update([
+                'current_mileage' => $jobCard->mileage_at_checkin,
+                'last_service_date' => $jobCard->checked_in_at ?? now(),
+            ]);
         }
     }
 }

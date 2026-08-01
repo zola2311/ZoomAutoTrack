@@ -4,28 +4,26 @@ namespace App\Filament\Resources\JobCards\Pages;
 
 use App\Models\Invoice;
 use App\Filament\Resources\Invoices\InvoiceResource;
-use App\Filament\Resources\JobCards\JobCardResource;
 use Filament\Actions\Action;
-use Filament\Actions\DeleteAction;
-use Filament\Actions\ForceDeleteAction;
-use Filament\Actions\RestoreAction;
-use Filament\Actions\ViewAction;
+use Filament\Actions\EditAction;
 use Filament\Notifications\Notification;
-use Filament\Resources\Pages\EditRecord;
+use Filament\Resources\Pages\ViewRecord;
+use App\Filament\Resources\JobCards\JobCardResource;
 
-class EditJobCard extends EditRecord
+class ViewJobCard extends ViewRecord
 {
     protected static string $resource = JobCardResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
-            // ✅ ADDED: Mark as Completed action (same as ViewJobCard)
             Action::make('markCompleted')
                 ->label('Mark as Completed')
                 ->icon('heroicon-o-check-circle')
                 ->color('success')
-                ->visible(fn () => ! in_array($this->record->status, ['completed', 'cancelled']))
+                ->visible(fn () => ! in_array($this->record->status, ['completed', 'cancelled'])
+                    && ($this->record->services()->exists() || $this->record->partsUsed()->exists())
+                )
                 ->requiresConfirmation()
                 ->action(function () {
                     $incompleteCount = $this->record->services()
@@ -63,7 +61,7 @@ class EditJobCard extends EditRecord
                     }
                 }),
 
-            // ✅ ADDED: Combined Generate/Update Invoice action
+            // ✅ FIXED: Combined Generate/Update Invoice action
             Action::make('invoice')
                 ->label(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')
                 ->icon(fn () => $this->record->invoice ? 'heroicon-o-arrow-path' : 'heroicon-o-document-currency-dollar')
@@ -81,6 +79,7 @@ class EditJobCard extends EditRecord
                 ->modalSubmitActionLabel(fn () => $this->record->invoice ? 'Yes, Update Invoice' : 'Yes, Generate Invoice')
                 ->action(function () {
                     if ($this->record->invoice) {
+                        // ✅ Update existing invoice
                         $this->record->invoice->resyncFromJobCard();
 
                         Notification::make()
@@ -90,6 +89,7 @@ class EditJobCard extends EditRecord
 
                         $this->redirect(InvoiceResource::getUrl('view', ['record' => $this->record->invoice]));
                     } else {
+                        // ✅ Generate new invoice
                         $invoice = Invoice::createFromJobCard($this->record);
 
                         Notification::make()
@@ -101,7 +101,6 @@ class EditJobCard extends EditRecord
                     }
                 }),
 
-            // ✅ ADDED: View Invoice action
             Action::make('viewInvoice')
                 ->label('View Invoice')
                 ->icon('heroicon-o-document-text')
@@ -111,45 +110,7 @@ class EditJobCard extends EditRecord
                     ? InvoiceResource::getUrl('view', ['record' => $this->record->invoice])
                     : null),
 
-            ViewAction::make(),
-            DeleteAction::make(),
-            ForceDeleteAction::make(),
-            RestoreAction::make(),
+            EditAction::make(),
         ];
-    }
-
-    protected function getRedirectUrl(): string
-    {
-        return $this->getResource()::getUrl('view', ['record' => $this->record]);
-    }
-    protected function afterSave(): void
-    {
-        if ($this->record->status !== 'completed') {
-            return;
-        }
-
-        $incompleteCount = $this->record->services()
-            ->where('is_completed', false)
-            ->where('status', '!=', 'cancelled')
-            ->count();
-
-        if ($incompleteCount > 0) {
-            $this->record->services()
-                ->where('is_completed', false)
-                ->where('status', '!=', 'cancelled')
-                ->each(function ($service) {
-                    $service->update([
-                        'is_completed' => true,
-                        'status' => 'completed',
-                        'completed_at' => now(),
-                    ]);
-                });
-
-            Notification::make()
-                ->title('Job card marked as completed')
-                ->body("{$incompleteCount} labor service(s) were automatically marked as completed too.")
-                ->warning()
-                ->send();
-        }
     }
 }

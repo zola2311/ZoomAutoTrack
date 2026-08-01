@@ -1,7 +1,9 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VoiceRecordingController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PaymentProofController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -19,6 +21,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/payment-proofs/{payment}', [PaymentProofController::class, 'show'])
+        ->name('payment-proofs.show');
+    Route::post('/voice-recordings', [VoiceRecordingController::class, 'store'])
+        ->name('voice-recordings.store');
+    // Test route - visit this to verify the controller works
+    Route::get('/voice-test', [VoiceRecordingController::class, 'test'])->name('voice-test');
+});
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/settings', function () {return view('settings.index');})->name('settings.index');

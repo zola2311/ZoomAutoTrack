@@ -54,6 +54,46 @@ class VehicleInfolist
                             ->placeholder('-'),
                     ]),
 
+                Section::make('Maintenance Schedule')
+                    ->columns(3)
+                    ->schema([
+
+                        TextEntry::make('next_service_status')
+                            ->label('Status')
+                            ->state(fn (Vehicle $record) => $record->nextServiceDue()['is_due'] ? 'Due Now' : 'On Track')
+                            ->badge()
+                            ->color(fn (Vehicle $record) => $record->nextServiceDue()['is_due'] ? 'danger' : 'success'),
+
+                        TextEntry::make('next_service_mileage')
+                            ->label('Due At Mileage')
+                            ->state(fn (Vehicle $record) => number_format($record->nextServiceDue()['due_mileage']) . ' km')
+                            ->color(fn (Vehicle $record) => $record->nextServiceDue()['km_remaining'] <= 0 ? 'danger' : 'gray'),
+
+                        TextEntry::make('next_service_date')
+                            ->label('Due By Date')
+                            ->state(fn (Vehicle $record) => $record->nextServiceDue()['due_date']->format('d M Y'))
+                            ->color(fn (Vehicle $record) => $record->nextServiceDue()['days_remaining'] <= 0 ? 'danger' : 'gray'),
+
+                        TextEntry::make('km_remaining')
+                            ->label('Kilometers Remaining')
+                            ->state(fn (Vehicle $record) => $record->nextServiceDue()['km_remaining'] > 0
+                                ? number_format($record->nextServiceDue()['km_remaining']) . ' km'
+                                : 'Overdue'
+                            ),
+
+                        TextEntry::make('days_remaining')
+                            ->label('Days Remaining')
+                            ->state(fn (Vehicle $record) => $record->nextServiceDue()['days_remaining'] > 0
+                                ? $record->nextServiceDue()['days_remaining'] . ' days'
+                                : 'Overdue'
+                            ),
+
+                        TextEntry::make('service_interval_km')
+                            ->label('Service Interval')
+                            ->state(fn (Vehicle $record) => number_format($record->service_interval_km) . ' km / ' . $record->service_interval_months . ' months'),
+
+                    ]),
+
                 Section::make('Identifiers')
                     ->columns(2)
                     ->schema([

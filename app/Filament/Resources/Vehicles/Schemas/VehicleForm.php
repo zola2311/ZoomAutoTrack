@@ -118,6 +118,22 @@ class VehicleForm
                             ->searchable()
                             ->placeholder('Select transmission type')
                             ->columnSpan(1),
+                        TextInput::make('service_interval_km')
+                            ->label('Service Interval (km)')
+                            ->numeric()
+                            ->default(5000)
+                            ->minValue(500)
+                            ->suffix('km')
+                            ->helperText('How often this vehicle should be serviced, by distance'),
+
+                        TextInput::make('service_interval_months')
+                            ->label('Service Interval (months)')
+                            ->numeric()
+                            ->default(6)
+                            ->minValue(1)
+                            ->maxValue(24)
+                            ->suffix('months')
+                            ->helperText('How often this vehicle should be serviced, by time'),
                     ])
                     ->compact(),
             ]);

@@ -66,9 +66,10 @@ class ViewJobCard extends ViewRecord
                 ->label(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')
                 ->icon(fn () => $this->record->invoice ? 'heroicon-o-arrow-path' : 'heroicon-o-document-currency-dollar')
                 ->color(fn () => $this->record->invoice ? 'warning' : 'success')
-                ->visible(fn () => $this->record->invoice
-                    || $this->record->services()->exists()
-                    || $this->record->partsUsed()->exists()
+                ->visible(fn () => ! auth()->user()->hasRole('mechanic')
+                    && ($this->record->invoice
+                        || $this->record->services()->exists()
+                        || $this->record->partsUsed()->exists())
                 )
                 ->requiresConfirmation()
                 ->modalHeading(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')

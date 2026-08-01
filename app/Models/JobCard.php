@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Concerns\HandlesMediaUploads;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\DB;
 
 class JobCard extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes ,HandlesMediaUploads;
 
     protected $guarded = ['id'];
 
@@ -37,6 +38,8 @@ class JobCard extends Model
         'estimated_completion_at',
         'completed_at',
         'delivered_at',
+        'customer_complaint_voice',
+        'mechanic_notes_voice',
     ];
 
     public function branch() { return $this->belongsTo(Branch::class); }
@@ -66,4 +69,18 @@ class JobCard extends Model
             ->where('status', '!=', 'cancelled')
             ->exists();
     }
+
+    public function photosIn(string $collection)
+    {
+        return $this->media()->where('collection', $collection)->orderBy('created_at');
+    }
+
+    public function checkinPhotos()   { return $this->photosIn('checkin_photos'); }
+    public function damagePhotos()    { return $this->photosIn('damage_photos'); }
+    public function beforePhotos()    { return $this->photosIn('before_photos'); }
+    public function afterPhotos()     { return $this->photosIn('after_photos'); }
+    public function checkoutPhotos()  { return $this->photosIn('checkout_photos'); }
+
+
+
 }
