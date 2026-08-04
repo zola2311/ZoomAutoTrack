@@ -6,11 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 
 class InvoiceItem extends Model
 {
-    protected $guarded = ['id'];
     protected $fillable = [
         'invoice_id',
         'item_type',
         'description',
+        'inventory_item_id',
         'quantity',
         'unit_price',
         'discount',

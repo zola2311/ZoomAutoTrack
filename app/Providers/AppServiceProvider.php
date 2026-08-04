@@ -23,6 +23,8 @@ use App\Policies\SupplierPolicy;
 use App\Models\InspectionItem;
 use App\Policies\UserPolicy;
 use App\Policies\InspectionItemPolicy;
+use App\Models\Branch;
+use App\Policies\BranchPolicy;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -51,5 +53,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Supplier::class, SupplierPolicy::class);
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(InspectionItem::class, InspectionItemPolicy::class);
+        Gate::policy(Branch::class, BranchPolicy::class);
     }
 }

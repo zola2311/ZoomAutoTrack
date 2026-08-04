@@ -3,11 +3,43 @@
 namespace App\Livewire;
 
 use App\Models\InventoryItem;
+use App\Models\InvoiceItem;
+use App\Models\PartUsed;
 use Filament\Widgets\StatsOverviewWidget as BaseStatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Carbon;
 
 class InventoryStatsWidget extends BaseStatsOverviewWidget
 {
+    protected function calculatePartsProfit(Carbon $start, Carbon $end): array
+    {
+        // Source 1: Parts used via job cards
+        $jobCardParts = PartUsed::whereHas('jobCard', fn ($q) => $q->whereBetween('created_at', [$start, $end]))
+            ->get();
+
+        $jobCardRevenue = $jobCardParts->sum(fn ($p) => $p->unit_price * $p->quantity);
+        $jobCardCost = $jobCardParts->sum(fn ($p) => $p->unit_cost * $p->quantity);
+
+        // Source 2: Parts sold via standalone invoices (no job card)
+        $standaloneParts = InvoiceItem::where('item_type', 'part')
+            ->whereNotNull('inventory_item_id')
+            ->whereHas('invoice', fn ($q) => $q->whereBetween('created_at', [$start, $end]))
+            ->with('inventoryItem')
+            ->get();
+
+        $standaloneRevenue = $standaloneParts->sum(fn ($i) => $i->unit_price * $i->quantity);
+        $standaloneCost = $standaloneParts->sum(fn ($i) => ($i->inventoryItem?->unit_cost ?? 0) * $i->quantity);
+
+        $revenue = $jobCardRevenue + $standaloneRevenue;
+        $cost = $jobCardCost + $standaloneCost;
+
+        return [
+            'revenue' => $revenue,
+            'cost'    => $cost,
+            'profit'  => $revenue - $cost,
+        ];
+    }
+
     protected function getStats(): array
     {
         $totalItems = InventoryItem::where('is_active', true)->count();
@@ -24,6 +56,12 @@ class InventoryStatsWidget extends BaseStatsOverviewWidget
         $outOfStock = InventoryItem::where('is_active', true)
             ->where('quantity_on_hand', '<=', 0)
             ->count();
+
+        $todayProfit = $this->calculatePartsProfit(today()->startOfDay(), today()->endOfDay());
+
+        $monthProfit = $this->calculatePartsProfit(now()->startOfMonth(), now()->endOfMonth());
+
+
 
         return [
             Stat::make('Total Parts', $totalItems)
@@ -45,6 +83,21 @@ class InventoryStatsWidget extends BaseStatsOverviewWidget
                 ->description('Zero quantity remaining')
                 ->descriptionIcon('heroicon-o-x-circle')
                 ->color($outOfStock > 0 ? 'danger' : 'success'),
+
+            Stat::make('Parts Profit Today', number_format($todayProfit['profit'], 2) . ' ETB')
+                ->description('Margin from parts sold today')
+                ->descriptionIcon('heroicon-o-chart-bar')
+                ->color('success'),
+
+            Stat::make('Parts Profit This Month', number_format($monthProfit['profit'], 2) . ' ETB')
+                ->description(now()->format('F Y'))
+                ->descriptionIcon('heroicon-o-chart-bar-square')
+                ->color('success'),
         ];
+    }
+
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager', 'inventory_manager']) ?? false;
     }
 }

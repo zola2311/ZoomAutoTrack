@@ -97,7 +97,7 @@ class InventoryItemInfolist
 
                 // --- Section 4: Stock Movement History ---
                 Section::make('Stock Movement History')
-                    ->columnSpanFull() // 🌟 FIX: Spans full width
+                    ->columnSpanFull()
                     ->icon('heroicon-o-arrows-up-down')
                     ->schema([
                         RepeatableEntry::make('stockMovements')
@@ -113,12 +113,20 @@ class InventoryItemInfolist
                                     ->formatStateUsing(fn ($state) => ucfirst(str_replace('_', ' ', $state))),
                                 TextEntry::make('quantity')
                                     ->weight('bold'),
+                                TextEntry::make('unit_cost')
+                                    ->label('Cost')
+                                    ->money('ETB')
+                                    ->placeholder('-'),
+                                TextEntry::make('unit_price')
+                                    ->label('Price')
+                                    ->money('ETB')
+                                    ->placeholder('-'),
                                 TextEntry::make('supplier.name')->label('Supplier')->placeholder('-'),
                                 TextEntry::make('creator.name')->label('By')->placeholder('-'),
                                 TextEntry::make('created_at')->dateTime()->label('Date'),
                                 TextEntry::make('notes')->placeholder('-'),
                             ])
-                            ->columns(6),
+                            ->columns(8),
                     ])
                     ->visible(fn (InventoryItem $record) => $record->stockMovements->isNotEmpty()),
 

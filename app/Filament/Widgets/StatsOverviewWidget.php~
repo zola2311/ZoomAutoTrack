@@ -42,7 +42,16 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
         $monthRevenue = Payment::whereMonth('paid_at', now()->month)
             ->whereYear('paid_at', now()->year)
             ->sum('amount');
+        $partsProfitToday = \App\Models\PartUsed::whereHas('jobCard', fn ($q) => $q->whereDate('created_at', today()))
+            ->get()
+            ->sum(fn ($part) => ($part->unit_price - $part->unit_cost) * $part->quantity);
 
+        $partsProfitMonth = \App\Models\PartUsed::whereHas('jobCard', fn ($q) => $q
+            ->whereMonth('created_at', now()->month)
+            ->whereYear('created_at', now()->year)
+        )
+            ->get()
+            ->sum(fn ($part) => ($part->unit_price - $part->unit_cost) * $part->quantity);
         return [
             Stat::make('Vehicles Today', $todayJobs)
                 ->description('Checked in today')
@@ -83,7 +92,19 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
                 ->description('Zero quantity remaining')
                 ->descriptionIcon('heroicon-o-x-circle')
                 ->color($outOfStock > 0 ? 'danger' : 'success'),
+            Stat::make("Parts Profit Today", number_format($partsProfitToday, 2) . ' ETB')
+                ->description('Margin from parts sold today')
+                ->descriptionIcon('heroicon-o-chart-bar')
+                ->color('success'),
+
+            Stat::make("Parts Profit This Month", number_format($partsProfitMonth, 2) . ' ETB')
+                ->description(now()->format('F Y'))
+                ->descriptionIcon('heroicon-o-chart-bar-square')
+                ->color('success'),
         ];
     }
-
+    public static function canView(): bool
+    {
+        return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;
+    }
 }

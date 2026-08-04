@@ -1,0 +1,46 @@
+<?php
+
+namespace App\Filament\Resources\Branches\Schemas;
+
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Schema;
+
+class BranchForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                Section::make('Branch Details')
+                    ->columns(2)
+                    ->schema([
+
+                        TextInput::make('name')
+                            ->label('Branch Name')
+                            ->required()
+                            ->maxLength(150)
+                            ->placeholder('e.g. AutoTrack Bole'),
+
+                        TextInput::make('phone')
+                            ->label('Phone Number')
+                            ->tel()
+                            ->maxLength(20)
+                            ->placeholder('+251 11 123 4567'),
+
+                        Textarea::make('address')
+                            ->rows(2)
+                            ->columnSpanFull()
+                            ->placeholder('Bole Road, Addis Ababa'),
+
+                        Toggle::make('is_active')
+                            ->label('Active')
+                            ->default(true)
+                            ->helperText('Inactive branches won\'t appear in staff/vehicle selection dropdowns'),
+
+                    ]),
+            ]);
+    }
+}

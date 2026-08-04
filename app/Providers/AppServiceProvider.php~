@@ -20,6 +20,9 @@ use App\Models\Supplier;
 use App\Policies\InvoicePolicy;
 use App\Policies\InventoryItemPolicy;
 use App\Policies\SupplierPolicy;
+use App\Models\InspectionItem;
+use App\Policies\UserPolicy;
+use App\Policies\InspectionItemPolicy;
 class AppServiceProvider extends ServiceProvider
 {
     /**
