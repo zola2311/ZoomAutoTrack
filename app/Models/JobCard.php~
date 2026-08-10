@@ -40,7 +40,6 @@ class JobCard extends Model
         'delivered_at',
         'customer_complaint_voice',
         'mechanic_notes_voice',
-        'completed_by',
     ];
 
     public function branch() { return $this->belongsTo(Branch::class); }

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 use App\Models\Customer;
+use App\Models\User;
 use App\Models\Vehicle;
 use App\Policies\CustomerPolicy;
 use App\Policies\VehiclePolicy;

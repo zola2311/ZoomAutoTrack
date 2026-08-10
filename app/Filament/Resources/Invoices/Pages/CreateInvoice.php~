@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Invoices\Pages;
 
 use App\Filament\Resources\Invoices\InvoiceResource;
 use App\Models\JobCard;
+use App\Models\Payment;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateInvoice extends CreateRecord
@@ -19,6 +20,8 @@ class CreateInvoice extends CreateRecord
                 $data['branch_id'] = $jobCard->branch_id;
                 $data['customer_id'] = $jobCard->customer_id;
             }
+        } else {
+            $data['branch_id'] ??= auth()->user()->branch_id ?? 1;
         }
 
         $data['subtotal'] ??= 0;
@@ -32,6 +35,7 @@ class CreateInvoice extends CreateRecord
     protected function afterCreate(): void
     {
         $this->recalculateTotals();
+        $this->recordInitialPayment();
     }
 
     protected function recalculateTotals(): void
@@ -48,4 +52,30 @@ class CreateInvoice extends CreateRecord
         ]);
     }
 
+    protected function recordInitialPayment(): void
+    {
+        $data = $this->form->getRawState();
+
+        if (empty($data['record_payment_now'])) {
+            return;
+        }
+
+        $invoice = $this->record->fresh();
+
+        if ($invoice->total <= 0) {
+            return;
+        }
+
+        Payment::create([
+            'invoice_id'       => $invoice->id,
+            'amount'           => $invoice->total,
+            'method'           => $data['payment_method'] ?? 'cash',
+            'reference_number' => $data['payment_reference'] ?? null,
+            'proof_path'       => $data['payment_proof'] ?? null,
+            'received_by'      => auth()->id(),
+            'paid_at'          => now(),
+        ]);
+
+        $invoice->recalculateFromPayments();
+    }
 }

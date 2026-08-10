@@ -4,6 +4,7 @@ namespace App\Filament\Resources\Invoices\Pages;
 
 use App\Filament\Resources\Invoices\InvoiceResource;
 use App\Models\JobCard;
+use App\Models\Payment;
 use Filament\Resources\Pages\CreateRecord;
 
 class CreateInvoice extends CreateRecord
@@ -30,9 +31,11 @@ class CreateInvoice extends CreateRecord
 
         return $data;
     }
+
     protected function afterCreate(): void
     {
         $this->recalculateTotals();
+        $this->recordInitialPayment();
     }
 
     protected function recalculateTotals(): void
@@ -49,4 +52,42 @@ class CreateInvoice extends CreateRecord
         ]);
     }
 
+    protected function recordInitialPayment(): void
+    {
+        $data = $this->form->getRawState();
+
+        if (empty($data['record_payment_now'])) {
+            return;
+        }
+
+        $invoice = $this->record->fresh();
+
+        if ($invoice->total <= 0) {
+            return;
+        }
+
+        // Sanitize proof_path — FileUpload can return an array
+        $proofPath = $data['payment_proof'] ?? null;
+        if (is_array($proofPath)) {
+            $proofPath = $proofPath[0] ?? null;
+        }
+
+        // Sanitize reference_number — just in case
+        $referenceNumber = $data['payment_reference'] ?? null;
+        if (is_array($referenceNumber)) {
+            $referenceNumber = null;
+        }
+
+        Payment::create([
+            'invoice_id'       => $invoice->id,
+            'amount'           => $invoice->total,
+            'method'           => $data['payment_method'] ?? 'cash',
+            'reference_number' => $referenceNumber,
+            'proof_path'       => $proofPath,
+            'received_by'      => auth()->id(),
+            'paid_at'          => now(),
+        ]);
+
+        $invoice->recalculateFromPayments();
+    }
 }

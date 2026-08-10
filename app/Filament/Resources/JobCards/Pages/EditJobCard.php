@@ -27,8 +27,13 @@ class EditJobCard extends EditRecord
                 ->color('success')
                 ->visible(fn () => ! in_array($this->record->status, ['completed', 'cancelled'])
                     && ($this->record->services()->exists() || $this->record->partsUsed()->exists())
+                    && ! auth()->user()->hasRole('mechanic') // mechanics never see this button at all now
                 )
                 ->requiresConfirmation()
+                ->modalDescription(fn () => $this->record->status !== 'quality_check'
+                    ? 'This job has not gone through Quality Check yet. Are you sure you want to mark it as completed?'
+                    : null
+                )
                 ->action(function () {
                     $incompleteCount = $this->record->services()
                         ->where('is_completed', false)
@@ -48,7 +53,11 @@ class EditJobCard extends EditRecord
                             });
                     }
 
-                    $this->record->update(['status' => 'completed', 'completed_at' => now()]);
+                    $this->record->update([
+                        'status' => 'completed',
+                        'completed_at' => now(),
+                        'completed_by' => auth()->id(),
+                    ]);
                     $this->refreshFormData(['status', 'completed_at']);
 
                     if ($incompleteCount > 0) {
@@ -129,10 +138,6 @@ class EditJobCard extends EditRecord
     protected function afterSave(): void
     {
 
-//        $formData = $this->form->getState();
-//
-//        \Illuminate\Support\Facades\Log::info('JobCard form state on save', $formData);
-
 
         // Sync photo collections
         $formData = $this->form->getRawState();
@@ -160,7 +165,9 @@ class EditJobCard extends EditRecord
         if ($this->record->status !== 'completed') {
             return;
         }
-
+        if (empty($this->record->completed_by)) {
+            $this->record->update(['completed_by' => auth()->id()]);
+        }
         $incompleteCount = $this->record->services()
             ->where('is_completed', false)
             ->where('status', '!=', 'cancelled')

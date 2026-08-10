@@ -4,19 +4,23 @@ namespace App\Filament\Resources\JobCards\Pages;
 
 use App\Models\Invoice;
 use App\Filament\Resources\Invoices\InvoiceResource;
-use Filament\Actions\Action;
-use Filament\Actions\EditAction;
-use Filament\Notifications\Notification;
-use Filament\Resources\Pages\ViewRecord;
 use App\Filament\Resources\JobCards\JobCardResource;
+use Filament\Actions\Action;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\ForceDeleteAction;
+use Filament\Actions\RestoreAction;
+use Filament\Actions\ViewAction;
+use Filament\Notifications\Notification;
+use Filament\Resources\Pages\EditRecord;
 
-class ViewJobCard extends ViewRecord
+class EditJobCard extends EditRecord
 {
     protected static string $resource = JobCardResource::class;
 
     protected function getHeaderActions(): array
     {
         return [
+            // ✅ ADDED: Mark as Completed action (same as ViewJobCard)
             Action::make('markCompleted')
                 ->label('Mark as Completed')
                 ->icon('heroicon-o-check-circle')
@@ -70,7 +74,7 @@ class ViewJobCard extends ViewRecord
                     }
                 }),
 
-            // ✅ FIXED: Combined Generate/Update Invoice action
+            // ✅ ADDED: Combined Generate/Update Invoice action
             Action::make('invoice')
                 ->label(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')
                 ->icon(fn () => $this->record->invoice ? 'heroicon-o-arrow-path' : 'heroicon-o-document-currency-dollar')
@@ -89,7 +93,6 @@ class ViewJobCard extends ViewRecord
                 ->modalSubmitActionLabel(fn () => $this->record->invoice ? 'Yes, Update Invoice' : 'Yes, Generate Invoice')
                 ->action(function () {
                     if ($this->record->invoice) {
-                        // ✅ Update existing invoice
                         $this->record->invoice->resyncFromJobCard();
 
                         Notification::make()
@@ -99,7 +102,6 @@ class ViewJobCard extends ViewRecord
 
                         $this->redirect(InvoiceResource::getUrl('view', ['record' => $this->record->invoice]));
                     } else {
-                        // ✅ Generate new invoice
                         $invoice = Invoice::createFromJobCard($this->record);
 
                         Notification::make()
@@ -111,6 +113,7 @@ class ViewJobCard extends ViewRecord
                     }
                 }),
 
+            // ✅ ADDED: View Invoice action
             Action::make('viewInvoice')
                 ->label('View Invoice')
                 ->icon('heroicon-o-document-text')
@@ -120,7 +123,72 @@ class ViewJobCard extends ViewRecord
                     ? InvoiceResource::getUrl('view', ['record' => $this->record->invoice])
                     : null),
 
-            EditAction::make(),
+            ViewAction::make(),
+            DeleteAction::make(),
+            ForceDeleteAction::make(),
+            RestoreAction::make(),
         ];
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('view', ['record' => $this->record]);
+    }
+
+    protected function afterSave(): void
+    {
+
+
+        // Sync photo collections
+        $formData = $this->form->getRawState();
+
+        foreach (['checkin_photos', 'damage_photos', 'before_photos', 'after_photos', 'checkout_photos'] as $collection) {
+            if (isset($formData[$collection])) {
+                $this->record->syncMediaCollection($formData[$collection], $collection);
+            }
+        }
+
+        // Sync voice notes (repeater-based, multiple recordings per collection)
+        foreach (['customer_complaint_voices', 'mechanic_notes_voices'] as $collection) {
+            if (isset($formData[$collection])) {
+                $paths = collect($formData[$collection])
+                    ->pluck('path')
+                    ->filter()
+                    ->values()
+                    ->toArray();
+
+                $this->record->syncMediaCollection($paths, $collection);
+            }
+        }
+
+        // Cascade-complete logic (your existing code)
+        if ($this->record->status !== 'completed') {
+            return;
+        }
+
+        $incompleteCount = $this->record->services()
+            ->where('is_completed', false)
+            ->where('status', '!=', 'cancelled')
+            ->count();
+
+        if ($incompleteCount > 0) {
+            $this->record->services()
+                ->where('is_completed', false)
+                ->where('status', '!=', 'cancelled')
+                ->each(function ($service) {
+                    $service->update([
+                        'is_completed' => true,
+                        'status' => 'completed',
+                        'completed_at' => now(),
+                    ]);
+                });
+
+            Notification::make()
+                ->title('Job card marked as completed')
+                ->body("{$incompleteCount} labor service(s) were automatically marked as completed too.")
+                ->warning()
+                ->send();
+        }
+    }
+
 }

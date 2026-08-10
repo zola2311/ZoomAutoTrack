@@ -226,48 +226,49 @@ class JobCardForm
 
 
 
-Section::make('Voice Notes')
-    ->description('Record one or more voice notes')
-    ->schema([
+                Section::make('Voice Notes')
+                    ->description('Record one or more voice notes')
+                    ->schema([
 
-        Repeater::make('customer_complaint_voices')
-            ->label('Customer Complaint (Voice Notes)')
-            ->itemLabel(fn (array $state, $rulesetIndex = null): string => 'Voice Note')
-            ->schema([
-                VoiceRecorder::make('path')
-                    ->label('Recording')
-                    ->dehydrated(),
-            ])
-            ->addActionLabel('+ Add another recording')
-            ->reorderable(false)
-            ->columnSpanFull()
-            ->afterStateHydrated(function ($component, $record) {
-                if ($record) {
-                    $paths = $record->getMediaCollectionPaths('customer_complaint_voices');
-                    $component->state(collect($paths)->map(fn ($p) => ['path' => $p])->toArray());
-                }
-            })
-            ->dehydrated(true),
+                        Repeater::make('customer_complaint_voices')
+                            ->label('Customer Complaint (Voice Notes)')
+                            ->itemLabel(fn (): string => 'Voice Note')
+                            ->schema([
+                                VoiceRecorder::make('path')
+                                    ->label('')
+                                    ->dehydrated(),
+                            ])
+                            ->addActionLabel('+ Add another recording')
+                            ->reorderable(false)
+                            ->columnSpanFull()
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $paths = $record->getMediaCollectionPaths('customer_complaint_voices');
+                                    $component->state(collect($paths)->map(fn ($p) => ['path' => $p])->toArray());
+                                }
+                            })
+                            ->dehydrated(true),
 
-        Repeater::make('mechanic_notes_voices')
-            ->label('Mechanic Notes (Voice Notes)')
-            ->schema([
-                VoiceRecorder::make('path')
-                    ->label('Recording')
-                    ->dehydrated(),
-            ])
-            ->addActionLabel('+ Add another recording')
-            ->reorderable(false)
-            ->columnSpanFull()
-            ->afterStateHydrated(function ($component, $record) {
-                if ($record) {
-                    $paths = $record->getMediaCollectionPaths('mechanic_notes_voices');
-                    $component->state(collect($paths)->map(fn ($p) => ['path' => $p])->toArray());
-                }
-            })
-            ->dehydrated(true),
+                        Repeater::make('mechanic_notes_voices')
+                            ->label('Mechanic Notes (Voice Notes)')
+                            ->itemLabel(fn (): string => 'Voice Note')
+                            ->schema([
+                                VoiceRecorder::make('path')
+                                    ->label('')
+                                    ->dehydrated(),
+                            ])
+                            ->addActionLabel('+ Add another recording')
+                            ->reorderable(false)
+                            ->columnSpanFull()
+                            ->afterStateHydrated(function ($component, $record) {
+                                if ($record) {
+                                    $paths = $record->getMediaCollectionPaths('mechanic_notes_voices');
+                                    $component->state(collect($paths)->map(fn ($p) => ['path' => $p])->toArray());
+                                }
+                            })
+                            ->dehydrated(true),
 
-    ]),
+                    ]),
                 Section::make('Status & Priority')
                     ->columns(2)
                     ->schema([
@@ -282,7 +283,17 @@ Section::make('Voice Notes')
                                 'completed'     => 'Completed',
                                 'cancelled'     => 'Cancelled',
                             ]),
-
+                    ->disableOptionWhen(function (string $value, Get $get) {
+                        // Mechanics can only move to quality_check, never directly to completed
+                        if (auth()->user()->hasRole('mechanic') && ! auth()->user()->hasAnyRole(['admin', 'manager'])) {
+                            return $value === 'completed';
+                        }
+                        return false;
+                    })
+                    ->helperText(fn () => auth()->user()->hasRole('mechanic') && ! auth()->user()->hasAnyRole(['admin', 'manager'])
+                        ? 'Mechanics can move jobs to Quality Check — only a manager or advisor can mark a job Completed.'
+                        : null
+                    ),
                         Select::make('priority')
                             ->required()
                             ->default('normal')

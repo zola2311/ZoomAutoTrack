@@ -44,6 +44,7 @@ return new class extends Migration
             $table->timestamp('estimated_completion_at')->nullable();
             $table->timestamp('completed_at')->nullable();
             $table->timestamp('delivered_at')->nullable();
+            $table->foreignId('completed_by')->nullable()->constrained('users')->nullOnDelete();
             $table->timestamps();
             $table->softDeletes();
         });

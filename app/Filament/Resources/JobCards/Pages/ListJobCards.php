@@ -11,12 +11,20 @@ class ListJobCards extends ListRecords
 {
     protected static string $resource = JobCardResource::class;
 
+    protected $queryString = [
+        'tableFilters',
+        'tableSortColumn',
+        'tableSortDirection',
+        'tableSearchQuery' => ['except' => ''],
+    ];
+
     protected function getHeaderActions(): array
     {
         return [
             CreateAction::make(),
         ];
     }
+
     protected function getHeaderWidgets(): array
     {
         return [

@@ -13,6 +13,8 @@ use Filament\Schemas\Components\Section;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Schema;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\FileUpload;
 
 class InvoiceForm
 {
@@ -260,6 +262,59 @@ class InvoiceForm
                             ->disabled()
                             ->dehydrated(),
                     ]),
+
+
+
+Section::make('Payment')
+    ->columns(2)
+    ->visible(fn (string $operation): bool => $operation === 'create')
+    ->schema([
+
+        Toggle::make('record_payment_now')
+            ->label('Record payment now')
+            ->helperText('Turn this on if the customer is paying at the time of sale')
+            ->live()
+            ->default(true)
+            ->columnSpanFull()
+            ->dehydrated(),
+
+        Select::make('payment_method')
+            ->label('Payment Method')
+            ->options([
+                'cash'          => 'Cash',
+                'bank_transfer' => 'Bank Transfer',
+                'telebirr'      => 'Telebirr',
+                'cbe_birr'      => 'CBE Birr',
+                'cheque'        => 'Cheque',
+            ])
+            ->default('cash')
+            ->live()
+            ->visible(fn (Get $get) => $get('record_payment_now'))
+            ->required(fn (Get $get) => $get('record_payment_now'))
+            ->dehydrated(),
+
+        TextInput::make('payment_reference')
+            ->label('Reference Number')
+            ->placeholder('e.g. Transaction ID, Cheque No.')
+            ->visible(fn (Get $get) => $get('record_payment_now') && $get('payment_method') !== 'cash')
+            ->dehydrated(),
+
+        FileUpload::make('payment_proof')
+            ->label('Payment Screenshot')
+            ->image()
+            ->disk('public_uploads')
+            ->directory('payment-proofs')
+            ->visibility('public')
+            ->maxSize(5120)
+            ->imageResizeTargetWidth('800')
+            ->imageResizeTargetHeight('600')
+            ->imageResizeMode('cover')
+            ->columnSpanFull()
+            ->visible(fn (Get $get) => $get('record_payment_now') && $get('payment_method') !== 'cash')
+            ->helperText('Required for non-cash payments')
+            ->dehydrated(),
+
+    ]),
             ]);
     }
 }
