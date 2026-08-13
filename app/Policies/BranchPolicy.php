@@ -9,36 +9,36 @@ class BranchPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('branches.view_any');
     }
 
     public function view(User $user, Branch $branch): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('branches.view_any');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('branches.create');
     }
 
     public function update(User $user, Branch $branch): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('branches.update');
     }
 
     public function delete(User $user, Branch $branch): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('branches.delete');
     }
 
     public function restore(User $user, Branch $branch): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('branches.restore');
     }
 
     public function forceDelete(User $user, Branch $branch): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('branches.force_delete');
     }
 }

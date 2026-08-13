@@ -9,36 +9,36 @@ class InspectionItemPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->can('inspection_items.view_any');
+        return $user->hasAnyRole(['admin', 'manager']);
     }
 
     public function view(User $user, InspectionItem $item): bool
     {
-        return $user->can('inspection_items.view_any');
+        return $user->hasAnyRole(['admin', 'manager']);
     }
 
     public function create(User $user): bool
     {
-        return $user->can('inspection_items.create');
+        return $user->hasAnyRole(['admin', 'manager']);
     }
 
     public function update(User $user, InspectionItem $item): bool
     {
-        return $user->can('inspection_items.update');
+        return $user->hasAnyRole(['admin', 'manager']);
     }
 
     public function delete(User $user, InspectionItem $item): bool
     {
-        return $user->can('inspection_items.delete');
+        return $user->hasRole('admin');
     }
 
     public function restore(User $user, InspectionItem $item): bool
     {
-        return $user->can('inspection_items.restore');
+        return $user->hasRole('admin');
     }
 
     public function forceDelete(User $user, InspectionItem $item): bool
     {
-        return $user->can('inspection_items.force_delete');
+        return $user->hasRole('admin');
     }
 }

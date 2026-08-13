@@ -9,36 +9,36 @@ class InvoicePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'cashier']);
+        return $user->can('invoices.view_any');
     }
 
     public function view(User $user, Invoice $invoice): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'cashier']);
+        return $user->can('invoices.view_any');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'cashier']);
+        return $user->can('invoices.create');
     }
 
     public function update(User $user, Invoice $invoice): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'cashier']);
+        return $user->can('invoices.update');
     }
 
     public function delete(User $user, Invoice $invoice): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('invoices.delete');
     }
 
     public function restore(User $user, Invoice $invoice): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('invoices.restore');
     }
 
     public function forceDelete(User $user, Invoice $invoice): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('invoices.force_delete');
     }
 }

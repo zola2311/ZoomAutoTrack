@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\Users\Schemas;
 
 use App\Models\Branch;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -46,7 +47,7 @@ class UserForm
                             ->searchable()
                             ->preload()
                             ->required()
-                            ->visible(fn () => auth()->user()->hasRole('admin')),
+                            ->visible(fn () => auth()->user()?->can('branches.view_any')),
 
                         TextInput::make('password')
                             ->label('Password')
@@ -82,6 +83,20 @@ class UserForm
                             ->default(true)
                             ->helperText('Inactive users cannot log in'),
                     ]),
+
+                // Direct Permission Overrides
+                Section::make('Direct Permission Overrides')
+                    ->description('Grant or revoke specific permissions for this individual user beyond their assigned role.')
+                    ->schema([
+                        CheckboxList::make('permissions')
+                            ->relationship('permissions', 'name')
+                            ->columns(3)
+                            ->gridDirection('row')
+                            ->bulkToggleable()
+                            ->searchable(),
+                    ])
+                    ->collapsible()
+                    ->collapsed(),
 
                 Hidden::make('email_verified_at')
                     ->default(now()),

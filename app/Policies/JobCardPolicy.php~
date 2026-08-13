@@ -9,12 +9,12 @@ class JobCardPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'receptionist']);
+        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'receptionist', 'cashier']);
     }
 
     public function view(User $user, JobCard $jobCard): bool
     {
-        if ($user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist'])) {
+        if ($user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist', 'cashier'])) {
             return true;
         }
 

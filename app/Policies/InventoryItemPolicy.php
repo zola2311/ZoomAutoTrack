@@ -9,36 +9,36 @@ class InventoryItemPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'inventory_manager']);
+        return $user->can('inventory.view_any');
     }
 
     public function view(User $user, InventoryItem $item): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'inventory_manager']);
+        return $user->can('inventory.view_any');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'inventory_manager']);
+        return $user->can('inventory.create');
     }
 
     public function update(User $user, InventoryItem $item): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'inventory_manager']);
+        return $user->can('inventory.update');
     }
 
     public function delete(User $user, InventoryItem $item): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('inventory.delete');
     }
 
     public function restore(User $user, InventoryItem $item): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('inventory.restore');
     }
 
     public function forceDelete(User $user, InventoryItem $item): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('inventory.force_delete');
     }
 }

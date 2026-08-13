@@ -9,36 +9,36 @@ class VehiclePolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist', 'cashier']);
+        return $user->can('vehicles.view_any');
     }
 
     public function view(User $user, Vehicle $vehicle): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist', 'cashier']);
+        return $user->can('vehicles.view_any');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist']);
+        return $user->can('vehicles.create');
     }
 
     public function update(User $user, Vehicle $vehicle): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist']);
+        return $user->can('vehicles.update');
     }
 
     public function delete(User $user, Vehicle $vehicle): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('vehicles.delete');
     }
 
     public function restore(User $user, Vehicle $vehicle): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('vehicles.restore');
     }
 
     public function forceDelete(User $user, Vehicle $vehicle): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('vehicles.force_delete');
     }
 }

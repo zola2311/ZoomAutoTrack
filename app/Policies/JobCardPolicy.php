@@ -9,34 +9,38 @@ class JobCardPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'receptionist', 'cashier']);
+        return $user->can('job_cards.view_any');
     }
 
     public function view(User $user, JobCard $jobCard): bool
     {
-        if ($user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist', 'cashier'])) {
+        // Global permission to view all job cards
+        if ($user->can('job_cards.view_all')) {
             return true;
         }
 
-        if ($user->hasRole('mechanic')) {
+        // Permission to view only assigned job cards (e.g. Mechanics)
+        if ($user->can('job_cards.view_own')) {
             return $jobCard->mechanic_id === $user->id;
         }
 
-        return false;
+        return $user->can('job_cards.view_any');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasAnyRole(['admin', 'manager', 'service_advisor', 'receptionist']);
+        return $user->can('job_cards.create');
     }
 
     public function update(User $user, JobCard $jobCard): bool
     {
-        if ($user->hasAnyRole(['admin', 'manager', 'service_advisor'])) {
+        // Permission to update any job card
+        if ($user->can('job_cards.update_all')) {
             return true;
         }
 
-        if ($user->hasRole('mechanic')) {
+        // Permission to update only assigned job cards
+        if ($user->can('job_cards.update_own')) {
             return $jobCard->mechanic_id === $user->id;
         }
 
@@ -45,16 +49,16 @@ class JobCardPolicy
 
     public function delete(User $user, JobCard $jobCard): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('job_cards.delete');
     }
 
     public function restore(User $user, JobCard $jobCard): bool
     {
-        return $user->hasAnyRole(['admin', 'manager']);
+        return $user->can('job_cards.restore');
     }
 
     public function forceDelete(User $user, JobCard $jobCard): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('job_cards.force_delete');
     }
 }

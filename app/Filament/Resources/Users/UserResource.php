@@ -62,7 +62,7 @@ class UserResource extends Resource
         ];
     }
 
-    // Branch scoping - admin sees all, others see only their branch
+    // Branch scoping - admin/manager with branch permissions see all, others see only their branch
     public static function getEloquentQuery(): Builder
     {
         $query = parent::getEloquentQuery()
@@ -72,7 +72,7 @@ class UserResource extends Resource
 
         $user = Filament::auth()->user();
 
-        if ($user && ! $user->hasRole(['admin', 'manager'])) {
+        if ($user && ! $user->can('branches.view_any')) {
             if ($user->branch_id) {
                 $query->where('branch_id', $user->branch_id);
             }

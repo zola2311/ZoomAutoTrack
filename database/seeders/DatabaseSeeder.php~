@@ -123,6 +123,6 @@ class DatabaseSeeder extends Seeder
 
         // Assign the admin role to this user
         $admin->assignRole('admin');
-        
+        $this->call(TestUsersSeeder::class);
     }
 }

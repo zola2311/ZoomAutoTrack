@@ -8,36 +8,36 @@ class UserPolicy
 {
     public function viewAny(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('users.view_any');
     }
 
     public function view(User $user, User $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('users.view_any');
     }
 
     public function create(User $user): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('users.create');
     }
 
     public function update(User $user, User $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('users.update');
     }
 
     public function delete(User $user, User $model): bool
     {
-        return $user->hasRole('admin') && $user->id !== $model->id;
+        return $user->can('users.delete') && $user->id !== $model->id;
     }
 
     public function restore(User $user, User $model): bool
     {
-        return $user->hasRole('admin');
+        return $user->can('users.restore');
     }
 
     public function forceDelete(User $user, User $model): bool
     {
-        return $user->hasRole('admin') && $user->id !== $model->id;
+        return $user->can('users.force_delete') && $user->id !== $model->id;
     }
 }
