@@ -88,6 +88,6 @@ class User extends Authenticatable
             default => 'gray',
         };
     }
-    
+
 }
 

@@ -283,17 +283,16 @@ class JobCardForm
                                 'completed'     => 'Completed',
                                 'cancelled'     => 'Cancelled',
                             ])
-                    ->disableOptionWhen(function (string $value, Get $get) {
-                        // Mechanics can only move to quality_check, never directly to completed
-                        if (auth()->user()->hasRole('mechanic') && ! auth()->user()->hasAnyRole(['admin', 'manager'])) {
-                            return $value === 'completed';
-                        }
-                        return false;
-                    })
-                    ->helperText(fn () => auth()->user()->hasRole('mechanic') && ! auth()->user()->hasAnyRole(['admin', 'manager'])
-                        ? 'Mechanics can move jobs to Quality Check — only a manager or advisor can mark a job Completed.'
-                        : null
-                    ),
+                            ->disableOptionWhen(function (string $value, Get $get) {
+                                if (! auth()->user()->can('job_cards.update_all')) {
+                                    return $value === 'completed';
+                                }
+                                return false;
+                            })
+                            ->helperText(fn () => ! auth()->user()->can('job_cards.update_all')
+                                ? 'Mechanics can move jobs to Quality Check — only a manager or advisor can mark a job Completed.'
+                                : null
+                            ),
                         Select::make('priority')
                             ->required()
                             ->default('normal')

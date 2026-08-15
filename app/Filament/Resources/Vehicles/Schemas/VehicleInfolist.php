@@ -6,6 +6,8 @@ use App\Models\Vehicle;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
+use SimpleSoftwareIO\QrCode\Facades\QrCode;
+use Filament\Infolists\Components\ViewEntry;
 
 class VehicleInfolist
 {
@@ -94,6 +96,23 @@ class VehicleInfolist
 
                     ]),
 
+                Section::make('Digital Passport')
+                    ->columns(2)
+                    ->schema([
+                        ViewEntry::make('qr_image')
+                            ->hiddenLabel()
+                            ->view('filament.infolists.vehicle-qr-code')
+                            ->columnSpan(1),
+
+                        TextEntry::make('qr_code')
+                            ->label('Passport Link')
+                            ->state(fn (Vehicle $record) => $record->passportUrl())
+                            ->url(fn (Vehicle $record) => $record->passportUrl(), shouldOpenInNewTab: true)
+                            ->copyable()
+                            ->placeholder('-')
+                            ->columnSpan(1),
+                    ]),
+
                 Section::make('Identifiers')
                     ->columns(2)
                     ->schema([
@@ -112,11 +131,6 @@ class VehicleInfolist
 
                         TextEntry::make('transmission')
                             ->badge()
-                            ->placeholder('-'),
-
-                        TextEntry::make('qr_code')
-                            ->label('QR Code')
-                            ->copyable()
                             ->placeholder('-'),
                     ]),
 

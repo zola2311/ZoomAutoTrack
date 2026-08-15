@@ -98,6 +98,6 @@ class JobCardStatsWidget extends BaseStatsOverviewWidget
 
     public static function canView(): bool
     {
-        $user = auth()->user();
-        return $user && ($user->can('job_cards.view_any') || $user->can('job_cards.view_own'));}
+        return auth()->user()?->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'receptionist', 'cashier']) ?? false;
+    }
 }

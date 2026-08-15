@@ -28,11 +28,13 @@ class LatestJobCardsWidget extends BaseTableWidget
                     ->latest('checked_in_at')
                     ->limit(10);
 
-                if ($user->hasRole('mechanic') && ! $user->hasAnyRole(['admin', 'manager'])) {
-                    $query->where('mechanic_id', $user->id);
+                if ($user->can('job_cards.view_all')) {
+                    return $query;
                 }
-
-                return $query;
+                if ($user->can('job_cards.view_own')) {
+                    return $query->where('mechanic_id', $user->id);
+                }
+                return $query->whereRaw('1 = 0');
             })
             ->columns([
                 TextColumn::make('job_number')
@@ -101,6 +103,7 @@ class LatestJobCardsWidget extends BaseTableWidget
     }
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole(['admin', 'manager', 'service_advisor', 'mechanic', 'receptionist']) ?? false;
+        $user = auth()->user();
+        return $user && ($user->can('job_cards.view_any') || $user->can('job_cards.view_own'));
     }
 }

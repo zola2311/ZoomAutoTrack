@@ -98,6 +98,6 @@ class InventoryStatsWidget extends BaseStatsOverviewWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole(['admin', 'manager', 'inventory_manager']) ?? false;
+        return auth()->user()?->can('inventory.view_any') ?? false;
     }
 }

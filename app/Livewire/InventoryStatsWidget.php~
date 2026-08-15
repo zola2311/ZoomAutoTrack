@@ -61,10 +61,6 @@ class InventoryStatsWidget extends BaseStatsOverviewWidget
 
         $monthProfit = $this->calculatePartsProfit(now()->startOfMonth(), now()->endOfMonth());
 
-        \Illuminate\Support\Facades\Log::info('Widget getStats called', [
-            'today_start' => today()->startOfDay()->toDateTimeString(),
-            'today_end' => today()->endOfDay()->toDateTimeString(),
-        ]);
 
 
         return [

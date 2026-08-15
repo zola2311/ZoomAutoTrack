@@ -49,20 +49,8 @@ class VehicleResource extends Resource
 
         $user = Filament::auth()->user();
 
-        if ($user) {
-            // 1. Read your direct text column value
-            $userColumnRole = strtolower($user->role ?? '');
-
-            // 2. Check Spatie role system
-            $hasSpatieRole = $user->hasRole(['admin', 'manager']);
-
-            // If they aren't an admin/manager by either method, scope them to their branch
-            if (! $hasSpatieRole && ! in_array($userColumnRole, ['admin', 'manager'])) {
-                // Fallback to branch assignment if a branch ID exists
-                if ($user->branch_id) {
-                    $query->where('branch_id', $user->branch_id);
-                }
-            }
+        if ($user && ! $user->canAccessAllBranches() && $user->branch_id) {
+            $query->where('branch_id', $user->branch_id);
         }
 
         return $query;

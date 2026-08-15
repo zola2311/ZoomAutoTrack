@@ -26,8 +26,10 @@ class JobCardResource extends Resource
 {
     protected static ?string $model = JobCard::class;
 
+    // JobCardResource nav side bar
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentList;
     protected static string|UnitEnum|null $navigationGroup = 'Workshop';
+
     protected static ?int $navigationSort = 1;
 
     protected static ?string $recordTitleAttribute = 'job_number';
@@ -83,14 +85,19 @@ class JobCardResource extends Resource
 
         $user = Filament::auth()->user();
 
-        if ($user && ! $user->hasRole(['admin', 'manager'])) {
-            if ($user->branch_id) {
-                $query->where('branch_id', $user->branch_id);
-            }
+        // Users scoped to only their own assigned job cards (mechanics) are
+        // already fully narrowed by mechanic_id — don't also filter by
+        // branch, or a branch_id mismatch between the user and the job
+        // card silently hides jobs that are legitimately theirs.
+        if ($user && $user->can('job_cards.view_own') && ! $user->can('job_cards.view_all')) {
+            return $query;
+        }
+
+        if ($user && ! $user->hasRole(['admin', 'manager']) && $user->branch_id) {
+            $query->where('branch_id', $user->branch_id);
         }
 
         return $query;
     }
-
 
 }

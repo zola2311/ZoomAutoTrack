@@ -4,16 +4,43 @@ namespace App\Filament\Widgets;
 
 use App\Models\InventoryItem;
 use App\Models\Invoice;
+use App\Models\InvoiceItem;
 use App\Models\JobCard;
+use App\Models\PartUsed;
 use App\Models\Payment;
 use Filament\Widgets\StatsOverviewWidget as BaseStatsOverviewWidget;
 use Filament\Widgets\StatsOverviewWidget\Stat;
+use Illuminate\Support\Carbon;
 
 class StatsOverviewWidget extends BaseStatsOverviewWidget
 {
+    protected function calculatePartsProfit(Carbon $start, Carbon $end): float
+    {
+        // Source 1: Parts used via job cards
+        $jobCardParts = PartUsed::whereHas('jobCard', fn ($q) => $q->whereBetween('created_at', [$start, $end]))
+            ->get();
+
+        $jobCardRevenue = $jobCardParts->sum(fn ($p) => $p->unit_price * $p->quantity);
+        $jobCardCost = $jobCardParts->sum(fn ($p) => $p->unit_cost * $p->quantity);
+
+        // Source 2: Parts sold via standalone invoices (no job card)
+        $standaloneParts = InvoiceItem::where('item_type', 'part')
+            ->whereNotNull('inventory_item_id')
+            ->whereHas('invoice', fn ($q) => $q->whereBetween('created_at', [$start, $end]))
+            ->with('inventoryItem')
+            ->get();
+
+        $standaloneRevenue = $standaloneParts->sum(fn ($i) => $i->unit_price * $i->quantity);
+        $standaloneCost = $standaloneParts->sum(fn ($i) => ($i->inventoryItem?->unit_cost ?? 0) * $i->quantity);
+
+        $revenue = $jobCardRevenue + $standaloneRevenue;
+        $cost = $jobCardCost + $standaloneCost;
+
+        return $revenue - $cost;
+    }
+
     protected function getStats(): array
     {
-
         $todayJobs = JobCard::whereDate('checked_in_at', today())->count();
 
         $inProgress = JobCard::whereIn('status', ['pending', 'in_progress', 'quality_check'])->count();
@@ -42,16 +69,11 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
         $monthRevenue = Payment::whereMonth('paid_at', now()->month)
             ->whereYear('paid_at', now()->year)
             ->sum('amount');
-        $partsProfitToday = \App\Models\PartUsed::whereHas('jobCard', fn ($q) => $q->whereDate('created_at', today()))
-            ->get()
-            ->sum(fn ($part) => ($part->unit_price - $part->unit_cost) * $part->quantity);
 
-        $partsProfitMonth = \App\Models\PartUsed::whereHas('jobCard', fn ($q) => $q
-            ->whereMonth('created_at', now()->month)
-            ->whereYear('created_at', now()->year)
-        )
-            ->get()
-            ->sum(fn ($part) => ($part->unit_price - $part->unit_cost) * $part->quantity);
+        $partsProfitToday = $this->calculatePartsProfit(today()->startOfDay(), today()->endOfDay());
+
+        $partsProfitMonth = $this->calculatePartsProfit(now()->startOfMonth(), now()->endOfMonth());
+
         return [
             Stat::make('Vehicles Today', $todayJobs)
                 ->description('Checked in today')
@@ -92,17 +114,19 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
                 ->description('Zero quantity remaining')
                 ->descriptionIcon('heroicon-o-x-circle')
                 ->color($outOfStock > 0 ? 'danger' : 'success'),
-            Stat::make("Parts Profit Today", number_format($partsProfitToday, 2) . ' ETB')
+
+            Stat::make('Parts Profit Today', number_format($partsProfitToday, 2) . ' ETB')
                 ->description('Margin from parts sold today')
                 ->descriptionIcon('heroicon-o-chart-bar')
                 ->color('success'),
 
-            Stat::make("Parts Profit This Month", number_format($partsProfitMonth, 2) . ' ETB')
+            Stat::make('Parts Profit This Month', number_format($partsProfitMonth, 2) . ' ETB')
                 ->description(now()->format('F Y'))
                 ->descriptionIcon('heroicon-o-chart-bar-square')
                 ->color('success'),
         ];
     }
+
     public static function canView(): bool
     {
         return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;

@@ -31,4 +31,32 @@ class Vehicle extends Model
     public function jobCards() { return $this->hasMany(JobCard::class); }
     public function inspections() { return $this->hasMany(VehicleInspection::class); }
     public function media() { return $this->morphMany(Media::class, 'model'); }
+    public function nextServiceDue(): array
+    {
+        $lastService = $this->jobCards()
+            ->whereNotNull('completed_at')
+            ->orderByDesc('completed_at')
+            ->first();
+
+        $baseMileage = $lastService?->mileage_at_checkin ?? $this->current_mileage;
+        $baseDate = $lastService?->completed_at ?? $this->created_at;
+
+        $dueMileage = $baseMileage + $this->service_interval_km;
+        $dueDate = $baseDate->copy()->addMonths($this->service_interval_months);
+
+        $kmRemaining = max(0, $dueMileage - $this->current_mileage);
+        $daysRemaining = now()->diffInDays($dueDate, false);
+
+        $isDue = $kmRemaining <= 0 || $daysRemaining <= 0;
+
+        return [
+            'due_mileage'     => $dueMileage,
+            'due_date'        => $dueDate,
+            'km_remaining'    => $kmRemaining,
+            'days_remaining'  => $daysRemaining,
+            'is_due'          => $isDue,
+            'due_reason'      => $kmRemaining <= 0 ? 'mileage' : ($daysRemaining <= 0 ? 'time' : null),
+        ];
+    }
+
 }

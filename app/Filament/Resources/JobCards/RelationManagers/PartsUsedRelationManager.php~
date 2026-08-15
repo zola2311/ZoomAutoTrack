@@ -80,7 +80,7 @@ class PartsUsedRelationManager extends RelationManager
                             ->prefix('ETB')
                             ->step(0.01)
                             ->live()
-                            ->disabled(fn () => ! auth()->user()->can('job_cards.update_all'))
+                            ->disabled(fn () => auth()->user()->hasRole('mechanic'))
                             ->dehydrated()
                             ->afterStateUpdated(function ($state, Get $get, Set $set) {
                                 $quantity = $get('quantity') ?? 1;

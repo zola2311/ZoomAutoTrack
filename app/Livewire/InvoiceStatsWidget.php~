@@ -75,6 +75,6 @@ class InvoiceStatsWidget extends BaseStatsOverviewWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->can('invoices.view_any') ?? false;
+        return auth()->user()?->hasAnyRole(['admin', 'manager', 'cashier']) ?? false;
     }
 }

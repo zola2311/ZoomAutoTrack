@@ -88,6 +88,15 @@ class User extends Authenticatable
             default => 'gray',
         };
     }
-
+    /**
+     * Whether this user should see data across every branch, vs. being
+     * scoped to their own branch_id. Centralized here so every resource's
+     * branch-scoping check stays in sync — this exact kind of duplicated
+     * check across files is what caused the job cards bug.
+     */
+    public function canAccessAllBranches(): bool
+    {
+        return $this->hasRole(['admin', 'manager']);
+    }
 }
 

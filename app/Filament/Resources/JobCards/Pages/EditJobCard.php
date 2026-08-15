@@ -27,7 +27,7 @@ class EditJobCard extends EditRecord
                 ->color('success')
                 ->visible(fn () => ! in_array($this->record->status, ['completed', 'cancelled'])
                     && ($this->record->services()->exists() || $this->record->partsUsed()->exists())
-                    && ! auth()->user()->hasRole('mechanic') // mechanics never see this button at all now
+                    && auth()->user()->can('job_cards.update_all')
                 )
                 ->requiresConfirmation()
                 ->modalDescription(fn () => $this->record->status !== 'quality_check'
@@ -79,7 +79,7 @@ class EditJobCard extends EditRecord
                 ->label(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')
                 ->icon(fn () => $this->record->invoice ? 'heroicon-o-arrow-path' : 'heroicon-o-document-currency-dollar')
                 ->color(fn () => $this->record->invoice ? 'warning' : 'success')
-                ->visible(fn () => ! auth()->user()->hasRole('mechanic')
+                ->visible(fn () => auth()->user()->can('job_cards.update_all')
                     && ($this->record->invoice
                         || $this->record->services()->exists()
                         || $this->record->partsUsed()->exists())

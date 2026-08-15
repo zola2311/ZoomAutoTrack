@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\VehiclePassportController;
 use App\Http\Controllers\VoiceRecordingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentProofController;
@@ -8,6 +9,9 @@ use App\Http\Controllers\PaymentProofController;
 Route::get('/', function () {
     return view('welcome');
 });
+// Public Digital Vehicle Passport — no auth, resolved by qr_code UUID.
+Route::get('/passport/{qrCode}', [VehiclePassportController::class, 'show'])
+    ->name('passport.show');
 
 //Route::get('/dashboard', function () {
 //    return view('dashboard');

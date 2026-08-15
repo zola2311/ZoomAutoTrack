@@ -129,6 +129,6 @@ class StatsOverviewWidget extends BaseStatsOverviewWidget
 
     public static function canView(): bool
     {
-        return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;
+        return auth()->user()?->can('reports.view') ?? false;
     }
 }

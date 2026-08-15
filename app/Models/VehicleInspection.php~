@@ -4,21 +4,31 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class VehicleInspection extends Model
+class VehicleInspectionAnswer extends Model
 {
     protected $guarded = ['id'];
-    protected $casts = ['inspected_at' => 'datetime'];
-    protected $fillable = [
-        'job_card_id',
-        'vehicle_id',
-        'inspected_by',
-        'type',
-        'notes',
-        'voice_note_id',
-        'inspected_at',
+
+    /**
+     * Maps the existing `result` values (pass/fail/warning/n/a) to a 0-100
+     * score so we can build the diagnostic report card without adding a
+     * new column. Adjust the weights here if you want a different curve.
+     */
+    public const RESULT_SCORES = [
+        'pass' => 100,
+        'warning' => 60,
+        'fail' => 20,
+        // 'n/a' is intentionally omitted — excluded from scoring, see scope() below.
     ];
-    public function jobCard() { return $this->belongsTo(JobCard::class); }
-    public function vehicle() { return $this->belongsTo(Vehicle::class); }
-    public function inspector() { return $this->belongsTo(User::class, 'inspected_by'); }
-    public function answers() { return $this->hasMany(VehicleInspectionAnswer::class); }
+
+    public function vehicleInspection() { return $this->belongsTo(VehicleInspection::class); }
+    public function inspectionItem() { return $this->belongsTo(InspectionItem::class); }
+
+    /**
+     * Numeric score for this single answer, or null if it doesn't count
+     * toward scoring (e.g. "n/a" or an unrecognized result).
+     */
+    public function getScoreAttribute(): ?int
+    {
+        return self::RESULT_SCORES[$this->result] ?? null;
+    }
 }

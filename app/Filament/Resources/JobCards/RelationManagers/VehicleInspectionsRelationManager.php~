@@ -59,7 +59,7 @@ class VehicleInspectionsRelationManager extends RelationManager
                             ->nullable()
                             ->placeholder('Select inspector')
                             ->columnSpan(1),
-                        
+
                         DateTimePicker::make('inspected_at')
                             ->label('Inspection Date')
                             ->default(now())

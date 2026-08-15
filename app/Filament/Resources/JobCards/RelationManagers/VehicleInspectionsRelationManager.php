@@ -54,7 +54,7 @@ class VehicleInspectionsRelationManager extends RelationManager
                                 ->pluck('name', 'id')
                             )
                             ->default(fn () => auth()->id())
-                            ->disabled(fn () => auth()->user()->hasRole('mechanic'))
+                            ->disabled(fn () => ! auth()->user()->can('job_cards.update_all'))
                             ->dehydrated()
                             ->nullable()
                             ->placeholder('Select inspector')

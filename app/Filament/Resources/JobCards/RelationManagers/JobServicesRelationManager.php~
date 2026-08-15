@@ -41,19 +41,12 @@ class JobServicesRelationManager extends RelationManager
                                 ->orderBy('name')
                                 ->pluck('name', 'id')
                             )
-                            ->searchable()
-                            ->preload()
-                            ->nullable()
-                            ->placeholder('Select a mechanic')
-                            ->columnSpan(1),
-                        Select::make('assigned_mechanic_id')
-                            ->label('Assigned Mechanic')
-                            ->options(fn () => User::role('mechanic')->pluck('name', 'id'))
                             ->default(fn () => auth()->user()->hasRole('mechanic') ? auth()->id() : null)
                             ->disabled(fn () => auth()->user()->hasRole('mechanic'))
                             ->dehydrated()
                             ->searchable()
-                            ->preload(),
+                            ->preload()
+                            ->placeholder('Select a mechanic'),
 
                         Select::make('status')
                             ->label('Status')

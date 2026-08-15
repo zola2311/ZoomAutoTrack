@@ -16,6 +16,7 @@ use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 
+
 class JobCardsTable
 {
     public static function configure(Table $table): Table
@@ -147,10 +148,16 @@ class JobCardsTable
             ])
             ->modifyQueryUsing(function (Builder $query) {
                 $user = auth()->user();
-                if ($user->hasRole('mechanic') && ! $user->hasAnyRole(['admin', 'manager'])) {
-                    $query->where('mechanic_id', $user->id);
+
+                if ($user->can('job_cards.view_all')) {
+                    return $query;
                 }
-                return $query;
+
+                if ($user->can('job_cards.view_own')) {
+                    return $query->where('mechanic_id', $user->id);
+                }
+
+                return $query->whereRaw('1 = 0'); // no permission at all — show nothing
             })
             ->deferFilters(false)
             ->recordActions([

@@ -21,12 +21,21 @@ class LatestJobCardsWidget extends BaseTableWidget
     public function table(Table $table): Table
     {
         return $table
-            ->query(
-                JobCard::query()
+            ->query(function () {
+                $user = auth()->user();
+                $query = JobCard::query()
                     ->whereNotIn('status', ['completed', 'cancelled'])
                     ->latest('checked_in_at')
-                    ->limit(10)
-            )
+                    ->limit(10);
+
+                if ($user->can('job_cards.view_all')) {
+                    return $query;
+                }
+                if ($user->can('job_cards.view_own')) {
+                    return $query->where('mechanic_id', $user->id);
+                }
+                return $query->whereRaw('1 = 0');
+            })
             ->columns([
                 TextColumn::make('job_number')
                     ->label('Job #')

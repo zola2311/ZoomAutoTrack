@@ -41,7 +41,7 @@ class DailyRevenueReport extends Page implements HasTable
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole(['admin', 'manager']) ?? false;
+        return auth()->user()?->can('reports.view') ?? false;
     }
 
     public function filtersForm(Schema $schema): Schema

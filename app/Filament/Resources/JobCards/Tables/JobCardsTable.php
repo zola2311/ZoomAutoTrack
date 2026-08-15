@@ -146,12 +146,16 @@ class JobCardsTable
                 TrashedFilter::make(),
 
             ])
+            // app/Filament/Resources/JobCards/Tables/JobCardsTable.php
             ->modifyQueryUsing(function (Builder $query) {
                 $user = auth()->user();
-                if ($user->hasRole('mechanic') && ! $user->hasAnyRole(['admin', 'manager'])) {
-                    $query->where('mechanic_id', $user->id);
+                if ($user->can('job_cards.view_all')) {
+                    return $query;
                 }
-                return $query;
+                if ($user->can('job_cards.view_own')) {
+                    return $query->where('mechanic_id', $user->id);
+                }
+                return $query->whereRaw('1 = 0');
             })
             ->deferFilters(false)
             ->recordActions([

@@ -79,7 +79,7 @@ class EditJobCard extends EditRecord
                 ->label(fn () => $this->record->invoice ? 'Update Invoice' : 'Generate Invoice')
                 ->icon(fn () => $this->record->invoice ? 'heroicon-o-arrow-path' : 'heroicon-o-document-currency-dollar')
                 ->color(fn () => $this->record->invoice ? 'warning' : 'success')
-                ->visible(fn () => ! auth()->user()->hasRole('mechanic')
+                ->visible(fn () => auth()->user()->can('job_cards.update_all')
                     && ($this->record->invoice
                         || $this->record->services()->exists()
                         || $this->record->partsUsed()->exists())
@@ -165,7 +165,9 @@ class EditJobCard extends EditRecord
         if ($this->record->status !== 'completed') {
             return;
         }
-
+        if (empty($this->record->completed_by)) {
+            $this->record->update(['completed_by' => auth()->id()]);
+        }
         $incompleteCount = $this->record->services()
             ->where('is_completed', false)
             ->where('status', '!=', 'cancelled')

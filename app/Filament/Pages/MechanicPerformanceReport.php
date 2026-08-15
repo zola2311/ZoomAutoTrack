@@ -34,7 +34,7 @@ class MechanicPerformanceReport extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasAnyRole(['admin', 'manager']) ?? false;
+        return auth()->user()?->can('reports.view') ?? false;
     }
 
     public function filtersForm(Schema $schema): Schema

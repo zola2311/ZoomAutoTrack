@@ -85,14 +85,19 @@ class JobCardResource extends Resource
 
         $user = Filament::auth()->user();
 
-        if ($user && ! $user->hasRole(['admin', 'manager'])) {
-            if ($user->branch_id) {
-                $query->where('branch_id', $user->branch_id);
-            }
+        if (! $user) {
+            return $query;
         }
 
-        return $query;
-    }
+        if ($user->can('job_cards.view_all')) {
+            return $query;
+        }
 
+        if ($user->can('job_cards.view_own')) {
+            return $query->where('mechanic_id', $user->id);
+        }
+
+        return $query->whereRaw('1 = 0');
+    }
 
 }

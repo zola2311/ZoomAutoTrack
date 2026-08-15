@@ -27,6 +27,8 @@ Route::middleware(['auth'])->group(function () {
         ->name('payment-proofs.show');
     Route::post('/voice-recordings', [VoiceRecordingController::class, 'store'])
         ->name('voice-recordings.store');
+    // Test route - visit this to verify the controller works
+    Route::get('/voice-test', [VoiceRecordingController::class, 'test'])->name('voice-test');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

@@ -55,10 +55,8 @@ class InventoryItemResource extends Resource
 
         $user = Filament::auth()->user();
 
-        if ($user && ! $user->hasRole(['admin', 'manager'])) {
-            if ($user->branch_id) {
-                $query->where('branch_id', $user->branch_id);
-            }
+        if ($user && ! $user->canAccessAllBranches() && $user->branch_id) {
+            $query->where('branch_id', $user->branch_id);
         }
 
         return $query;

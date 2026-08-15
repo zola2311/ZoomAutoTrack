@@ -10,7 +10,7 @@ class CreateCustomer extends CreateRecord
     protected static string $resource = CustomerResource::class;
     protected function mutateFormDataBeforeFill(array $data): array
     {
-        if (! auth()->user()->canAccessAllBranches()) {
+        if (! auth()->user()->hasRole(['admin', 'manager'])) {
             $data['branch_id'] = auth()->user()->branch_id ?? 1;
         }
         return $data;
