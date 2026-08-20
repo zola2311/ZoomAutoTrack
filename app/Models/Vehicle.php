@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Str;
 class Vehicle extends Model
 {
     use SoftDeletes;
@@ -88,5 +88,14 @@ class Vehicle extends Model
     public function passportUrl(): ?string
     {
         return $this->qr_code ? route('passport.show', $this->qr_code) : null;
+    }
+
+    protected static function booted(): void
+    {
+        static::creating(function (Vehicle $vehicle) {
+            if (empty($vehicle->qr_code)) {
+                $vehicle->qr_code = (string) Str::uuid();
+            }
+        });
     }
 }

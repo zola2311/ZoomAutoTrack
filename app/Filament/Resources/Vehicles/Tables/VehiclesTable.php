@@ -11,6 +11,9 @@ use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Filters\TrashedFilter;
 use Filament\Tables\Table;
 use Filament\Actions\ViewAction;
+use Filament\Actions\Action;
+use Filament\Support\Icons\Heroicon;
+
 
 class VehiclesTable
 {
@@ -69,6 +72,13 @@ class VehiclesTable
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('printQrSticker')
+                    ->label('QR Sticker')
+                    ->icon(Heroicon::OutlinedQrCode)
+                    ->color('gray')
+                    ->visible(fn ($record) => filled($record->qr_code))
+                    ->url(fn ($record) => route('vehicles.qr-sticker', $record))
+                    ->openUrlInNewTab(),
             ])
             ->bulkActions([
                 BulkActionGroup::make([

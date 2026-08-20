@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePassportController;
+use App\Http\Controllers\VehicleQrStickerController;
 use App\Http\Controllers\VoiceRecordingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentProofController;
@@ -33,6 +34,9 @@ Route::middleware(['auth'])->group(function () {
         ->name('voice-recordings.store');
     // Test route - visit this to verify the controller works
     Route::get('/voice-test', [VoiceRecordingController::class, 'test'])->name('voice-test');
+    Route::get('/vehicles/{vehicle}/qr-sticker', [VehicleQrStickerController::class, 'show'])
+        ->name('vehicles.qr-sticker');
+
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {

@@ -164,9 +164,12 @@ class JobCardsTable
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                    ForceDeleteBulkAction::make(),
-                    RestoreBulkAction::make(),
+                    DeleteBulkAction::make()
+                        ->authorize(fn () => auth()->user()->can('job_cards.delete')),
+                    ForceDeleteBulkAction::make()
+                        ->authorize(fn () => auth()->user()->can('job_cards.force_delete')),
+                    RestoreBulkAction::make()
+                        ->authorize(fn () => auth()->user()->can('job_cards.restore')),
                 ]),
             ]);
     }

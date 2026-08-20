@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Str;
 class Vehicle extends Model
 {
     use SoftDeletes;
@@ -31,6 +31,7 @@ class Vehicle extends Model
     public function jobCards() { return $this->hasMany(JobCard::class); }
     public function inspections() { return $this->hasMany(VehicleInspection::class); }
     public function media() { return $this->morphMany(Media::class, 'model'); }
+
     public function nextServiceDue(): array
     {
         $lastService = $this->jobCards()
@@ -59,4 +60,35 @@ class Vehicle extends Model
         ];
     }
 
+    /**
+     * Most recent inspection with scoreable answers, used for the
+     * diagnostic report card on the passport and customer dashboard.
+     */
+    public function latestInspection(): ?VehicleInspection
+    {
+        return $this->inspections()
+            ->with('answers.inspectionItem')
+            ->whereHas('answers')
+            ->orderByDesc('inspected_at')
+            ->first();
+    }
+
+    /**
+     * Convenience wrapper — returns [] if there's no scoreable inspection yet.
+     */
+    public function latestHealthScores(): array
+    {
+        return $this->latestInspection()?->healthScores() ?? [];
+    }
+
+    /**
+     * The full public passport URL for this vehicle (used for the QR
+     * image and for printing/sharing).
+     */
+    public function passportUrl(): ?string
+    {
+        return $this->qr_code ? route('passport.show', $this->qr_code) : null;
+    }
+
+    
 }
