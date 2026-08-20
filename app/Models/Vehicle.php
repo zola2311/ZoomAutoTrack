@@ -98,4 +98,8 @@ class Vehicle extends Model
             }
         });
     }
+    public function sendPasswordResetNotification($token): void
+    {
+        $this->notify(new \App\Notifications\CustomerInvitation($token));
+    }
 }

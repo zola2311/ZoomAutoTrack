@@ -1,11 +1,13 @@
 <?php
 
+use App\Http\Controllers\Auth\CustomerPasswordController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePassportController;
 use App\Http\Controllers\VehicleQrStickerController;
 use App\Http\Controllers\VoiceRecordingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentProofController;
+use App\Http\Controllers\Auth\CustomerAuthController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -47,12 +49,31 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
 Route::middleware(['auth', 'role:admin|manager'])->group(function () {
     Route::get('/reports', function () {return view('reports.index');})->name('reports.index');
 });
-//Route::middleware(['auth', 'permission:view job cards|manage job cards|view assigned job cards'])->group(function () {
-//    Route::get('/job-cards', [JobCardController::class, 'index'])->name('job-cards.index');
-//});
-//Route::middleware(['auth', 'permission:create job cards|manage job cards'])->group(function () {
-//    Route::get('/job-cards/create', [JobCardController::class, 'create'])->name('job-cards.create');
-//    Route::post('/job-cards', [JobCardController::class, 'store'])->name('job-cards.store');
-//});
+Route::prefix('portal')->name('portal.')->group(function () {
+    Route::middleware('guest:customer')->group(function () {
+        Route::get('/login', [CustomerAuthController::class, 'showLogin'])->name('login');
+        Route::post('/login', [CustomerAuthController::class, 'login']);
+        Route::get('/register', [CustomerAuthController::class, 'showRegister'])->name('register');
+        Route::post('/register', [CustomerAuthController::class, 'register']);
+
+        Route::get('/set-password/{token}', [CustomerPasswordController::class, 'showSetForm'])->name('password.set');
+        Route::post('/set-password', [CustomerPasswordController::class, 'update'])->name('password.update');
+
+        Route::get('/forgot-password', [CustomerPasswordController::class, 'showForgotForm'])->name('password.request');
+        Route::post('/forgot-password', [CustomerPasswordController::class, 'sendResetLink'])->name('password.email');
+
+    });
+
+
+
+    Route::middleware('auth:customer')->group(function () {
+        Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
+        Route::get('/dashboard', function () {
+            return 'Portal dashboard placeholder';
+        })->name('dashboard');
+
+
+    });
+});
 
 require __DIR__.'/auth.php';

@@ -56,7 +56,12 @@ class CustomerForm
                             ->tel()
                             ->required()
                             ->maxLength(20)
-                            ->unique(table: 'customers', column: 'phone', ignoreRecord: true)
+                            ->unique(
+                                table: 'customers',
+                                column: 'phone',
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn ($rule) => $rule->whereNull('deleted_at'),
+                            )
                             ->columnSpan(1),
 
                         TextInput::make('secondary_phone')
@@ -70,7 +75,12 @@ class CustomerForm
                             ->label('Email Address')
                             ->email()
                             ->maxLength(150)
-                            ->unique(table: 'customers', column: 'email', ignoreRecord: true)
+                            ->unique(
+                                table: 'customers',
+                                column: 'email',
+                                ignoreRecord: true,
+                                modifyRuleUsing: fn ($rule) => $rule->whereNull('deleted_at'),
+                            )
                             ->columnSpan(1),
 
                         TextInput::make('tin_number')

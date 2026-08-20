@@ -5,9 +5,12 @@ namespace App\Filament\Resources\Customers\Pages;
 use App\Filament\Resources\Customers\CustomerResource;
 use Filament\Resources\Pages\CreateRecord;
 use Filament\Facades\Filament;
+use Illuminate\Support\Facades\Password;
+
 class CreateCustomer extends CreateRecord
 {
     protected static string $resource = CustomerResource::class;
+
     protected function mutateFormDataBeforeFill(array $data): array
     {
         if (! auth()->user()->canAccessAllBranches()) {
@@ -15,6 +18,7 @@ class CreateCustomer extends CreateRecord
         }
         return $data;
     }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         if (empty($data['branch_id'])) {
@@ -23,5 +27,12 @@ class CreateCustomer extends CreateRecord
         return $data;
     }
 
+    protected function afterCreate(): void
+    {
+        $customer = $this->record;
 
+        if ($customer->email) {
+            Password::broker('customers')->sendResetLink(['email' => $customer->email]);
+        }
+    }
 }

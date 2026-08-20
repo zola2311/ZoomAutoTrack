@@ -1,0 +1,81 @@
+<?php
+
+namespace App\Http\Controllers\Auth;
+
+use App\Http\Controllers\Controller;
+use App\Models\Customer;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
+use Illuminate\View\View;
+use Illuminate\Validation\Rule;
+
+class CustomerAuthController extends Controller
+{
+    public function showLogin(): View
+    {
+        return view('portal.auth.login');
+    }
+
+    public function login(Request $request): RedirectResponse
+    {
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required'],
+        ]);
+
+        if (! Auth::guard('customer')->attempt($credentials, $request->boolean('remember'))) {
+            return back()
+                ->withInput($request->only('email'))
+                ->withErrors(['email' => 'Those credentials don\'t match our records.']);
+        }
+
+        $request->session()->regenerate();
+
+        return redirect()->intended(route('portal.dashboard'));
+    }
+
+    public function showRegister(): View
+    {
+        return view('portal.auth.register');
+    }
+
+    public function register(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'full_name' => ['required', 'string', 'max:150'],
+            'phone' => ['required', 'string', 'max:20', Rule::unique('customers', 'phone')->whereNull('deleted_at')],
+            'email' => ['required', 'email', 'max:150', Rule::unique('customers', 'email')->whereNull('deleted_at')],
+            'password' => ['required', 'confirmed', Password::defaults()],
+        ]);
+
+        // Self-registered customers aren't tied to a branch yet — they
+        // pick/get assigned one on their first booking or visit.
+        $customer = Customer::create([
+            'branch_id' => 1,
+            'type' => 'individual',
+            'full_name' => $data['full_name'],
+            'phone' => $data['phone'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+        ]);
+
+        Auth::guard('customer')->login($customer);
+
+        $request->session()->regenerate();
+
+        return redirect()->route('portal.dashboard');
+    }
+
+    public function logout(Request $request): RedirectResponse
+    {
+        Auth::guard('customer')->logout();
+
+        $request->session()->invalidate();
+        $request->session()->regenerateToken();
+
+        return redirect()->route('portal.login');
+    }
+}

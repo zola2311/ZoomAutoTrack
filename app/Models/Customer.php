@@ -2,12 +2,15 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
-class Customer extends Model
+
+class Customer extends Authenticatable implements MustVerifyEmail
 {
-    use SoftDeletes;
+    use SoftDeletes, Notifiable;
+
     protected $fillable = [
         'branch_id',
         'customer_code',
@@ -22,27 +25,49 @@ class Customer extends Model
         'preferred_language',
         'loyalty_points',
         'notes',
+        'password',
     ];
-    protected $guarded = ['id'];
-    protected $casts = ['loyalty_points' => 'integer'];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'loyalty_points' => 'integer',
+        'password' => 'hashed',
+        'email_verified_at' => 'datetime',
+    ];
 
     public function branch() { return $this->belongsTo(Branch::class); }
     public function vehicles() { return $this->hasMany(Vehicle::class); }
     public function jobCards() { return $this->hasMany(JobCard::class); }
     public function invoices() { return $this->hasMany(Invoice::class); }
+
     protected static function booted(): void
     {
         static::creating(function (Customer $customer) {
-            $customer->customer_code = 'CUST-' . str_pad(
-                    Customer::withTrashed()->count() + 1,
-                    4, '0', STR_PAD_LEFT
-                );
+            if (empty($customer->customer_code)) {
+                $customer->customer_code = 'CUST-' . str_pad(
+                        Customer::withTrashed()->count() + 1,
+                        4, '0', STR_PAD_LEFT
+                    );
+            }
         });
     }
+
     public function getDisplayNameAttribute(): string
     {
         return $this->type === 'company'
             ? ($this->company_name ?: $this->full_name ?: 'Unnamed')
             : ($this->full_name ?: $this->company_name ?: 'Unnamed');
+    }
+    public function sendPasswordResetNotification($token): void
+    {
+        if (is_null($this->password)) {
+            $this->notify(new \App\Notifications\CustomerInvitation($token));
+        } else {
+            $this->notify(new \App\Notifications\CustomerPasswordReset($token));
+        }
     }
 }
