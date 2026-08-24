@@ -13,88 +13,135 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
-        // 1. Define ALL unique permissions across all roles
+        // 1. Define ALL unique granular permissions across all modules
         $permissions = [
-            // Core original permissions
-            'manage users',
-            'manage branches',
-            'manage customers',
-            'manage vehicles',
-            'manage job cards',
-            'assign mechanics',
-            'manage inspections',
-            'manage inventory',
-            'manage suppliers',
-            'manage purchase orders',
-            'manage invoices',
-            'receive payments',
-            'view reports',
-            'manage settings',
+            // Job Cards
+            'job_cards.view_any', 'job_cards.view_all', 'job_cards.view_own',
+            'job_cards.create', 'job_cards.update_all', 'job_cards.update_own',
+            'job_cards.delete', 'job_cards.restore', 'job_cards.force_delete',
 
-            // New fine-grained permissions requested for mechanic/receptionist roles
-            'view assigned job cards',
-            'update assigned job cards',
-            'use job parts',
-            'complete services',
-            'create job cards',
-            'view job cards',
-            'view invoices',
-            'create invoices',
-            'manage invoices',
-            'void invoices',
+            // Customers
+            'customers.view_any', 'customers.create', 'customers.update',
+            'customers.delete', 'customers.restore', 'customers.force_delete',
 
+            // Vehicles
+            'vehicles.view_any', 'vehicles.create', 'vehicles.update',
+            'vehicles.delete', 'vehicles.restore', 'vehicles.force_delete',
+
+            // Invoices
+            'invoices.view_any', 'invoices.create', 'invoices.update',
+            'invoices.delete', 'invoices.restore', 'invoices.force_delete',
+
+            // Inventory
+            'inventory.view_any', 'inventory.create', 'inventory.update',
+            'inventory.delete', 'inventory.restore', 'inventory.force_delete',
+
+            // Suppliers
+            'suppliers.view_any', 'suppliers.create', 'suppliers.update',
+            'suppliers.delete', 'suppliers.restore', 'suppliers.force_delete',
+
+            // Inspection Items
+            'inspection_items.view_any', 'inspection_items.create', 'inspection_items.update',
+            'inspection_items.delete', 'inspection_items.restore', 'inspection_items.force_delete',
+
+            // Branches
+            'branches.view_any', 'branches.create', 'branches.update',
+            'branches.delete', 'branches.restore', 'branches.force_delete',
+
+            // Users
+            'users.view_any', 'users.create', 'users.update',
+            'users.delete', 'users.restore', 'users.force_delete',
+
+            // Appointments
+            'appointments.view_any', 'appointments.create', 'appointments.update',
+            'appointments.delete', 'appointments.restore',
         ];
 
-        // Bulk insert or find permissions
+        // Ensure all permissions exist in database
         foreach ($permissions as $permission) {
-            Permission::firstOrCreate(['name' => $permission]);
+            Permission::firstOrCreate([
+                'name' => $permission,
+                'guard_name' => 'web',
+            ]);
         }
 
-        // 2. Define Roles and map their specific permissions
+        // 2. Define Role to Permission mappings
         $rolePermissions = [
-            'admin' => $permissions, // Gets everything
+            'admin' => $permissions, // Full access
 
             'manager' => [
-                'manage customers', 'manage vehicles', 'manage job cards', 'assign mechanics',
-                'manage inspections', 'manage inventory', 'manage suppliers', 'manage purchase orders',
-                'manage invoices', 'receive payments', 'view reports'
+                'job_cards.view_any', 'job_cards.view_all', 'job_cards.create',
+                'job_cards.update_all', 'job_cards.delete', 'job_cards.restore',
+
+                'customers.view_any', 'customers.create', 'customers.update',
+                'customers.delete', 'customers.restore',
+
+                'vehicles.view_any', 'vehicles.create', 'vehicles.update',
+                'vehicles.delete', 'vehicles.restore',
+
+                'invoices.view_any', 'invoices.create', 'invoices.update',
+                'invoices.delete', 'invoices.restore',
+
+                'inventory.view_any', 'inventory.create', 'inventory.update',
+                'inventory.delete', 'inventory.restore',
+
+                'suppliers.view_any', 'suppliers.create', 'suppliers.update',
+                'suppliers.delete', 'suppliers.restore',
+
+                'inspection_items.view_any', 'inspection_items.create', 'inspection_items.update',
+
+                'branches.view_any', 'branches.create', 'branches.update',
+
+                'appointments.view_any', 'appointments.create', 'appointments.update',
+                'appointments.delete', 'appointments.restore',
             ],
 
             'service_advisor' => [
-                'manage customers', 'manage vehicles', 'manage job cards',
-                'assign mechanics', 'manage inspections', 'manage invoices'
+                'job_cards.view_any', 'job_cards.view_all', 'job_cards.create', 'job_cards.update_all',
+                'customers.view_any', 'customers.create', 'customers.update',
+                'vehicles.view_any', 'vehicles.create', 'vehicles.update',
+                'invoices.view_any',
+                'inventory.view_any',
             ],
 
             'mechanic' => [
-                'view assigned job cards', 'update assigned job cards',
-                'manage inspections', 'use job parts', 'complete services'
+                'job_cards.view_any', 'job_cards.view_own', 'job_cards.update_own',
+                'inventory.view_any',
+                'suppliers.view_any',
             ],
 
             'receptionist' => [
-                'manage customers', 'manage vehicles', 'create job cards', 'view job cards'
+                'job_cards.view_any', 'job_cards.view_all', 'job_cards.create',
+                'customers.view_any', 'customers.create', 'customers.update',
+                'vehicles.view_any', 'vehicles.create', 'vehicles.update',
+                'appointments.view_any', 'appointments.create', 'appointments.update',
             ],
 
             'cashier' => [
-                // Invoice permissions
-                'view invoices',
-                'create invoices',
-                'manage invoices',
-                'void invoices',
-                'receive payments',
+                'job_cards.view_any', 'job_cards.view_all',
+                'customers.view_any',
+                'vehicles.view_any',
+                'invoices.view_any', 'invoices.create', 'invoices.update',
             ],
 
             'inventory_manager' => [
-                'manage inventory', 'manage suppliers', 'manage purchase orders'
+                'inventory.view_any', 'inventory.create', 'inventory.update',
+                'inventory.delete', 'inventory.restore',
+                'suppliers.view_any', 'suppliers.create', 'suppliers.update',
+                'suppliers.delete', 'suppliers.restore',
             ],
         ];
 
-        // Create roles and sync their assigned permissions
+        // Create roles and sync assigned permissions
         foreach ($rolePermissions as $roleName => $assignedPermissions) {
-            $role = Role::firstOrCreate(['name' => $roleName]);
+            $role = Role::firstOrCreate([
+                'name' => $roleName,
+                'guard_name' => 'web',
+            ]);
             $role->syncPermissions($assignedPermissions);
         }
 
-        // 3. Ensure a base branch exists
+        // 3. Base Branch setup
         DB::table('branches')->updateOrInsert(
             ['name' => 'AutoTrack Bole'],
             [
@@ -108,21 +155,23 @@ class DatabaseSeeder extends Seeder
 
         $branchId = DB::table('branches')->where('name', 'AutoTrack Bole')->value('id');
 
-        // 4. Create or Update the Admin user safely
+        // 4. Default Admin User setup
         $admin = User::updateOrCreate(
             ['email' => 'admin@autotrack.et'],
             [
                 'branch_id'  => $branchId,
                 'name'       => 'AutoTrack Admin',
-                'password'   => Hash::make('password'), // Change in production!
+                'password'   => Hash::make('password'),
                 'phone'      => '+251 91 000 0000',
                 'role'       => 'admin',
                 'is_active'  => true,
             ]
         );
 
-        // Assign the admin role to this user
         $admin->assignRole('admin');
-        $this->call(TestUsersSeeder::class);
+
+        if (class_exists(TestUsersSeeder::class)) {
+            $this->call(TestUsersSeeder::class);
+        }
     }
 }

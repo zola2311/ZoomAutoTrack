@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Observers;
+
+use App\Http\Controllers\Portal\AppointmentController;
+use App\Models\Appointment;
+use App\Models\JobCard;
+
+class AppointmentObserver
+{
+    public function created(Appointment $appointment): void
+    {
+        $this->maybeCreateJobCard($appointment);
+    }
+
+    public function updated(Appointment $appointment): void
+    {
+        if ($appointment->wasChanged('status')) {
+            $this->maybeCreateJobCard($appointment);
+        }
+    }
+
+    protected function maybeCreateJobCard(Appointment $appointment): void
+    {
+        if ($appointment->status !== 'confirmed' || $appointment->job_card_id) {
+            return;
+        }
+
+        $jobCard = JobCard::create([
+            'branch_id' => $appointment->branch_id,
+            'customer_id' => $appointment->customer_id,
+            'vehicle_id' => $appointment->vehicle_id,
+            'mileage_at_checkin' => $appointment->vehicle?->current_mileage,
+            'customer_complaint' => collect($appointment->service_types ?? [])
+                    ->map(fn ($t) => AppointmentController::SERVICE_TYPES[$t] ?? $t)
+                    ->join(', ')
+                .($appointment->other_service_description ? ' — '.$appointment->other_service_description : '')
+                .($appointment->notes ? "\n\nNotes: ".$appointment->notes : ''),
+            'status' => 'pending',
+        ]);
+
+        // Update quietly — avoids re-firing this observer's updated() hook.
+        $appointment->timestamps = false;
+        $appointment->job_card_id = $jobCard->id;
+        $appointment->saveQuietly();
+    }
+}

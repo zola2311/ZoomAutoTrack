@@ -5,7 +5,7 @@ namespace App\Observers;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\JobCard;
-
+use App\Notifications\VehicleReadyForPickup;
 class JobCardObserver
 {
     public function created(JobCard $jobCard): void
@@ -24,6 +24,9 @@ class JobCardObserver
 
         if ($jobCard->status !== 'completed') {
             return;
+        }
+        if ($jobCard->customer && $jobCard->customer->email) {
+            $jobCard->customer->notify(new VehicleReadyForPickup($jobCard));
         }
 
         // Don't create a duplicate invoice if one already exists

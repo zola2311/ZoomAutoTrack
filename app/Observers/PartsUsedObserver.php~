@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Models\PartsUsed;
 
+use App\Models\PartUsed;
 class PartsUsedObserver
 {
     /**
@@ -25,7 +25,7 @@ class PartsUsedObserver
     /**
      * Handle the PartsUsed "deleted" event.
      */
-  
+
 
     /**
      * Handle the PartsUsed "restored" event.

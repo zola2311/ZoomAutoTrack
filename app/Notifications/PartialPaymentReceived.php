@@ -1,0 +1,32 @@
+<?php
+
+namespace App\Notifications;
+
+use App\Models\Invoice;
+use Illuminate\Bus\Queueable;
+use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
+
+class PartialPaymentReceived extends Notification
+{
+    use Queueable;
+
+    public function __construct(public Invoice $invoice, public float $amountPaidNow) {}
+
+    public function via($notifiable): array
+    {
+        return ['mail'];
+    }
+
+    public function toMail($notifiable): MailMessage
+    {
+        return (new MailMessage)
+            ->subject('Payment received — '.$this->invoice->invoice_number)
+            ->greeting('Hi, '.$notifiable->full_name.'!')
+            ->line('We\'ve received a payment towards invoice '.$this->invoice->invoice_number.'.')
+            ->line('Amount paid: '.number_format($this->amountPaidNow, 2).' ETB')
+            ->line('Total paid so far: '.number_format($this->invoice->paid_amount, 2).' ETB')
+            ->line('Remaining balance: '.number_format($this->invoice->balance, 2).' ETB')
+            ->line('Thank you for your business.');
+    }
+}

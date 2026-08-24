@@ -51,6 +51,10 @@ class DatabaseSeeder extends Seeder
             // Users
             'users.view_any', 'users.create', 'users.update',
             'users.delete', 'users.restore', 'users.force_delete',
+
+            // Appointments
+            'appointments.view_any', 'appointments.create', 'appointments.update',
+            'appointments.delete', 'appointments.restore',
         ];
 
         // Ensure all permissions exist in database
@@ -87,6 +91,9 @@ class DatabaseSeeder extends Seeder
                 'inspection_items.view_any', 'inspection_items.create', 'inspection_items.update',
 
                 'branches.view_any', 'branches.create', 'branches.update',
+
+                'appointments.view_any', 'appointments.create', 'appointments.update',
+                'appointments.delete', 'appointments.restore',
             ],
 
             'service_advisor' => [
@@ -95,6 +102,7 @@ class DatabaseSeeder extends Seeder
                 'vehicles.view_any', 'vehicles.create', 'vehicles.update',
                 'invoices.view_any',
                 'inventory.view_any',
+                'appointments.view_any', 'appointments.update',
             ],
 
             'mechanic' => [
@@ -107,6 +115,7 @@ class DatabaseSeeder extends Seeder
                 'job_cards.view_any', 'job_cards.view_all', 'job_cards.create',
                 'customers.view_any', 'customers.create', 'customers.update',
                 'vehicles.view_any', 'vehicles.create', 'vehicles.update',
+                'appointments.view_any', 'appointments.create', 'appointments.update',
             ],
 
             'cashier' => [

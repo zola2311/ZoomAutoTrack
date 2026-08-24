@@ -2,14 +2,14 @@
 
 namespace App\Observers;
 
-use App\Models\PartsUsed;
 
+use App\Models\PartUsed;
 class PartsUsedObserver
 {
     /**
      * Handle the PartsUsed "created" event.
      */
-    public function created(PartsUsed $partsUsed): void
+    public function created(PartUsed $partsUsed): void
     {
         //
     }
@@ -17,7 +17,7 @@ class PartsUsedObserver
     /**
      * Handle the PartsUsed "updated" event.
      */
-    public function updated(PartsUsed $partsUsed): void
+    public function updated(PartUsed $partsUsed): void
     {
         //
     }
@@ -30,7 +30,7 @@ class PartsUsedObserver
     /**
      * Handle the PartsUsed "restored" event.
      */
-    public function restored(PartsUsed $partsUsed): void
+    public function restored(PartUsed $partsUsed): void
     {
         //
     }
@@ -38,7 +38,7 @@ class PartsUsedObserver
     /**
      * Handle the PartsUsed "force deleted" event.
      */
-    public function forceDeleted(PartsUsed $partsUsed): void
+    public function forceDeleted(PartUsed $partsUsed): void
     {
         //
     }

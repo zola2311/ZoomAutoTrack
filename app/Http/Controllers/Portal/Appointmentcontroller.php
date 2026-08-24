@@ -1,0 +1,93 @@
+<?php
+
+namespace App\Http\Controllers\Portal;
+
+use App\Http\Controllers\Controller;
+use App\Models\Appointment;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\View\View;
+
+class AppointmentController extends Controller
+{
+    public const SERVICE_TYPES = [
+        'basic_service' => 'Basic / Regular Service',
+        'monthly_service' => 'Monthly Vehicle Service',
+        'scheduled_maintenance' => 'Scheduled Maintenance',
+        'general_repair' => 'General Repair',
+        'general_inspection' => 'General Inspection',
+        'diagnostic' => 'Vehicle Diagnostic / Problem Check',
+        'engine_mechanical' => 'Engine / Mechanical Service',
+        'electrical_service' => 'Electrical Service',
+        'brake_suspension' => 'Brake / Suspension Service',
+        'tire_wheel' => 'Tire / Wheel Service',
+        'ac_service' => 'AC / Heating Service',
+        'body_repair' => 'Body Repair',
+        'accident_repair' => 'Accident Repair',
+        'body_paint' => 'Body Paint / Painting',
+        'detailing_cleaning' => 'Car Wash / Detailing',
+        'other' => 'Other',
+    ];
+
+    public function create(): View
+    {
+        $customer = Auth::guard('customer')->user();
+
+        return view('portal.appointments.create', [
+            'vehicles' => $customer->vehicles()->orderBy('plate_number')->get(),
+            'serviceTypes' => self::SERVICE_TYPES,
+        ]);
+    }
+
+    public function store(Request $request): RedirectResponse
+    {
+        $customer = Auth::guard('customer')->user();
+
+        $data = $request->validate([
+            'vehicle_id' => ['required', 'exists:vehicles,id'],
+            'requested_date' => ['required', 'date', 'after_or_equal:today'],
+            'requested_time_slot' => ['nullable', 'string', 'max:50'],
+            'service_types' => ['required', 'array', 'min:1'],
+            'service_types.*' => ['string', 'in:'.implode(',', array_keys(self::SERVICE_TYPES))],
+            'other_service' => ['nullable', 'string', 'max:500', 'required_if:service_types.*,other'],
+            'notes' => ['nullable', 'string', 'max:1000'],
+        ]);
+        if (in_array('other', $data['service_types']) && empty($data['other_service'])) {
+            return back()->withInput()->withErrors(['other_service' => 'Please describe the "Other" service you need.']);
+        }
+        // Ownership check — a customer can only book for their own vehicle.
+        if (! $customer->vehicles()->where('id', $data['vehicle_id'])->exists()) {
+            abort(403);
+        }
+
+        Appointment::create([
+            'vehicle_id' => $data['vehicle_id'],
+            'requested_date' => $data['requested_date'],
+            'requested_time_slot' => $data['requested_time_slot'] ?? null,
+            'service_types' => $data['service_types'],
+            'other_service_description' => $data['other_service'] ?? null,
+            'notes' => $data['notes'] ?? null,
+            'branch_id' => $customer->branch_id,
+            'customer_id' => $customer->id,
+            'status' => 'pending',
+            'source' => 'portal',
+        ]);
+
+        return redirect()
+            ->route('portal.appointments.index')
+            ->with('status', 'Your appointment request has been sent. We\'ll confirm it soon.');
+    }
+
+    public function index(): View
+    {
+        $customer = Auth::guard('customer')->user();
+
+        $appointments = $customer->appointments()
+            ->with('vehicle')
+            ->orderByDesc('requested_date')
+            ->get();
+
+        return view('portal.appointments.index', ['appointments' => $appointments]);
+    }
+}

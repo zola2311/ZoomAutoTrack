@@ -64,6 +64,10 @@ class Customer extends Authenticatable implements MustVerifyEmail
     }
     public function sendPasswordResetNotification($token): void
     {
-        $this->notify(new \App\Notifications\CustomerInvitation($token));
+        if (is_null($this->password)) {
+            $this->notify(new \App\Notifications\CustomerInvitation($token));
+        } else {
+            $this->notify(new \App\Notifications\CustomerPasswordReset($token));
+        }
     }
 }

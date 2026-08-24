@@ -22,9 +22,10 @@ class Vehicle extends Model
         'fuel_type',
         'transmission',
         'qr_code',
+        'last_maintenance_reminder_sent_at',
     ];
     protected $guarded = ['id'];
-    protected $casts = ['year' => 'integer', 'current_mileage' => 'integer'];
+    protected $casts = ['year' => 'integer', 'current_mileage' => 'integer','last_maintenance_reminder_sent_at' => 'datetime'];
 
     public function branch() { return $this->belongsTo(Branch::class); }
     public function customer() { return $this->belongsTo(Customer::class); }
@@ -102,4 +103,5 @@ class Vehicle extends Model
     {
         $this->notify(new \App\Notifications\CustomerInvitation($token));
     }
+    public function appointments() { return $this->hasMany(Appointment::class); }
 }

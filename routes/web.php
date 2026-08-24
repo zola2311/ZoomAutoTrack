@@ -1,6 +1,9 @@
 <?php
 
 use App\Http\Controllers\Auth\CustomerPasswordController;
+use App\Http\Controllers\Portal\AppointmentController;
+use App\Http\Controllers\Portal\PortalController;
+use App\Http\Controllers\PrintController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\VehiclePassportController;
 use App\Http\Controllers\VehicleQrStickerController;
@@ -39,6 +42,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/vehicles/{vehicle}/qr-sticker', [VehicleQrStickerController::class, 'show'])
         ->name('vehicles.qr-sticker');
 
+    Route::get('/invoices/{invoice}/print', [PrintController::class, 'invoice'])->name('invoices.print');
+    Route::get('/job-cards/{jobCard}/print', [PrintController::class, 'jobCard'])->name('job-cards.print');
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -66,12 +71,22 @@ Route::prefix('portal')->name('portal.')->group(function () {
 
 
 
+//    Route::middleware('auth:customer')->group(function () {
+//        Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
+//        Route::get('/dashboard', function () {
+//            return 'Portal dashboard placeholder';
+//        })->name('dashboard');
+//
+//
+//    });
     Route::middleware('auth:customer')->group(function () {
         Route::post('/logout', [CustomerAuthController::class, 'logout'])->name('logout');
-        Route::get('/dashboard', function () {
-            return 'Portal dashboard placeholder';
-        })->name('dashboard');
+        Route::get('/dashboard', [PortalController::class, 'dashboard'])->name('dashboard');
+        Route::get('/history', [PortalController::class, 'history'])->name('history');
 
+        Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
+        Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
+        Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
 
     });
 });

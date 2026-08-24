@@ -70,4 +70,5 @@ class Customer extends Authenticatable implements MustVerifyEmail
             $this->notify(new \App\Notifications\CustomerPasswordReset($token));
         }
     }
+    public function appointments() { return $this->hasMany(Appointment::class); }
 }

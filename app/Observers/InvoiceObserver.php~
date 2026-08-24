@@ -1,0 +1,26 @@
+<?php
+
+namespace App\Observers;
+
+use App\Models\Invoice;
+use App\Notifications\InvoicePaid;
+use App\Notifications\PartialPaymentReceived;
+
+class InvoiceObserver
+{
+    public function updated(Invoice $invoice): void
+    {
+        if (! $invoice->customer || ! $invoice->customer->email) {
+            return;
+        }
+
+        if ($invoice->wasChanged('status') && $invoice->status === 'paid') {
+            $invoice->customer->notify(new InvoicePaid($invoice));
+            return;
+        }
+
+        if ($invoice->status === 'partial' && $invoice->wasChanged('paid_amount')) {
+            $invoice->customer->notify(new PartialPaymentReceived($invoice));
+        }
+    }
+}

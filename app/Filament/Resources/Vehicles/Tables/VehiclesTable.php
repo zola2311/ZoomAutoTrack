@@ -13,7 +13,7 @@ use Filament\Tables\Table;
 use Filament\Actions\ViewAction;
 use Filament\Actions\Action;
 use Filament\Support\Icons\Heroicon;
-
+use Illuminate\Database\Eloquent\Builder;
 
 class VehiclesTable
 {

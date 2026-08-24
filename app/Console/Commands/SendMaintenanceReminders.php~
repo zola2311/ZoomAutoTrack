@@ -1,0 +1,47 @@
+<?php
+
+namespace App\Console\Commands;
+
+use App\Models\Vehicle;
+use App\Notifications\MaintenanceDueReminder;
+use Illuminate\Console\Command;
+
+class SendMaintenanceReminders extends Command
+{
+    protected $signature = 'reminders:maintenance';
+
+    protected $description = 'Email customers whose vehicles are due or approaching their next service';
+
+    public function handle(): void
+    {
+        $sent = 0;
+
+        Vehicle::with('customer')
+            ->whereNotNull('customer_id')
+            ->chunk(100, function ($vehicles) use (&$sent) {
+                foreach ($vehicles as $vehicle) {
+                    if (! $vehicle->customer || ! $vehicle->customer->email) {
+                        continue;
+                    }
+
+                    $due = $vehicle->nextServiceDue();
+
+                    if (! $due['is_due'] && $due['km_remaining'] > 500) {
+                        continue;
+                    }
+
+                    // Don't re-notify inside the same 7 days.
+                    if ($vehicle->last_maintenance_reminder_sent_at
+                        && $vehicle->last_maintenance_reminder_sent_at->gt(now()->subDays(7))) {
+                        continue;
+                    }
+
+                    $vehicle->customer->notify(new MaintenanceDueReminder($vehicle, $due));
+                    $vehicle->update(['last_maintenance_reminder_sent_at' => now()]);
+                    $sent++;
+                }
+            });
+
+        $this->info("Sent {$sent} maintenance reminder(s).");
+    }
+}

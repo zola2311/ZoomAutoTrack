@@ -119,7 +119,12 @@ class ViewJobCard extends ViewRecord
                 ->url(fn () => $this->record->invoice
                     ? InvoiceResource::getUrl('view', ['record' => $this->record->invoice])
                     : null),
-
+            Action::make('printJobCard')
+                ->label('Print Job Card')
+                ->icon('heroicon-o-printer')
+                ->color('gray')
+                ->url(fn () => route('job-cards.print', $this->record))
+                ->openUrlInNewTab(),
             EditAction::make(),
         ];
     }
