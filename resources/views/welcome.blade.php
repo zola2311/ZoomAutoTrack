@@ -243,7 +243,7 @@
             <a href="#contact">Contact</a>
         </div>
         <div class="nav-cta">
-            <a href="{{ route('login') }}" class="btn btn-ghost">Sign in</a>
+            <a href="#" class="btn btn-ghost">Sign in</a>
             <a href="#contact" class="btn btn-primary">Request a demo</a>
         </div>
     </div>
@@ -468,7 +468,7 @@
         <p>Request a walkthrough and we'll set up your first branch, staff accounts, and vehicle charts.</p>
         <div class="cta-actions">
             <a href="mailto:hello@autotrack.et" class="btn btn-primary">Request a demo</a>
-            <a href="{{ route('login') }}" class="btn btn-ghost">Sign in to your garage</a>
+            <a href="#" class="btn btn-ghost">Sign in to your garage</a>
         </div>
     </div>
 </section>
@@ -489,7 +489,7 @@
             <div class="footer-col">
                 <h4>Company</h4>
                 <a href="#contact">Contact</a>
-                <a href="{{ route('login') }}">Sign in</a>
+                <a href="#">Sign in</a>
             </div>
             <div class="footer-col">
                 <h4>Get in touch</h4>

@@ -57,6 +57,15 @@ class CustomerAuthController extends Controller
             ? Customer::where('referral_code', $request->input('referral_code'))->first()
             : null;
 
+        $customer = Customer::create([
+            'branch_id' => 1,
+            'type' => 'individual',
+            'full_name' => $data['full_name'],
+            'phone' => $data['phone'],
+            'email' => $data['email'],
+            'password' => $data['password'],
+            'referred_by_customer_id' => $referrer?->id,
+        ]);
         // Self-registered customers aren't tied to a branch yet — they
         // pick/get assigned one on their first booking or visit.
         $customer = Customer::create([
@@ -66,7 +75,6 @@ class CustomerAuthController extends Controller
             'phone' => $data['phone'],
             'email' => $data['email'],
             'password' => $data['password'],
-            'referred_by_customer_id' => $referrer?->id,
         ]);
 
         Auth::guard('customer')->login($customer);

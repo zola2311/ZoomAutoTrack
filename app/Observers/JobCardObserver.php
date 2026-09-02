@@ -6,6 +6,7 @@ use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\JobCard;
 use App\Notifications\VehicleReadyForPickup;
+use App\Models\Customer;
 class JobCardObserver
 {
     public function created(JobCard $jobCard): void
@@ -28,7 +29,7 @@ class JobCardObserver
         if ($jobCard->customer && $jobCard->customer->email) {
             $jobCard->customer->notify(new VehicleReadyForPickup($jobCard));
         }
-
+        $this->maybeAwardReferralBonus($jobCard);
         // Don't create a duplicate invoice if one already exists
         if (Invoice::where('job_card_id', $jobCard->id)->exists()) {
             return;
@@ -100,5 +101,37 @@ class JobCardObserver
                 'last_service_date' => $jobCard->checked_in_at ?? now(),
             ]);
         }
+    }
+    protected function maybeAwardReferralBonus(JobCard $jobCard): void
+    {
+        // 500-point bonus to both sides, awarded once, on the referred
+        // customer's very first completed job.
+
+
+        $customer = $jobCard->customer;
+
+        if (! $customer || ! $customer->referred_by_customer_id || $customer->referral_bonus_awarded_at) {
+            return;
+        }
+
+        $isFirstCompletedJob = JobCard::where('customer_id', $customer->id)
+            ->where('status', 'completed')
+            ->where('id', '!=', $jobCard->id)
+            ->doesntExist();
+
+        if (! $isFirstCompletedJob) {
+            return;
+        }
+
+        $referrer = $customer->referredBy;
+
+        if (! $referrer) {
+            return;
+        }
+
+        $customer->increment('loyalty_points', 500);
+        $referrer->increment('loyalty_points', 500);
+
+        $customer->update(['referral_bonus_awarded_at' => now()]);
     }
 }

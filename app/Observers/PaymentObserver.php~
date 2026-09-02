@@ -3,56 +3,56 @@
 namespace App\Observers;
 
 use App\Models\Payment;
+use App\Notifications\InvoicePaid;
+use App\Notifications\PartialPaymentReceived;
 
 class PaymentObserver
 {
-    /**
-     * Handle the Payment "created" event.
-     */
     public function created(Payment $payment): void
     {
         $this->recalculateInvoice($payment);
+        $this->notifyCustomer($payment);
     }
 
-    /**
-     * Handle the Payment "updated" event.
-     */
     public function updated(Payment $payment): void
     {
         $this->recalculateInvoice($payment);
     }
 
-    /**
-     * Handle the Payment "deleted" event.
-     */
     public function deleted(Payment $payment): void
     {
         $this->recalculateInvoice($payment);
     }
 
-    /**
-     * Handle the Payment "restored" event.
-     */
     public function restored(Payment $payment): void
     {
         $this->recalculateInvoice($payment);
     }
 
-    /**
-     * Handle the Payment "force deleted" event.
-     */
     public function forceDeleted(Payment $payment): void
     {
         $this->recalculateInvoice($payment);
     }
 
-    /**
-     * Recalculate the invoice totals when a payment changes.
-     */
     protected function recalculateInvoice(Payment $payment): void
     {
         if ($payment->invoice) {
             $payment->invoice->recalculateFromPayments();
+        }
+    }
+
+    protected function notifyCustomer(Payment $payment): void
+    {
+        $invoice = $payment->invoice?->fresh();
+
+        if (! $invoice || ! $invoice->customer || ! $invoice->customer->email) {
+            return;
+        }
+
+        if ($invoice->status === 'paid') {
+            $invoice->customer->notify(new InvoicePaid($invoice, (float) $payment->amount));
+        } elseif ($invoice->status === 'partial') {
+            $invoice->customer->notify(new PartialPaymentReceived($invoice, (float) $payment->amount));
         }
     }
 }

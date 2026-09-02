@@ -17,7 +17,17 @@ return Application::configure(basePath: dirname(__DIR__))
             'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
             'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
             'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
-        ]);
+            'verified.customer' => \App\Http\Middleware\EnsureCustomerEmailIsVerified::class,
+            ]);
+
+        $middleware->redirectGuestsTo(function ($request) {
+            if ($request->is('portal/*')) {
+                return route('portal.login');
+            }
+
+            return route('filament.admin.auth.login');
+        });
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

@@ -8,9 +8,13 @@ use App\Notifications\PartialPaymentReceived;
 
 class PaymentObserver
 {
+    // 1 loyalty point per 100 ETB paid.
+    protected const POINTS_PER_ETB = 100;
+
     public function created(Payment $payment): void
     {
         $this->recalculateInvoice($payment);
+        $this->awardPoints($payment);
         $this->notifyCustomer($payment);
     }
 
@@ -38,6 +42,21 @@ class PaymentObserver
     {
         if ($payment->invoice) {
             $payment->invoice->recalculateFromPayments();
+        }
+    }
+
+    protected function awardPoints(Payment $payment): void
+    {
+        $customer = $payment->invoice?->customer;
+
+        if (! $customer) {
+            return;
+        }
+
+        $points = (int) floor($payment->amount / self::POINTS_PER_ETB);
+
+        if ($points > 0) {
+            $customer->increment('loyalty_points', $points);
         }
     }
 

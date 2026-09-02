@@ -30,6 +30,7 @@ use App\Policies\BranchPolicy;
 use App\Observers\AppointmentObserver;
 use App\Models\Appointment;
 use App\Policies\AppointmentPolicy;
+use Illuminate\Validation\Rules\Password;
 class AppServiceProvider extends ServiceProvider
 {
     /**
@@ -45,11 +46,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Password::defaults(function () {
+//            return Password::min(8)->mixedCase()->numbers();
+            return Password::min(8);
+        });
+
         JobCard::observe(JobCardObserver::class);
         Payment::observe(PaymentObserver::class);
         PartUsed::observe(PartsUsedObserver::class);
-        Payment::observe(PaymentObserver::class);
         Invoice::observe(InvoiceObserver::class);
         Appointment::observe(AppointmentObserver::class);
         Gate::policy(Appointment::class, AppointmentPolicy::class);

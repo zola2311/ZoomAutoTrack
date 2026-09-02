@@ -10,34 +10,6 @@
         </div>
     </div>
 
-    @php
-        $reminders = $vehicles->map(fn ($v) => ['vehicle' => $v, 'due' => $v->nextServiceDue()])
-            ->filter(fn ($r) => $r['due']['is_due'] || $r['due']['km_remaining'] <= 500);
-    @endphp
-
-    @if ($reminders->isNotEmpty())
-        <div class="card mb-3">
-            <div class="card-header">
-                <h3 class="card-title">Reminders</h3>
-            </div>
-            <div class="list-group list-group-flush">
-                @foreach ($reminders as $r)
-                    <div class="list-group-item d-flex align-items-center">
-                        <div>
-                            <strong>{{ $r['vehicle']->plate_number }}</strong>
-                            —
-                            @if ($r['due']['is_due'])
-                                service is due now
-                            @else
-                                only {{ number_format($r['due']['km_remaining']) }} km until next service
-                            @endif
-                        </div>
-                    </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
     @if ($vehicles->isEmpty())
         <div class="card">
             <div class="card-body text-center text-secondary">
@@ -62,12 +34,10 @@
                                 @endif
                             </div>
                         </div>
-                        <div class="text-secondary mb-3">
-                            {{ $vehicle->make }} {{ $vehicle->model }}
-                            @if ($vehicle->year)
-                                ({{ $vehicle->year }})
-                            @endif
-                        </div>   <div class="text-secondary small mb-3">
+
+                        <div class="text-secondary mb-3">{{ $vehicle->make }} {{ $vehicle->model }} ({{ $vehicle->year }})</div>
+
+                        <div class="text-secondary small mb-3">
                             {{ number_format($vehicle->current_mileage) }} km
                             &middot;
                             @if ($due['km_remaining'] > 0)

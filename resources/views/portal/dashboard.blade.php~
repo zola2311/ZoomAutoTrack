@@ -62,10 +62,12 @@
                                 @endif
                             </div>
                         </div>
-
-                        <div class="text-secondary mb-3">{{ $vehicle->make }} {{ $vehicle->model }} ({{ $vehicle->year }})</div>
-
-                        <div class="text-secondary small mb-3">
+                        <div class="text-secondary mb-3">
+                            {{ $vehicle->make }} {{ $vehicle->model }}
+                            @if ($vehicle->year)
+                                ({{ $vehicle->year }})
+                            @endif
+                        </div>   <div class="text-secondary small mb-3">
                             {{ number_format($vehicle->current_mileage) }} km
                             &middot;
                             @if ($due['km_remaining'] > 0)
