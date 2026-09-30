@@ -26,6 +26,7 @@ class JobCardObserver
         if ($jobCard->status !== 'completed') {
             return;
         }
+        
         if ($jobCard->customer && $jobCard->customer->email) {
             $jobCard->customer->notify(new VehicleReadyForPickup($jobCard));
         }
@@ -106,7 +107,7 @@ class JobCardObserver
     {
         // 500-point bonus to both sides, awarded once, on the referred
         // customer's very first completed job.
-    
+
 
         $customer = $jobCard->customer;
 

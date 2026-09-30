@@ -25,11 +25,11 @@ class CustomerPasswordReset extends Notification
         ], false));
 
         return (new MailMessage)
-            ->subject('Reset your AutoTrack password')
-            ->greeting('Hi, '.$notifiable->full_name.'!')
+            ->subject('Reset your AutoTrack Ethiopia password')
+            ->greeting('Hi ' . $notifiable->full_name . ',')
             ->line('We received a request to reset your password.')
-            ->action('Reset your password', $url)
-            ->line('This link expires in 60 minutes.')
-            ->line('If you did not request this, no action is needed.');
+            ->action('Reset password', $url)
+            ->line('This link expires in **60 minutes**.')
+            ->line('If you didn\'t request a password reset, no further action is required.');
     }
 }

@@ -52,8 +52,14 @@ class Customer extends Authenticatable implements MustVerifyEmail
     {
         static::creating(function (Customer $customer) {
             if (empty($customer->customer_code)) {
+                // Find the highest existing ID (including soft-deleted records)
+                $maxId = Customer::withTrashed()->max('id') ?? 0;
+
+                // Increment that highest ID to guarantee a fresh, unused code
+                $nextNumber = $maxId + 1;
+
                 $customer->customer_code = 'CUST-' . str_pad(
-                        Customer::withTrashed()->count() + 1,
+                        $nextNumber,
                         4, '0', STR_PAD_LEFT
                     );
             }

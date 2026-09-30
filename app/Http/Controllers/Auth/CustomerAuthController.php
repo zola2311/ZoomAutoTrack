@@ -70,6 +70,9 @@ class CustomerAuthController extends Controller
         ]);
 
         Auth::guard('customer')->login($customer);
+        $customer = $customer->fresh();
+
+        $customer->sendEmailVerificationNotification();
 
         $request->session()->regenerate();
 

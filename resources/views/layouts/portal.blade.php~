@@ -3,60 +3,127 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'My Vehicles')  — AutoTrack Ethiopia</title>
+    <title>@yield('title', 'My Portal') — AutoTrack Ethiopia</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        .navbar-brand-logo {
+            width: 32px; height: 32px; border-radius: 8px;
+            background: rgba(255,255,255,0.2); color: #fff;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 15px; font-weight: 700; margin-right: 8px; flex-shrink: 0;
+        }
+        .avatar-circle {
+            width: 36px; height: 36px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); color: #fff;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: 600; flex-shrink: 0;
+        }
+    </style>
 </head>
-<body>
-<div class="page">
-    <header class="navbar navbar-expand-md navbar-dark d-print-none" style="background:#0C447C">
-        <div class="container-xl">
-            <a href="{{ route('portal.dashboard') }}" class="navbar-brand">AutoTrack Ethiopia</a>
+<body class="antialiased">
+<div class="wrapper">
 
-            <div class="navbar-nav flex-row ms-auto">
-                <div class="nav-item dropdown">
-                    <a href="#" class="nav-link d-flex lh-1 text-white text-decoration-none" data-bs-toggle="dropdown">
-                        {{ auth('customer')->user()->full_name }}
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-end">
-                        <form method="POST" action="{{ route('portal.logout') }}">
+    <aside class="navbar navbar-vertical navbar-expand-lg" data-bs-theme="dark" style="background:#0C447C">
+        <div class="container-fluid">
+
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar-menu">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+
+            <a href="{{ route('portal.dashboard') }}" class="navbar-brand d-flex align-items-center">
+                <span class="navbar-brand-logo">A</span>
+                AutoTrack Ethiopia
+            </a>
+
+            <div class="navbar-nav flex-row d-lg-none">
+                <span class="avatar-circle">
+                    {{ strtoupper(substr(auth('customer')->user()->full_name, 0, 1)) }}
+                </span>
+            </div>
+
+            <div class="collapse navbar-collapse" id="navbar-menu">
+                <ul class="navbar-nav pt-lg-3">
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('portal.dashboard') ? 'active' : '' }}"
+                           href="{{ route('portal.dashboard') }}">
+                            <span class="nav-link-icon"><i class="ti ti-car"></i></span>
+                            <span class="nav-link-title">My Vehicles</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('portal.history') ? 'active' : '' }}"
+                           href="{{ route('portal.history') }}">
+                            <span class="nav-link-icon"><i class="ti ti-history"></i></span>
+                            <span class="nav-link-title">Service History</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('portal.appointments.*') ? 'active' : '' }}"
+                           href="{{ route('portal.appointments.index') }}">
+                            <span class="nav-link-icon"><i class="ti ti-calendar-event"></i></span>
+                            <span class="nav-link-title">Appointments</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {{ request()->routeIs('portal.profile') ? 'active' : '' }}"
+                           href="{{ route('portal.profile') }}">
+                            <span class="nav-link-icon"><i class="ti ti-user"></i></span>
+                            <span class="nav-link-title">My Profile</span>
+                        </a>
+                    </li>
+                </ul>
+
+                <div class="mt-auto">
+                    <div class="d-flex align-items-center gap-2 px-3 py-3 border-top border-white border-opacity-10">
+                        <span class="avatar-circle">
+                            {{ strtoupper(substr(auth('customer')->user()->full_name, 0, 1)) }}
+                        </span>
+                        <div class="flex-fill overflow-hidden">
+                            <div class="text-white fw-semibold text-truncate small">{{ auth('customer')->user()->full_name }}</div>
+                            <div class="text-white-50 text-truncate" style="font-size:11px">{{ auth('customer')->user()->email }}</div>
+                        </div>
+                        <form method="POST" action="{{ route('portal.logout') }}" class="ms-auto">
                             @csrf
-                            <button type="submit" class="dropdown-item">Logout</button>
+                            <button type="submit" class="btn btn-sm btn-ghost-light" title="Logout">
+                                <i class="ti ti-logout"></i>
+                            </button>
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-    </header>
-
-    <div class="navbar-expand-md">
-        <div class="collapse navbar-collapse" style="background:var(--tblr-bg-surface)">
-            <div class="container-xl">
-                <ul class="navbar-nav me-3">
-                    <li class="nav-item me-3">
-                        <a class="nav-link {{ request()->routeIs('portal.dashboard') ? 'active' : '' }}" href="{{ route('portal.dashboard') }}">My Vehicles</a>
-                    </li>
-                    <li class="nav-item me-3">
-                        <a class="nav-link {{ request()->routeIs('portal.history') ? 'active' : '' }}" href="{{ route('portal.history') }}">Service History</a>
-                    </li>
-                    <li class="nav-item me-3">
-                        <a class="nav-link {{ request()->routeIs('portal.appointments.*') ? 'active' : '' }}" href="{{ route('portal.appointments.index') }}">Appointments</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+    </aside>
 
     <div class="page-wrapper">
         <div class="page-body">
             <div class="container-xl">
                 @if (session('status'))
-                    <div class="alert alert-success">{{ session('status') }}</div>
+                    <div class="alert alert-success d-flex align-items-center mt-3">
+                        <i class="ti ti-circle-check me-2"></i>
+                        {{ session('status') }}
+                    </div>
                 @endif
 
                 @yield('content')
             </div>
         </div>
+
+        <footer class="footer footer-transparent d-print-none">
+            <div class="container-xl">
+                <div class="row text-center align-items-center">
+                    <div class="col-12 col-lg-auto mt-3 mt-lg-0">
+                        <p class="text-secondary mb-0">
+                            &copy; {{ date('Y') }} AutoTrack Ethiopia. All rights reserved.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </footer>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0/dist/js/tabler.min.js"></script>
+@stack('scripts')
 </body>
 </html>

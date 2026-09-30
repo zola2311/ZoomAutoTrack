@@ -21,11 +21,12 @@ class InvoicePaid extends Notification
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Payment received — '.$this->invoice->invoice_number)
-            ->greeting('Hi, '.$notifiable->full_name.'!')
-            ->line('We\'ve received your payment in full for invoice '.$this->invoice->invoice_number.'.')
-            ->line('Amount paid: '.number_format($this->amountPaidNow, 2).' ETB')
-            ->line('Total paid: '.number_format($this->invoice->total, 2).' ETB')
-            ->line('Thank you for your business.');
+            ->subject('Payment received — ' . $this->invoice->invoice_number)
+            ->greeting('Hi ' . $notifiable->full_name . ',')
+            ->line('We\'ve received your full payment for invoice **' . $this->invoice->invoice_number . '**.')
+            ->line('Amount paid: **' . number_format($this->amountPaidNow, 2) . ' ETB**')
+            ->line('Total: **' . number_format($this->invoice->total, 2) . ' ETB**')
+            ->line('Your account balance is now cleared. Thank you for your business!')
+            ->line('Thank you for choosing AutoTrack Ethiopia.');
     }
 }

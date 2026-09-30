@@ -35,7 +35,10 @@
             <button type="submit" class="btn btn-primary w-100">Sign in</button>
         </div>
     </form>
-
+    <label class="form-label">
+        Password
+        <a href="{{ route('portal.password.request') }}" class="float-end small text-secondary">Forgot password?</a>
+    </label>
     <div class="text-center text-secondary mt-3">
         Don't have an account yet? <a href="{{ route('portal.register') }}">Sign up</a>
     </div>

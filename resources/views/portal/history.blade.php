@@ -3,11 +3,12 @@
 @section('title', 'Service History')
 
 @section('content')
-    <h2 class="page-title mb-3 mt-4">Service History</h2>
+    <h2 class="page-title mb-3 mt-4"><i class="ti ti-history me-2"></i>Service History</h2>
 
     @if ($jobCards->isEmpty())
         <div class="card">
-            <div class="card-body text-center text-secondary">
+            <div class="card-body text-center text-secondary py-5">
+                <i class="ti ti-clipboard-off fs-1 d-block mb-2"></i>
                 No completed service visits yet.
             </div>
         </div>
@@ -26,9 +27,14 @@
                     <tbody>
                     @foreach ($jobCards as $job)
                         <tr>
-                            <td>{{ $job->completed_at->format('d M Y') }}</td>
-                            <td>{{ $job->vehicle->plate_number }} — {{ $job->vehicle->make }} {{ $job->vehicle->model }}</td>
-                            <td>{{ $job->job_number }}</td>
+                            <td class="text-secondary">
+                                <i class="ti ti-calendar me-1"></i>{{ $job->completed_at->format('d M Y') }}
+                            </td>
+                            <td>
+                                <span class="badge bg-blue-lt">{{ $job->vehicle->plate_number }}</span>
+                                {{ $job->vehicle->make }} {{ $job->vehicle->model }}
+                            </td>
+                            <td><span class="text-secondary">{{ $job->job_number }}</span></td>
                             <td>{{ \Illuminate\Support\Str::limit($job->customer_complaint, 60) }}</td>
                         </tr>
                     @endforeach

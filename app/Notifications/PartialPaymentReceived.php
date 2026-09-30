@@ -21,12 +21,13 @@ class PartialPaymentReceived extends Notification
     public function toMail($notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Payment received — '.$this->invoice->invoice_number)
-            ->greeting('Hi, '.$notifiable->full_name.'!')
-            ->line('We\'ve received a payment towards invoice '.$this->invoice->invoice_number.'.')
-            ->line('Amount paid: '.number_format($this->amountPaidNow, 2).' ETB')
-            ->line('Total paid so far: '.number_format($this->invoice->paid_amount, 2).' ETB')
-            ->line('Remaining balance: '.number_format($this->invoice->balance, 2).' ETB')
-            ->line('Thank you for your business.');
+            ->subject('Payment received — ' . $this->invoice->invoice_number)
+            ->greeting('Hi ' . $notifiable->full_name . ',')
+            ->line('We\'ve received a payment towards invoice **' . $this->invoice->invoice_number . '**.')
+            ->line('Amount paid this time: **' . number_format($this->amountPaidNow, 2) . ' ETB**')
+            ->line('Total paid so far: **' . number_format($this->invoice->paid_amount, 2) . ' ETB**')
+            ->line('Remaining balance: **' . number_format($this->invoice->balance, 2) . ' ETB**')
+            ->line('Thank you for your payment. Please settle the remaining balance at your earliest convenience.')
+            ->line('Thank you for choosing AutoTrack Ethiopia.');
     }
 }

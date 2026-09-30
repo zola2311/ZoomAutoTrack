@@ -23,11 +23,12 @@ class VehicleReadyForPickup extends Notification
         $vehicle = $this->jobCard->vehicle;
 
         return (new MailMessage)
-            ->subject('Your vehicle is ready for pickup')
-            ->greeting('Hi, '.$notifiable->full_name.'!')
-            ->line("Good news — your {$vehicle->make} {$vehicle->model} ({$vehicle->plate_number}) is ready for pickup.")
-            ->line('Job card: '.$this->jobCard->job_number)
+            ->subject('Your vehicle is ready for pickup — ' . $vehicle->plate_number)
+            ->greeting('Hi ' . $notifiable->full_name . ',')
+            ->line('Great news! Your **' . $vehicle->make . ' ' . $vehicle->model . '** (' . $vehicle->plate_number . ') is ready for pickup.')
+            ->line('Job card: **' . $this->jobCard->job_number . '**')
             ->action('View service details', $vehicle->passportUrl())
+            ->line('Please collect your vehicle at your earliest convenience.')
             ->line('Thank you for choosing AutoTrack Ethiopia.');
     }
 }

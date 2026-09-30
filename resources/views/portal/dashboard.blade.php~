@@ -3,86 +3,301 @@
 @section('title', 'My Vehicles')
 
 @section('content')
-    <div class="d-flex align-items-center mb-3 mt-4">
-        <h2 class="page-title">My Vehicles</h2>
-        <div class="ms-auto">
-            <span class="badge bg-blue-lt">{{ $customer->loyalty_points }} loyalty points</span>
-        </div>
-    </div>
+    <div class="mt-4">
 
-    @php
-        $reminders = $vehicles->map(fn ($v) => ['vehicle' => $v, 'due' => $v->nextServiceDue()])
-            ->filter(fn ($r) => $r['due']['is_due'] || $r['due']['km_remaining'] <= 500);
-    @endphp
-
-    @if ($reminders->isNotEmpty())
-        <div class="card mb-3">
-            <div class="card-header">
-                <h3 class="card-title">Reminders</h3>
-            </div>
-            <div class="list-group list-group-flush">
-                @foreach ($reminders as $r)
-                    <div class="list-group-item d-flex align-items-center">
-                        <div>
-                            <strong>{{ $r['vehicle']->plate_number }}</strong>
-                            —
-                            @if ($r['due']['is_due'])
-                                service is due now
-                            @else
-                                only {{ number_format($r['due']['km_remaining']) }} km until next service
-                            @endif
-                        </div>
+        {{-- Welcome banner --}}
+        <div class="card mb-4" style="background: linear-gradient(135deg, #0C447C 0%, #1a6bb5 100%); border: none; border-radius: 16px; overflow: hidden;">
+            <div class="card-body py-4 px-4">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <div class="text-white-50 small mb-1">Welcome back</div>
+                        <h2 class="text-white mb-1 fw-bold">{{ $customer->full_name }} 👋</h2>
+                        <div class="text-white-50 small">{{ now()->format('l, d F Y') }}</div>
                     </div>
-                @endforeach
-            </div>
-        </div>
-    @endif
-
-    @if ($vehicles->isEmpty())
-        <div class="card">
-            <div class="card-body text-center text-secondary">
-                No vehicles on your account yet. Visit a garage to get your first vehicle registered.
-            </div>
-        </div>
-    @endif
-
-    <div class="row row-cards">
-        @foreach ($vehicles as $vehicle)
-            @php $due = $vehicle->nextServiceDue(); @endphp
-            <div class="col-md-6 col-lg-4">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center mb-2">
-                            <div class="fw-bold">{{ $vehicle->plate_number }}</div>
-                            <div class="ms-auto">
-                                @if ($due['is_due'])
-                                    <span class="badge bg-red-lt">Service due</span>
-                                @else
-                                    <span class="badge bg-green-lt">On track</span>
-                                @endif
-                            </div>
-                        </div>
-                        <div class="text-secondary mb-3">
-                            {{ $vehicle->make }} {{ $vehicle->model }}
-                            @if ($vehicle->year)
-                                ({{ $vehicle->year }})
-                            @endif
-                        </div>   <div class="text-secondary small mb-3">
-                            {{ number_format($vehicle->current_mileage) }} km
-                            &middot;
-                            @if ($due['km_remaining'] > 0)
-                                {{ number_format($due['km_remaining']) }} km until next service
-                            @else
-                                due now
-                            @endif
-                        </div>
-
-                        <a href="{{ $vehicle->passportUrl() }}" target="_blank" class="btn btn-outline-primary w-100">
-                            View full history
+                    <div class="d-flex gap-2 flex-wrap">
+                        <a href="{{ route('portal.appointments.create') }}" class="btn btn-white">
+                            <i class="ti ti-calendar-plus me-1"></i> Book service
+                        </a>
+                        <a href="{{ route('portal.history') }}" class="btn btn-outline-white">
+                            <i class="ti ti-history me-1"></i> History
                         </a>
                     </div>
                 </div>
             </div>
-        @endforeach
+        </div>
+
+        {{-- Stat cards --}}
+        <div class="row g-3 mb-4">
+            <div class="col-6 col-lg-3">
+                <div class="card card-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="avatar bg-blue-lt me-2"><i class="ti ti-car fs-4"></i></span>
+                            <span class="text-secondary small">Vehicles</span>
+                        </div>
+                        <div class="h2 mb-0">{{ $vehicles->count() }}</div>
+                        <div class="text-secondary small mt-1">Registered</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="card card-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="avatar bg-yellow-lt me-2"><i class="ti ti-star fs-4"></i></span>
+                            <span class="text-secondary small">Loyalty points</span>
+                        </div>
+                        <div class="h2 mb-0">{{ number_format($customer->loyalty_points) }}</div>
+                        <div class="text-secondary small mt-1">
+                            @if ($customer->loyalty_points >= 1000)
+                                <span class="badge bg-yellow-lt"><i class="ti ti-crown me-1"></i>Gold member</span>
+                            @elseif ($customer->loyalty_points >= 500)
+                                <span class="badge bg-azure-lt">Silver member</span>
+                            @else
+                                <span class="badge bg-muted-lt">Bronze member</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="card card-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="avatar bg-green-lt me-2"><i class="ti ti-clipboard-check fs-4"></i></span>
+                            <span class="text-secondary small">Total visits</span>
+                        </div>
+                        <div class="h2 mb-0">{{ $totalVisits }}</div>
+                        <div class="text-secondary small mt-1">
+                            @if ($lastVisit)
+                                Last: {{ $lastVisit->completed_at->format('d M Y') }}
+                            @else
+                                No visits yet
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-6 col-lg-3">
+                <div class="card card-sm h-100">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center mb-2">
+                            <span class="avatar bg-purple-lt me-2"><i class="ti ti-users fs-4"></i></span>
+                            <span class="text-secondary small">Referrals</span>
+                        </div>
+                        <div class="h2 mb-0">{{ $referralCount }}</div>
+                        <div class="text-secondary small mt-1">Friends referred</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {{-- Reminders --}}
+        @php
+            $reminders = $vehicles->map(fn ($v) => ['vehicle' => $v, 'due' => $v->nextServiceDue()])
+                ->filter(fn ($r) => $r['due']['is_due'] || $r['due']['km_remaining'] <= 500);
+        @endphp
+
+        @if ($reminders->isNotEmpty())
+            <div class="alert alert-warning d-flex gap-2 align-items-start mb-4" role="alert">
+                <i class="ti ti-bell-ringing fs-4 mt-1 flex-shrink-0"></i>
+                <div>
+                    <strong>Service reminders</strong>
+                    <ul class="mb-0 mt-1 ps-3">
+                        @foreach ($reminders as $r)
+                            <li>
+                                <strong>{{ $r['vehicle']->plate_number }}</strong> —
+                                @if ($r['due']['is_due'])
+                                    service is <span class="text-danger fw-bold">overdue</span>
+                                @else
+                                    only {{ number_format($r['due']['km_remaining']) }} km until next service
+                                @endif
+                            </li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        @endif
+
+        <div class="row g-3">
+            {{-- My Vehicles --}}
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header d-flex align-items-center">
+                        <h3 class="card-title"><i class="ti ti-car me-2"></i>My Vehicles</h3>
+                    </div>
+                    <div class="card-body">
+                        @if ($vehicles->isEmpty())
+                            <div class="text-center text-secondary py-4">
+                                <i class="ti ti-car-off fs-1 d-block mb-2"></i>
+                                No vehicles yet. Visit a garage to register your first vehicle.
+                            </div>
+                        @else
+                            <div class="row g-3">
+                                @foreach ($vehicles as $vehicle)
+                                    @php
+                                        $due = $vehicle->nextServiceDue();
+                                        $health = $vehicle->latestHealthScores();
+                                        $overall = $health['Overall'] ?? null;
+                                        $healthColor = $overall === null ? 'secondary'
+                                            : ($overall >= 70 ? 'success' : ($overall >= 40 ? 'warning' : 'danger'));
+                                    @endphp
+                                    <div class="col-12">
+                                        <div class="card card-sm" style="border-left: 3px solid var(--tblr-{{ $healthColor }})">
+                                            <div class="card-body">
+                                                <div class="d-flex align-items-start justify-content-between mb-2">
+                                                    <div>
+                                                        <span class="badge bg-blue-lt fs-6 mb-1">{{ $vehicle->plate_number }}</span>
+                                                        <div class="fw-bold">{{ $vehicle->make }} {{ $vehicle->model }}
+                                                            @if($vehicle->year)
+                                                                <span class="text-secondary fw-normal">({{ $vehicle->year }})</span>
+                                                            @endif
+                                                        </div>
+                                                        <div class="text-secondary small">
+                                                            <i class="ti ti-gauge me-1"></i>{{ number_format($vehicle->current_mileage) }} km
+                                                            &middot;
+                                                            @if ($due['km_remaining'] > 0)
+                                                                {{ number_format($due['km_remaining']) }} km to next service
+                                                            @else
+                                                                <span class="text-danger">service overdue</span>
+                                                            @endif
+                                                        </div>
+                                                    </div>
+                                                    <div class="text-end">
+                                                        @if ($due['is_due'])
+                                                            <span class="badge bg-red-lt"><i class="ti ti-alert-circle me-1"></i>Due</span>
+                                                        @else
+                                                            <span class="badge bg-green-lt"><i class="ti ti-circle-check me-1"></i>On track</span>
+                                                        @endif
+                                                    </div>
+                                                </div>
+
+                                                <div class="mb-2">
+                                                    <div class="d-flex justify-content-between mb-1">
+                                                        <span class="small text-secondary">Health score</span>
+                                                        <span class="small fw-bold text-{{ $healthColor }}">{{ $overall ?? '—' }}</span>
+                                                    </div>
+                                                    <div class="progress progress-sm">
+                                                        <div class="progress-bar bg-{{ $healthColor }}"
+                                                             style="width: {{ $overall ?? 0 }}%"></div>
+                                                    </div>
+                                                </div>
+
+                                                @if (!empty($health) && count(array_filter(array_keys($health), fn($k) => $k !== 'Overall')) > 0)
+                                                    <div class="row g-1 mb-2">
+                                                        @foreach ($health as $category => $score)
+                                                            @if ($category !== 'Overall')
+                                                                @php $c = $score >= 70 ? 'success' : ($score >= 40 ? 'warning' : 'danger'); @endphp
+                                                                <div class="col-auto">
+                                                                <span class="badge bg-{{ $c }}-lt text-{{ $c }}">
+                                                                    {{ $category }}: {{ $score }}
+                                                                </span>
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+
+                                                <a href="{{ $vehicle->passportUrl() }}" target="_blank"
+                                                   class="btn btn-sm btn-outline-primary w-100">
+                                                    <i class="ti ti-id-badge-2 me-1"></i> View Digital Passport
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            {{-- Right column --}}
+            <div class="col-lg-4">
+                {{-- Recent history --}}
+                <div class="card mb-3">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-history me-2"></i>Recent visits</h3>
+                        <div class="card-options">
+                            <a href="{{ route('portal.history') }}" class="small text-secondary">See all →</a>
+                        </div>
+                    </div>
+                    @if ($recentHistory->isEmpty())
+                        <div class="card-body text-secondary text-center small">No visits yet.</div>
+                    @else
+                        <div class="list-group list-group-flush">
+                            @foreach ($recentHistory as $job)
+                                <div class="list-group-item">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="avatar avatar-sm bg-blue-lt"><i class="ti ti-tool"></i></span>
+                                        <div class="flex-fill overflow-hidden">
+                                            <div class="small fw-semibold text-truncate">{{ \Illuminate\Support\Str::limit($job->customer_complaint, 40) }}</div>
+                                            <div class="text-secondary" style="font-size:11px">
+                                                {{ $job->vehicle->plate_number }} · {{ $job->completed_at->format('d M Y') }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Referral card --}}
+                <div class="card mb-3" style="background: linear-gradient(135deg, #1a6bb5, #0C447C); border: none;">
+                    <div class="card-body text-white">
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="ti ti-gift fs-3 me-2"></i>
+                            <div>
+                                <div class="fw-bold">Refer a friend</div>
+                                <div class="small text-white-50">You both earn 500 points</div>
+                            </div>
+                        </div>
+                        <div class="input-group input-group-sm">
+                            <input type="text" class="form-control" readonly
+                                   value="{{ route('portal.register', ['ref' => $customer->referral_code]) }}"
+                                   id="referralLink">
+                            <button class="btn btn-white" type="button"
+                                    onclick="navigator.clipboard.writeText(document.getElementById('referralLink').value);this.innerHTML='<i class=\'ti ti-check\'></i>'">
+                                <i class="ti ti-copy"></i>
+                            </button>
+                        </div>
+                        <div class="text-white-50 small mt-2">Code: <strong class="text-white">{{ $customer->referral_code }}</strong></div>
+                    </div>
+                </div>
+
+                {{-- Coming soon --}}
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title"><i class="ti ti-sparkles me-2 text-yellow"></i>Coming soon</h3>
+                    </div>
+                    <div class="list-group list-group-flush">
+                        <div class="list-group-item d-flex align-items-center gap-2 text-secondary">
+                            <i class="ti ti-device-mobile"></i>
+                            <div class="flex-fill small">Mobile app</div>
+                            <span class="badge bg-yellow-lt">Soon</span>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center gap-2 text-secondary">
+                            <i class="ti ti-discount"></i>
+                            <div class="flex-fill small">Redeem loyalty rewards</div>
+                            <span class="badge bg-yellow-lt">Soon</span>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center gap-2 text-secondary">
+                            <i class="ti ti-message"></i>
+                            <div class="flex-fill small">WhatsApp notifications</div>
+                            <span class="badge bg-yellow-lt">Soon</span>
+                        </div>
+                        <div class="list-group-item d-flex align-items-center gap-2 text-secondary">
+                            <i class="ti ti-building-store"></i>
+                            <div class="flex-fill small">Parts marketplace</div>
+                            <span class="badge bg-yellow-lt">Soon</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 @endsection

@@ -4,15 +4,18 @@
 
 @section('content')
     <div class="d-flex align-items-center mb-3 mt-4">
-        <h2 class="page-title">My Appointments</h2>
+        <h2 class="page-title"><i class="ti ti-calendar-event me-2"></i>My Appointments</h2>
         <div class="ms-auto">
-            <a href="{{ route('portal.appointments.create') }}" class="btn btn-primary">Book appointment</a>
+            <a href="{{ route('portal.appointments.create') }}" class="btn btn-primary">
+                <i class="ti ti-plus me-1"></i> Book appointment
+            </a>
         </div>
     </div>
 
     @if ($appointments->isEmpty())
         <div class="card">
-            <div class="card-body text-center text-secondary">
+            <div class="card-body text-center text-secondary py-5">
+                <i class="ti ti-calendar-off fs-1 d-block mb-2"></i>
                 No appointment requests yet.
             </div>
         </div>
@@ -31,16 +34,22 @@
                     <tbody>
                     @foreach ($appointments as $appt)
                         <tr>
-                            <td>
-                                {{ $appt->requested_date->format('d M Y') }}
+                            <td class="text-secondary">
+                                <i class="ti ti-calendar me-1"></i>{{ $appt->requested_date->format('d M Y') }}
                                 @if ($appt->requested_time_slot)
                                     <span class="text-secondary">({{ ucfirst($appt->requested_time_slot) }})</span>
                                 @endif
                             </td>
-                            <td>{{ $appt->vehicle->plate_number ?? '—' }}</td>
+                            <td>
+                                @if ($appt->vehicle)
+                                    <span class="badge bg-blue-lt">{{ $appt->vehicle->plate_number }}</span>
+                                @else
+                                    —
+                                @endif
+                            </td>
                             <td>
                                 @foreach ($appt->service_types ?? [] as $type)
-                                    <span class="badge bg-blue-lt mb-1">
+                                    <span class="badge bg-azure-lt mb-1">
                                             {{ \App\Http\Controllers\Portal\AppointmentController::SERVICE_TYPES[$type] ?? $type }}
                                         </span>
                                 @endforeach
@@ -50,11 +59,11 @@
                             </td>
                             <td>
                                 @if ($appt->status === 'pending')
-                                    <span class="badge bg-yellow-lt">Pending</span>
+                                    <span class="badge bg-yellow-lt"><i class="ti ti-clock me-1"></i>Pending</span>
                                 @elseif ($appt->status === 'confirmed')
-                                    <span class="badge bg-green-lt">Confirmed</span>
+                                    <span class="badge bg-green-lt"><i class="ti ti-circle-check me-1"></i>Confirmed</span>
                                 @else
-                                    <span class="badge bg-red-lt">Rejected</span>
+                                    <span class="badge bg-red-lt"><i class="ti ti-x me-1"></i>Rejected</span>
                                 @endif
                             </td>
                         </tr>

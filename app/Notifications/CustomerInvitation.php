@@ -25,10 +25,12 @@ class CustomerInvitation extends Notification
         ], false));
 
         return (new MailMessage)
-            ->subject('Set up your AutoTrack account')
-            ->greeting('Welcome, '.$notifiable->full_name.'!')
-            ->line('A garage account has been created for you. Set a password to view your vehicle history and service records online.')
+            ->subject('You\'ve been added to AutoTrack Ethiopia')
+            ->greeting('Hi ' . $notifiable->full_name . ',')
+            ->line('A garage account has been created for you on **AutoTrack Ethiopia**.')
+            ->line('You can now view your vehicle service history, book appointments, and track your loyalty points online.')
             ->action('Set your password', $url)
-            ->line('This link expires in 60 minutes.');
+            ->line('This link expires in **60 minutes**.')
+            ->line('If you weren\'t expecting this, you can safely ignore this email.');
     }
 }

@@ -2,8 +2,8 @@
 
 namespace App\Notifications;
 
+use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,44 +11,24 @@ class AppointmentConfirmed extends Notification
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
-    public function __construct()
-    {
-        //
-    }
+    public function __construct(public Appointment $appointment) {}
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
-    public function via(object $notifiable): array
+    public function via($notifiable): array
     {
         return ['mail'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
-    public function toMail(object $notifiable): MailMessage
+    public function toMail($notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->line('The introduction to the notification.')
-            ->action('Notification Action', url('/'))
-            ->line('Thank you for using our application!');
-    }
+        $vehicle = $this->appointment->vehicle;
 
-    /**
-     * Get the array representation of the notification.
-     *
-     * @return array<string, mixed>
-     */
-    public function toArray(object $notifiable): array
-    {
-        return [
-            //
-        ];
+        return (new MailMessage)
+            ->subject('Your appointment is confirmed')
+            ->greeting('Hi, '.$notifiable->full_name.'!')
+            ->line('Your appointment for '.$vehicle->plate_number.' ('.$vehicle->make.' '.$vehicle->model.') has been confirmed.')
+            ->line('Date: '.$this->appointment->requested_date->format('d M Y')
+                .($this->appointment->requested_time_slot ? ' — '.ucfirst($this->appointment->requested_time_slot) : ''))
+            ->when($this->appointment->jobCard, fn ($mail) => $mail->line('Job card: '.$this->appointment->jobCard->job_number))
+            ->line('We look forward to seeing you.');
     }
 }

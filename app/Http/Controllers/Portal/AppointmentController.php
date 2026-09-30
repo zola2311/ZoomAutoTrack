@@ -27,6 +27,7 @@ class AppointmentController extends Controller
         'accident_repair' => 'Accident Repair',
         'body_paint' => 'Body Paint / Painting',
         'detailing_cleaning' => 'Car Wash / Detailing',
+        'ev_service' => 'Electric Vehicle (EV) Service',
         'other' => 'Other',
     ];
 
@@ -68,7 +69,7 @@ class AppointmentController extends Controller
             'service_types' => $data['service_types'],
             'other_service_description' => $data['other_service'] ?? null,
             'notes' => $data['notes'] ?? null,
-            'branch_id' => $customer->branch_id,
+            'branch_id' => $customer->branch_id ?? \App\Models\Branch::where('is_active', true)->value('id') ?? 1,
             'customer_id' => $customer->id,
             'status' => 'pending',
             'source' => 'portal',

@@ -5,17 +5,30 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'AutoTrack Ethiopia')</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/core@1.0.0/dist/css/tabler.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+    <style>
+        body {
+            background: linear-gradient(180deg, #0C447C 0%, #0C447C 220px, var(--tblr-bg-surface-secondary, #f4f4f5) 220px);
+        }
+        .auth-logo {
+            width: 56px; height: 56px; border-radius: 12px;
+            background: #fff; display: flex; align-items: center; justify-content: center;
+            font-size: 26px; font-weight: 700; color: #0C447C; margin: 0 auto 12px;
+        }
+        .auth-brand { color: rgba(32, 73, 135, 0.57); font-weight: 600; font-size: 20px; }
+    </style>
 </head>
 <body class="d-flex flex-column">
 <div class="page page-center">
     <div class="container container-tight py-4">
         <div class="text-center mb-4">
-            <a href="{{ route('portal.login') }}" class="navbar-brand navbar-brand-autodark">
-                AutoTrack Ethiopia
+            <div class="auth-logo">A</div>
+            <a href="{{ route('portal.login') }}" class="auth-brand text-decoration-none">
+              Zoom EV
             </a>
         </div>
-        <div class="card card-md">
-            <div class="card-body">
+        <div class="card card-md shadow-sm">
+            <div class="card-body p-4">
                 @yield('content')
             </div>
         </div>

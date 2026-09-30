@@ -23,16 +23,21 @@ class MaintenanceDueReminder extends Notification
         $vehicle = $this->vehicle;
         $isDue = $this->due['is_due'];
 
+        $subject = $isDue
+            ? 'Service overdue — ' . $vehicle->plate_number
+            : 'Service coming up — ' . $vehicle->plate_number;
+
+        $line1 = $isDue
+            ? 'Your **' . $vehicle->make . ' ' . $vehicle->model . '** (' . $vehicle->plate_number . ') is overdue for its next service.'
+            : 'Your **' . $vehicle->make . ' ' . $vehicle->model . '** (' . $vehicle->plate_number . ') is approaching its next service — only **' . number_format($this->due['km_remaining']) . ' km** remaining.';
+
         return (new MailMessage)
-            ->subject($isDue
-                ? "Service due — {$vehicle->plate_number}"
-                : "Service coming up — {$vehicle->plate_number}")
-            ->greeting('Hi, '.$notifiable->full_name.'!')
-            ->line($isDue
-                ? "Your {$vehicle->make} {$vehicle->model} ({$vehicle->plate_number}) is due for its next service."
-                : "Your {$vehicle->make} {$vehicle->model} ({$vehicle->plate_number}) will need service soon — "
-                .number_format($this->due['km_remaining']).' km remaining.')
-            ->line('Book a visit at your earliest convenience to keep your service history up to date.')
-            ->action('View vehicle', $vehicle->passportUrl());
+            ->subject($subject)
+            ->greeting('Hi ' . $notifiable->full_name . ',')
+            ->line($line1)
+            ->line('Keeping up with regular service protects your vehicle and maintains its resale value.')
+            ->action('View vehicle history', $vehicle->passportUrl())
+            ->line('Book an appointment to schedule your next service.')
+            ->line('Thank you for choosing AutoTrack Ethiopia.');
     }
 }

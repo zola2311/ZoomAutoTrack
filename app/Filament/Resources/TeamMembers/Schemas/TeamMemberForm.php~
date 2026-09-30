@@ -1,0 +1,59 @@
+<?php
+
+namespace App\Filament\Resources\TeamMembers\Schemas;
+
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Schemas\Components\Section as SchemaSection;
+use Filament\Schemas\Schema;
+
+class TeamMemberForm
+{
+    public static function configure(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                SchemaSection::make('Team Member')
+                    ->columns(2)
+                    ->schema([
+                        TextInput::make('name')
+                            ->label('Full Name')
+                            ->required()
+                            ->maxLength(255),
+
+                        TextInput::make('role')
+                            ->label('Role / Job Title')
+                            ->maxLength(255)
+                            ->placeholder('e.g. Lead Mechanic'),
+
+                        Textarea::make('bio')
+                            ->label('Short Bio')
+                            ->rows(4)
+                            ->columnSpan(2)
+                            ->helperText('A sentence or two — experience, specialisms, certifications.'),
+
+                        FileUpload::make('photo')
+                            ->label('Photo')
+                            ->image()
+                            ->directory('team')
+                            ->visibility('public')
+                            ->imageEditor()
+                            ->columnSpan(2)
+                            ->helperText('Around 390x260 works well.'),
+
+                        TextInput::make('sort_order')
+                            ->label('Sort Order')
+                            ->numeric()
+                            ->default(0)
+                            ->minValue(0)
+                            ->helperText('Lower numbers appear first.'),
+
+                        Toggle::make('is_active')
+                            ->label('Visible on the website')
+                            ->default(true),
+                    ]),
+            ]);
+    }
+}

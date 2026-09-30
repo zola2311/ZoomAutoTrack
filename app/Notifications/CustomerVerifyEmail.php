@@ -28,10 +28,11 @@ class CustomerVerifyEmail extends Notification
         );
 
         return (new MailMessage)
-            ->subject('Verify your email address')
-            ->greeting('Hi, '.$notifiable->full_name.'!')
-            ->line('Please click the button below to verify your email address.')
-            ->action('Verify email', $url)
-            ->line('This link expires in 60 minutes.');
+            ->subject('Verify your AutoTrack Ethiopia account')
+            ->greeting('Hi ' . $notifiable->full_name . ',')
+            ->line('Thanks for signing up! Please verify your email address to access your vehicle history, book appointments, and earn loyalty points.')
+            ->action('Verify my email', $url)
+            ->line('This link expires in **60 minutes**.')
+            ->line('If you didn\'t create an account, no further action is required.');
     }
 }

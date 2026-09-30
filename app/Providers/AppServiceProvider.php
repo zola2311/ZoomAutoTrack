@@ -10,6 +10,7 @@ use App\Policies\VehiclePolicy;
 use App\Models\PartUsed;
 use App\Models\Payment;
 use App\Observers\PartsUsedObserver;
+use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 use App\Models\JobCard;
 use App\Observers\JobCardObserver;
@@ -49,6 +50,9 @@ class AppServiceProvider extends ServiceProvider
         Password::defaults(function () {
 //            return Password::min(8)->mixedCase()->numbers();
             return Password::min(8);
+        });
+        View::composer('layouts.site', function ($view) {
+            $view->with('navServices', \App\Models\Service::active()->orderBy('sort_order')->get());
         });
 
         JobCard::observe(JobCardObserver::class);

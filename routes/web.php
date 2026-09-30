@@ -4,19 +4,43 @@ use App\Http\Controllers\Auth\CustomerPasswordController;
 use App\Http\Controllers\Auth\CustomerVerificationController;
 use App\Http\Controllers\Portal\AppointmentController;
 use App\Http\Controllers\Portal\PortalController;
+use App\Http\Controllers\Portal\ProfileController;
 use App\Http\Controllers\PrintController;
-use App\Http\Controllers\ProfileController;
+
+use App\Http\Controllers\PublicAppointmentController;
 use App\Http\Controllers\VehiclePassportController;
 use App\Http\Controllers\VehicleQrStickerController;
 use App\Http\Controllers\VoiceRecordingController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PaymentProofController;
 use App\Http\Controllers\Auth\CustomerAuthController;
+use App\Http\Controllers\ContactController;
+
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\ServiceController;
 
 Route::get('/', function () {
     return view('welcome');
-});
+})->name('home');
 
+Route::get('/about', function () {
+    return view('site.about');
+})->name('about');
+
+
+Route::get('/about', [PageController::class, 'about'])->name('about');
+Route::get('/team', [PageController::class, 'team'])->name('team');
+Route::get('/gallery', [PageController::class, 'gallery'])->name('gallery');
+Route::get('/services', [ServiceController::class, 'index'])->name('services');
+Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+
+Route::get('/book-a-service', [PublicAppointmentController::class, 'create'])->name('booking.create');
+Route::post('/book-a-service', [PublicAppointmentController::class, 'store'])->name('booking.store');
+
+
+Route::get('/contact', [ContactController::class, 'show'])->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/services', function () { return view('site.services'); })->name('services');
 // Public Digital Vehicle Passport — no auth, resolved by qr_code UUID.
 Route::get('/passport/{qrCode}', [VehiclePassportController::class, 'show'])
     ->name('passport.show');
@@ -25,11 +49,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
 });
 
-Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
+
 
 Route::middleware(['auth'])->group(function () {
     Route::get('/payment-proofs/{payment}', [PaymentProofController::class, 'show'])
@@ -90,5 +110,12 @@ Route::prefix('portal')->name('portal.')->group(function () {
         Route::get('/appointments', [AppointmentController::class, 'index'])->name('appointments.index');
         Route::get('/appointments/create', [AppointmentController::class, 'create'])->name('appointments.create');
         Route::post('/appointments', [AppointmentController::class, 'store'])->name('appointments.store');
+
+        Route::get('/profile', [ProfileController::class, 'show'])->name('profile');
+        Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
     });
+
+
+
 });

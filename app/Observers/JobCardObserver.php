@@ -26,6 +26,10 @@ class JobCardObserver
         if ($jobCard->status !== 'completed') {
             return;
         }
+        if ($jobCard->customer && ! $jobCard->customer->password && $jobCard->customer->email) {
+            $token = \Illuminate\Support\Facades\Password::broker('customers')->createToken($jobCard->customer);
+            $jobCard->customer->sendPasswordResetNotification($token);
+        }
         if ($jobCard->customer && $jobCard->customer->email) {
             $jobCard->customer->notify(new VehicleReadyForPickup($jobCard));
         }
