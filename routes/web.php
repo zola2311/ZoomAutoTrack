@@ -23,11 +23,6 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('/about', function () {
-    return view('site.about');
-})->name('about');
-
-
 Route::get('/about', [PageController::class, 'about'])->name('about');
 Route::get('/team', [PageController::class, 'team'])->name('team');
 Route::get('/gallery', [PageController::class, 'gallery'])->name('gallery');
@@ -37,17 +32,26 @@ Route::get('/services/{service}', [ServiceController::class, 'show'])->name('ser
 Route::get('/book-a-service', [PublicAppointmentController::class, 'create'])->name('booking.create');
 Route::post('/book-a-service', [PublicAppointmentController::class, 'store'])->name('booking.store');
 
-
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
-Route::get('/services', function () { return view('site.services'); })->name('services');
+
 // Public Digital Vehicle Passport — no auth, resolved by qr_code UUID.
+Route::get('/passport-lookup', [VehiclePassportController::class, 'lookup'])
+    ->name('passport.lookup');
 Route::get('/passport/{qrCode}', [VehiclePassportController::class, 'show'])
     ->name('passport.show');
+Route::get('/passport/{qrCode}/certificate', [VehiclePassportController::class, 'certificate'])
+    ->name('passport.certificate');
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/dashboard', function () {return view('dashboard');})->name('dashboard');
-});
+Route::get('/dashboard', function () {
+    if (auth('customer')->check()) {
+        return redirect()->route('portal.dashboard');
+    }
+    if (auth('web')->check()) {
+        return redirect('/admin');
+    }
+    return redirect()->route('portal.login');
+})->name('dashboard');
 
 
 
@@ -65,12 +69,12 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/settings', function () {return view('settings.index');})->name('settings.index');
-    Route::get('/users', function () {return view('users.index');})->name('users.index');
+    Route::get('/settings', function () { return redirect('/admin/system-setup'); })->name('settings.index');
+    Route::get('/users', function () { return redirect('/admin/users'); })->name('users.index');
 });
 
 Route::middleware(['auth', 'role:admin|manager'])->group(function () {
-    Route::get('/reports', function () {return view('reports.index');})->name('reports.index');
+    Route::get('/reports', function () { return redirect('/admin/daily-revenue-report'); })->name('reports.index');
 });
 
 Route::prefix('portal')->name('portal.')->group(function () {

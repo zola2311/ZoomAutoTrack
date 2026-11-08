@@ -3,228 +3,359 @@
 @section('title', 'Dashboard')
 
 @section('content')
-    <div class="mt-3 pb-4">
 
-        {{-- Welcome banner --}}
-        <div class="card mb-4" style="background: linear-gradient(135deg, #0C447C 0%, #1565C0 60%, #1976D2 100%); border: none; border-radius: 20px; overflow: hidden; position: relative;">
-            <div style="position:absolute;top:-40px;right:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.05)"></div>
-            <div style="position:absolute;bottom:-60px;right:80px;width:150px;height:150px;border-radius:50%;background:rgba(255,255,255,0.04)"></div>
-            <div class="card-body py-4 px-4" style="position:relative;z-index:1">
-                <div class="row align-items-center g-3">
-                    <div class="col">
-                        <div class="text-white-50 small mb-1 text-uppercase tracking-wide" style="letter-spacing:.08em">Welcome back</div>
-                        <h2 class="text-white mb-1 fw-bold fs-2">{{ $customer->full_name }} 👋</h2>
-                        <div class="text-white-50 small">{{ now()->format('l, d F Y') }}</div>
-                        <div class="mt-3 d-flex gap-2 flex-wrap">
-                            <a href="{{ route('portal.appointments.create') }}" class="btn btn-white btn-sm">
-                                <i class="ti ti-calendar-plus me-1"></i> Book service
-                            </a>
-                            <a href="{{ route('portal.history') }}" class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3)">
-                                <i class="ti ti-history me-1"></i> Service history
-                            </a>
-                            <a href="{{ route('portal.appointments.index') }}" class="btn btn-sm" style="background:rgba(255,255,255,0.15);color:#fff;border:1px solid rgba(255,255,255,0.3)">
-                                <i class="ti ti-calendar me-1"></i> My appointments
-                            </a>
-                        </div>
+    <!-- Welcome Hero Card (Adminator Style) -->
+    <div class="adminator-card mb-4" style="background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%); color: #ffffff; border: none; box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);">
+        <div class="adminator-card-body p-4">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="badge" style="background: rgba(255,255,255,0.15); color: #ffffff; font-family: 'JetBrains Mono', monospace; font-size: 11px;">
+                            <i class="ti ti-shield-check me-1"></i> ID: {{ $customer->customer_code ?: 'CUST-' . str_pad($customer->id, 4, '0', STR_PAD_LEFT) }}
+                        </span>
+                        @if ($customer->loyalty_points >= 1000)
+                            <span class="badge" style="background: #f59e0b; color: #111827; font-weight: 700; font-size: 11px;">
+                                <i class="ti ti-award me-1"></i> Gold Tier Member
+                            </span>
+                        @elseif ($customer->loyalty_points >= 500)
+                            <span class="badge" style="background: #38bdf8; color: #0f172a; font-weight: 700; font-size: 11px;">
+                                <i class="ti ti-award me-1"></i> Silver Tier Member
+                            </span>
+                        @else
+                            <span class="badge" style="background: rgba(255,255,255,0.12); color: #e2e8f0; font-size: 11px;">
+                                <i class="ti ti-check me-1"></i> Standard Member
+                            </span>
+                        @endif
                     </div>
-                    <div class="col-auto d-none d-md-block">
-                        <div style="width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:36px;">
-                            🚗
+
+                    <h1 class="h3 text-white fw-bold mb-2">Welcome back, {{ $customer->full_name }}</h1>
+                    <p class="text-white-50 mb-3" style="max-width: 620px; font-size: 13.5px; line-height: 1.6;">
+                        Manage your vehicle fleet, access verified digital service passports, track monotonic odometer readings, and schedule authorized garage maintenance.
+                    </p>
+
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{{ route('portal.appointments.create') }}" class="btn-adminator-primary" style="background: #0d6efd; border-color: #0d6efd;">
+                            <i class="ti ti-calendar-plus"></i> Schedule Service
+                        </a>
+                        <a href="{{ route('portal.history') }}" class="btn-adminator-secondary" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: #ffffff !important;">
+                            <i class="ti ti-history"></i> Service Logbook
+                        </a>
+                        <a href="{{ route('portal.appointments.index') }}" class="btn-adminator-secondary" style="background: rgba(255,255,255,0.12); border-color: rgba(255,255,255,0.25); color: #ffffff !important;">
+                            <i class="ti ti-calendar"></i> My Appointments
+                        </a>
+                    </div>
+                </div>
+
+                <div class="col-lg-4 d-none d-lg-block text-end">
+                    <div style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); border-radius: 10px; padding: 18px; display: inline-block; text-align: left; min-width: 230px;">
+                        <div class="text-white-50 small mb-1 text-uppercase fw-bold" style="font-size: 10.5px; letter-spacing: 0.05em;">Workshop Status</div>
+                        <div class="d-flex align-items-center mb-2">
+                            <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 8px; box-shadow: 0 0 6px #10b981;"></span>
+                            <span class="fw-bold text-white" style="font-size: 13px;">Online & Operational</span>
+                        </div>
+                        <div class="text-white-50 small" style="font-size: 11.5px;">
+                            <i class="ti ti-map-pin me-1 text-info"></i> Zoom AutoTrack Bole (HQ)
+                        </div>
+                        <div class="text-white-50 small mt-1" style="font-size: 11.5px;">
+                            <i class="ti ti-calendar me-1 text-info"></i> {{ now()->format('D, M j, Y') }}
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        {{-- Stat cards --}}
-        <div class="row g-3 mb-4">
-            <div class="col-6 col-xl-3">
-                <div class="card card-sm h-100" style="border-top: 3px solid #0C447C">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-secondary small text-uppercase" style="letter-spacing:.06em;font-size:11px">Vehicles</span>
-                            <span class="avatar avatar-sm bg-blue-lt"><i class="ti ti-car"></i></span>
-                        </div>
-                        <div class="h1 mb-0 fw-bold">{{ $vehicles->count() }}</div>
-                        <div class="text-secondary small mt-1">Registered</div>
-                    </div>
+    <!-- 4 Adminator Stat Metric Widgets -->
+    <div class="row g-3 mb-4">
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-widget">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="stat-widget-title">Registered Fleet</div>
+                    <span class="icon-holder c-blue-500 m-0">
+                        <i class="ti ti-car"></i>
+                    </span>
                 </div>
-            </div>
-
-            <div class="col-6 col-xl-3">
-                <div class="card card-sm h-100" style="border-top: 3px solid #f59f00">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-secondary small text-uppercase" style="letter-spacing:.06em;font-size:11px">Loyalty</span>
-                            <span class="avatar avatar-sm bg-yellow-lt"><i class="ti ti-star"></i></span>
-                        </div>
-                        <div class="h1 mb-0 fw-bold">{{ number_format($customer->loyalty_points) }}</div>
-                        <div class="mt-1">
-                            @if ($customer->loyalty_points >= 1000)
-                                <span class="badge bg-yellow-lt text-yellow"><i class="ti ti-crown me-1"></i>Gold member</span>
-                            @elseif ($customer->loyalty_points >= 500)
-                                <span class="badge bg-azure-lt">Silver member</span>
-                            @else
-                                <span class="badge bg-muted-lt text-secondary">Bronze member</span>
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-xl-3">
-                <div class="card card-sm h-100" style="border-top: 3px solid #2fb344">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-secondary small text-uppercase" style="letter-spacing:.06em;font-size:11px">Total visits</span>
-                            <span class="avatar avatar-sm bg-green-lt"><i class="ti ti-clipboard-check"></i></span>
-                        </div>
-                        <div class="h1 mb-0 fw-bold">{{ $totalVisits }}</div>
-                        <div class="text-secondary small mt-1">
-                            @if ($lastVisit)
-                                Last: {{ $lastVisit->completed_at->format('d M Y') }}
-                            @else
-                                No visits yet
-                            @endif
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-6 col-xl-3">
-                <div class="card card-sm h-100" style="border-top: 3px solid #ae3ec9">
-                    <div class="card-body">
-                        <div class="d-flex align-items-center justify-content-between mb-2">
-                            <span class="text-secondary small text-uppercase" style="letter-spacing:.06em;font-size:11px">Referrals</span>
-                            <span class="avatar avatar-sm bg-purple-lt"><i class="ti ti-users"></i></span>
-                        </div>
-                        <div class="h1 mb-0 fw-bold">{{ $referralCount }}</div>
-                        <div class="text-secondary small mt-1">Friends referred</div>
-                    </div>
+                <div class="stat-widget-val">{{ $vehicles->count() }} <span class="text-muted fw-normal" style="font-size: 14px;">vehicles</span></div>
+                <div class="d-flex align-items-center text-muted small mt-2" style="font-size: 12px;">
+                    <span class="text-success fw-bold me-1"><i class="ti ti-shield-check"></i> 100%</span>
+                    <span>Passports Active</span>
                 </div>
             </div>
         </div>
 
-        {{-- Reminders --}}
-        @php
-            $reminders = $vehicles->map(fn ($v) => ['vehicle' => $v, 'due' => $v->nextServiceDue()])
-                ->filter(fn ($r) => $r['due']['is_due'] || $r['due']['km_remaining'] <= 500);
-        @endphp
-
-        @if ($reminders->isNotEmpty())
-            <div class="card mb-4" style="border-left: 4px solid #f59f00; border-radius: 12px;">
-                <div class="card-body py-3">
-                    <div class="d-flex gap-3 align-items-start">
-                        <span class="avatar bg-yellow-lt flex-shrink-0"><i class="ti ti-bell-ringing"></i></span>
-                        <div>
-                            <div class="fw-bold mb-1">Service reminders</div>
-                            @foreach ($reminders as $r)
-                                <div class="d-flex align-items-center gap-2 mb-1">
-                                    <span class="badge bg-blue-lt">{{ $r['vehicle']->plate_number }}</span>
-                                    @if ($r['due']['is_due'])
-                                        <span class="text-danger small fw-semibold"><i class="ti ti-alert-circle me-1"></i>Service overdue</span>
-                                    @else
-                                        <span class="text-warning small"><i class="ti ti-clock me-1"></i>{{ number_format($r['due']['km_remaining']) }} km remaining</span>
-                                    @endif
-                                </div>
-                            @endforeach
-                        </div>
-                    </div>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-widget">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="stat-widget-title">Loyalty Points</div>
+                    <span class="icon-holder c-amber-500 m-0">
+                        <i class="ti ti-award"></i>
+                    </span>
+                </div>
+                <div class="stat-widget-val">{{ number_format($customer->loyalty_points) }} <span class="text-muted fw-normal" style="font-size: 14px;">pts</span></div>
+                <div class="text-muted small mt-2" style="font-size: 12px;">
+                    Earn 100 points per 1,000 ETB
                 </div>
             </div>
-        @endif
+        </div>
 
-        <div class="row g-4">
-            {{-- Vehicles column --}}
-            <div class="col-lg-7">
-                <div class="d-flex align-items-center mb-3">
-                    <h3 class="mb-0"><i class="ti ti-car me-2 text-primary"></i>My Vehicles</h3>
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-widget">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="stat-widget-title">Workshop Visits</div>
+                    <span class="icon-holder c-green-500 m-0">
+                        <i class="ti ti-check"></i>
+                    </span>
+                </div>
+                <div class="stat-widget-val">{{ $totalVisits }} <span class="text-muted fw-normal" style="font-size: 14px;">visits</span></div>
+                <div class="text-muted small mt-2" style="font-size: 12px;">
+                    @if ($lastVisit)
+                        Last: {{ $lastVisit->completed_at->format('M d, Y') }}
+                    @else
+                        No visits recorded yet
+                    @endif
+                </div>
+            </div>
+        </div>
+
+        <div class="col-sm-6 col-xl-3">
+            <div class="stat-widget">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                    <div class="stat-widget-title">Referral Code</div>
+                    <span class="icon-holder c-purple-500 m-0">
+                        <i class="ti ti-gift"></i>
+                    </span>
+                </div>
+                <div class="stat-widget-val font-monospace" style="font-size: 22px;">{{ $customer->referral_code }}</div>
+                <div class="text-muted small mt-2" style="font-size: 12px;">
+                    <span class="text-primary fw-semibold">{{ $referralCount }} friends</span> joined
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Service Due Alert (if any vehicle needs maintenance) -->
+    @php
+        $reminders = $vehicles->map(fn ($v) => ['vehicle' => $v, 'due' => $v->nextServiceDue()])
+            ->filter(fn ($r) => $r['due']['is_due'] || $r['due']['km_remaining'] <= 500);
+    @endphp
+
+    @if ($reminders->isNotEmpty())
+        <div class="alert alert-warning alert-dismissible fade show mb-4 border-0 shadow-sm" role="alert">
+            <div class="d-flex align-items-start">
+                <span class="icon-holder c-amber-500 me-3" style="width: 36px; height: 36px; font-size: 20px;">
+                    <i class="ti ti-bell-ringing"></i>
+                </span>
+                <div class="flex-grow-1">
+                    <div class="fw-bold mb-1" style="font-size: 14.5px; color: #92400e;">Maintenance Attention Required</div>
+                    <div class="d-flex flex-column gap-2 mt-2">
+                        @foreach ($reminders as $r)
+                            <div class="d-flex align-items-center gap-2 flex-wrap">
+                                <span class="plate-badge-et">{{ $r['vehicle']->plate_number }}</span>
+                                <span class="fw-semibold small text-dark">{{ $r['vehicle']->make }} {{ $r['vehicle']->model }}:</span>
+                                @if ($r['due']['is_due'])
+                                    <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Service Overdue</span>
+                                @else
+                                    <span class="badge bg-warning-subtle text-warning border border-warning-subtle">{{ number_format($r['due']['km_remaining']) }} km remaining</span>
+                                @endif
+                                <a href="{{ route('portal.appointments.create', ['vehicle_id' => $r['vehicle']->id]) }}" class="btn-adminator-primary py-1 px-2.5 ms-auto" style="font-size: 12px;">
+                                    Book Service &rarr;
+                                </a>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+    @endif
+
+    <!-- Main 2-Column Split: Fleet Cards & Right Sidebar -->
+    <div class="row g-4">
+        
+        <!-- Left Column: Registered Vehicles -->
+        <div class="col-lg-7 col-xl-8">
+            <div class="adminator-card">
+                <div class="adminator-card-header">
+                    <div>
+                        <h2 class="adminator-card-title">
+                            <i class="ti ti-car text-primary"></i> My Registered Vehicles
+                        </h2>
+                        <div class="text-muted small" style="font-size: 12px;">Certified records, live condition scores, and digital passports</div>
+                    </div>
+                    <div>
+                        <span class="badge bg-primary-subtle text-primary border border-primary-subtle fw-semibold">
+                            {{ $vehicles->count() }} Registered
+                        </span>
+                    </div>
                 </div>
 
                 @if ($vehicles->isEmpty())
-                    <div class="card" style="border-radius:16px;border:2px dashed var(--tblr-border-color)">
-                        <div class="card-body text-center py-5 text-secondary">
-                            <i class="ti ti-car-off" style="font-size:48px"></i>
-                            <div class="mt-2">No vehicles registered yet.</div>
-                            <div class="small">Visit a garage to get your first vehicle registered.</div>
+                    <div class="adminator-card-body text-center py-5">
+                        <div class="icon-holder c-blue-500 mx-auto mb-3" style="width: 52px; height: 52px; font-size: 26px;">
+                            <i class="ti ti-car-off"></i>
                         </div>
+                        <h4 class="fw-bold mb-1">No vehicles currently registered</h4>
+                        <p class="text-muted small mb-3">When you service your vehicle at Zoom AutoTrack Bole, it will automatically appear here with a full digital passport.</p>
+                        <a href="{{ route('portal.appointments.create') }}" class="btn-adminator-primary">
+                            <i class="ti ti-calendar-plus"></i> Schedule First Visit
+                        </a>
                     </div>
                 @else
-                    <div class="d-flex flex-column gap-3">
+                    <div class="list-group list-group-flush">
                         @foreach ($vehicles as $vehicle)
                             @php
                                 $due = $vehicle->nextServiceDue();
                                 $health = $vehicle->latestHealthScores();
                                 $overall = $health['Overall'] ?? null;
-                                $healthColor = $overall === null ? 'secondary'
-                                    : ($overall >= 70 ? 'success' : ($overall >= 40 ? 'warning' : 'danger'));
+                                $healthStatus = $overall === null ? 'Pending Data' : ($overall >= 75 ? 'Optimal' : ($overall >= 50 ? 'Fair' : 'Attention Needed'));
+                                $healthColor = $overall === null ? 'secondary' : ($overall >= 75 ? 'success' : ($overall >= 50 ? 'warning' : 'danger'));
+                                $plateParts = explode(' ', $vehicle->plate_number);
+                                $plateRegion = count($plateParts) > 1 ? $plateParts[0] : 'ET';
+                                $plateNum = count($plateParts) > 1 ? implode(' ', array_slice($plateParts, 1)) : $vehicle->plate_number;
                             @endphp
-                            <div class="card" style="border-radius:16px;overflow:hidden;border:none;box-shadow:0 1px 8px rgba(0,0,0,.08)">
-                                <div style="height:4px;background:var(--tblr-{{ $healthColor }})"></div>
-                                <div class="card-body p-3">
-                                    <div class="d-flex align-items-start gap-3">
-                                        <div class="avatar avatar-lg bg-blue-lt flex-shrink-0">
-                                            <i class="ti ti-car fs-2"></i>
-                                        </div>
-                                        <div class="flex-fill">
-                                            <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-1">
-                                                <div>
-                                                    <span class="badge bg-blue-lt me-2">{{ $vehicle->plate_number }}</span>
-                                                    @if ($due['is_due'])
-                                                        <span class="badge bg-red-lt"><i class="ti ti-alert-circle me-1"></i>Service due</span>
-                                                    @else
-                                                        <span class="badge bg-green-lt"><i class="ti ti-circle-check me-1"></i>On track</span>
-                                                    @endif
-                                                </div>
-                                                <a href="{{ $vehicle->passportUrl() }}" target="_blank" class="btn btn-sm btn-outline-primary">
-                                                    <i class="ti ti-id-badge-2 me-1"></i> Passport
-                                                </a>
-                                            </div>
 
-                                            <div class="fw-bold mb-1">
-                                                {{ $vehicle->make }} {{ $vehicle->model }}
-                                                @if ($vehicle->year)
-                                                    <span class="text-secondary fw-normal">({{ $vehicle->year }})</span>
-                                                @endif
-                                            </div>
+                            <div class="list-group-item p-3 border-bottom">
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-2">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <span class="plate-badge-et">
+                                            <span class="region">{{ $plateRegion }}</span>
+                                            <span>{{ $plateNum }}</span>
+                                        </span>
 
-                                            <div class="text-secondary small mb-2">
-                                                <i class="ti ti-gauge me-1"></i>{{ number_format($vehicle->current_mileage) }} km
-                                                &middot;
-                                                @if ($due['km_remaining'] > 0)
-                                                    {{ number_format($due['km_remaining']) }} km to next service
-                                                @else
-                                                    <span class="text-danger">service overdue</span>
-                                                @endif
-                                            </div>
+                                        @if ($due['is_due'])
+                                            <span class="badge bg-danger-subtle text-danger border border-danger-subtle" style="font-size: 11px;">
+                                                <i class="ti ti-alert-triangle me-1"></i> Service Due
+                                            </span>
+                                        @else
+                                            <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 11px;">
+                                                <i class="ti ti-check me-1"></i> Roadworthy
+                                            </span>
+                                        @endif
 
-                                            <div class="d-flex align-items-center gap-2 mb-2">
-                                                <div class="flex-fill">
-                                                    <div class="d-flex justify-content-between mb-1">
-                                                        <span class="small text-secondary">Health</span>
-                                                        <span class="small fw-bold text-{{ $healthColor }}">{{ $overall ?? '—' }}</span>
-                                                    </div>
-                                                    <div class="progress" style="height:6px;border-radius:99px">
-                                                        <div class="progress-bar bg-{{ $healthColor }}"
-                                                             style="width:{{ $overall ?? 0 }}%;border-radius:99px"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
+                                        @if ($vehicle->fuel_type)
+                                            <span class="badge bg-light text-secondary border text-uppercase" style="font-size: 10.5px;">{{ $vehicle->fuel_type }}</span>
+                                        @endif
+                                    </div>
 
-                                            @if (!empty($health))
-                                                <div class="d-flex flex-wrap gap-1">
-                                                    @foreach ($health as $category => $score)
-                                                        @if ($category !== 'Overall')
-                                                            @php $c = $score >= 70 ? 'success' : ($score >= 40 ? 'warning' : 'danger'); @endphp
-                                                            <span class="badge bg-{{ $c }}-lt" style="font-size:10px">
-                                                            {{ $category }}: {{ $score }}
-                                                        </span>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <a href="{{ $vehicle->passportUrl() }}" target="_blank" class="btn-adminator-secondary" style="font-size: 12px; padding: 5px 10px;">
+                                            <i class="ti ti-id-badge-2 text-primary"></i> Passport
+                                        </a>
+                                        <a href="{{ route('passport.certificate', $vehicle->qr_code) }}" target="_blank" class="btn-adminator-secondary" style="font-size: 12px; padding: 5px 10px;">
+                                            <i class="ti ti-certificate text-success"></i> Certificate
+                                        </a>
+                                    </div>
+                                </div>
+
+                                <div class="row align-items-center my-2">
+                                    <div class="col-sm-7">
+                                        <div class="h5 fw-bold text-dark mb-1">
+                                            {{ $vehicle->make }} {{ $vehicle->model }}
+                                            @if ($vehicle->year)
+                                                <span class="text-muted fw-normal" style="font-size: 14px;">({{ $vehicle->year }})</span>
                                             @endif
                                         </div>
+                                        <div class="text-muted small" style="font-size: 12px;">
+                                            <i class="ti ti-dashboard me-1"></i> {{ number_format($vehicle->current_mileage) }} km &bull; VIN: <span class="font-monospace text-dark">{{ $vehicle->vin ?: 'Verified Record' }}</span>
+                                        </div>
                                     </div>
+
+                                    <div class="col-sm-5 mt-2 mt-sm-0 text-sm-end">
+                                        <div class="d-inline-block text-start" style="min-width: 140px;">
+                                            <div class="d-flex justify-content-between align-items-baseline mb-1">
+                                                <span class="text-muted text-uppercase fw-bold" style="font-size: 10.5px; letter-spacing: 0.04em;">Health Score</span>
+                                                <span class="fw-bold text-{{ $healthColor }}" style="font-size: 12.5px;">
+                                                    {{ $overall ? $overall . '/100' : 'Pending' }}
+                                                </span>
+                                            </div>
+                                            <div class="progress" style="height: 6px; background-color: #f1f5f9; border-radius: 4px;">
+                                                <div class="progress-bar bg-{{ $healthColor }}" style="width: {{ $overall ?? 15 }}%; border-radius: 4px;"></div>
+                                            </div>
+                                            <div class="text-end mt-1">
+                                                <span class="badge bg-{{ $healthColor }}-subtle text-{{ $healthColor }} border border-{{ $healthColor }}-subtle" style="font-size: 10px;">{{ $healthStatus }}</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                @if (!empty($health))
+                                    <div class="p-2 rounded border my-2" style="background: var(--adminator-footer-bg); border-color: var(--adminator-border) !important;">
+                                        <div class="text-muted text-uppercase fw-bold mb-1" style="font-size: 10px; letter-spacing: 0.04em;">Diagnostic Systems Assessment</div>
+                                        <div class="d-flex flex-wrap gap-1">
+                                            @foreach ($health as $category => $score)
+                                                @if ($category !== 'Overall')
+                                                    @php $c = $score >= 75 ? 'success' : ($score >= 50 ? 'warning' : 'danger'); @endphp
+                                                    <span class="badge bg-{{ $c }}-subtle text-{{ $c }} border border-{{ $c }}-subtle" style="font-size: 10.5px;">
+                                                        {{ $category }}: {{ $score }}%
+                                                    </span>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+
+                                <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 pt-2 mt-2 border-top">
+                                    <div class="text-muted small" style="font-size: 12px;">
+                                        <i class="ti ti-clock me-1"></i>
+                                        @if ($due['km_remaining'] > 0)
+                                            Next service recommended in <strong class="text-dark">{{ number_format($due['km_remaining']) }} km</strong>
+                                        @else
+                                            <span class="text-danger fw-bold">Overdue for maintenance check</span>
+                                        @endif
+                                    </div>
+
+                                    <a href="{{ route('portal.appointments.create', ['vehicle_id' => $vehicle->id]) }}" class="btn-adminator-primary" style="font-size: 12px; padding: 5px 12px;">
+                                        <i class="ti ti-calendar-plus"></i> Book Service for this Vehicle
+                                    </a>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        </div>
+
+        <!-- Right Column: Recent Visits, Referral Card, Guarantees -->
+        <div class="col-lg-5 col-xl-4">
+            
+            <!-- Recent Completed Visits -->
+            <div class="adminator-card mb-4">
+                <div class="adminator-card-header">
+                    <h2 class="adminator-card-title">
+                        <i class="ti ti-history text-primary"></i> Recent Visits
+                    </h2>
+                    <div>
+                        <a href="{{ route('portal.history') }}" class="btn-adminator-secondary" style="font-size: 11.5px; padding: 4px 8px;">
+                            Full Logbook &rarr;
+                        </a>
+                    </div>
+                </div>
+
+                @if ($recentHistory->isEmpty())
+                    <div class="adminator-card-body text-center py-4 text-muted small">
+                        <i class="ti ti-clipboard-off d-block mb-1 fs-3 text-muted"></i>
+                        No completed workshop services recorded yet.
+                    </div>
+                @else
+                    <div class="list-group list-group-flush">
+                        @foreach ($recentHistory as $job)
+                            <div class="list-group-item p-3 border-bottom">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="icon-holder c-blue-500 m-0" style="width: 34px; height: 34px; font-size: 16px;">
+                                        <i class="ti ti-tool"></i>
+                                    </div>
+                                    <div class="flex-grow-1 text-truncate">
+                                        <div class="fw-semibold text-dark text-truncate" style="font-size: 13px;">
+                                            {{ \Illuminate\Support\Str::limit($job->customer_complaint, 36) ?: 'Scheduled Maintenance & Inspection' }}
+                                        </div>
+                                        <div class="d-flex align-items-center gap-2 text-muted small mt-1" style="font-size: 11px;">
+                                            <span class="badge bg-light text-dark border font-monospace">{{ $job->vehicle->plate_number }}</span>
+                                            <span>{{ $job->completed_at->format('M d, Y') }}</span>
+                                            <span>&bull;</span>
+                                            <span>Job #{{ $job->job_number }}</span>
+                                        </div>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success border border-success-subtle" style="font-size: 10.5px;">Completed</span>
                                 </div>
                             </div>
                         @endforeach
@@ -232,103 +363,95 @@
                 @endif
             </div>
 
-            {{-- Right column --}}
-            <div class="col-lg-5">
-
-                {{-- Recent visits --}}
-                <div class="card mb-3" style="border-radius:16px;border:none;box-shadow:0 1px 8px rgba(0,0,0,.08)">
-                    <div class="card-header" style="border-bottom:1px solid var(--tblr-border-color)">
-                        <h3 class="card-title"><i class="ti ti-history me-2 text-primary"></i>Recent visits</h3>
-                        <div class="card-options">
-                            <a href="{{ route('portal.history') }}" class="btn btn-sm btn-ghost-primary">See all →</a>
-                        </div>
+            <!-- Referral Card (Adminator Style) -->
+            <div class="adminator-card mb-4" style="background: linear-gradient(135deg, #0d6efd 0%, #0b5ed7 100%); color: #ffffff; border: none; box-shadow: 0 4px 15px rgba(13, 110, 253, 0.25);">
+                <div class="adminator-card-body p-3.5">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <h3 class="h6 fw-bold text-white mb-0">Refer a Vehicle Owner</h3>
+                        <span class="icon-holder c-purple-500 m-0" style="width: 32px; height: 32px; font-size: 16px; background: rgba(255,255,255,0.2); color: #ffffff;">
+                            <i class="ti ti-gift"></i>
+                        </span>
                     </div>
-                    @if ($recentHistory->isEmpty())
-                        <div class="card-body text-secondary text-center small py-4">
-                            <i class="ti ti-clipboard-off d-block mb-1" style="font-size:28px"></i>
-                            No visits yet
-                        </div>
-                    @else
-                        <div class="list-group list-group-flush">
-                            @foreach ($recentHistory as $job)
-                                <div class="list-group-item py-3">
-                                    <div class="d-flex align-items-center gap-3">
-                                    <span class="avatar avatar-sm bg-blue-lt flex-shrink-0">
-                                        <i class="ti ti-tool"></i>
-                                    </span>
-                                        <div class="flex-fill overflow-hidden">
-                                            <div class="small fw-semibold text-truncate">
-                                                {{ \Illuminate\Support\Str::limit($job->customer_complaint, 45) ?: 'Service visit' }}
-                                            </div>
-                                            <div class="text-secondary d-flex gap-2 mt-1" style="font-size:11px">
-                                                <span class="badge bg-blue-lt">{{ $job->vehicle->plate_number }}</span>
-                                                {{ $job->completed_at->format('d M Y') }}
-                                            </div>
-                                        </div>
-                                        <span class="badge bg-green-lt flex-shrink-0">Done</span>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Referral card --}}
-                <div class="card mb-3" style="border-radius:16px;border:none;background:linear-gradient(135deg,#0C447C,#1976D2);overflow:hidden;position:relative">
-                    <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,0.07)"></div>
-                    <div class="card-body text-white" style="position:relative;z-index:1">
-                        <div class="d-flex align-items-center mb-3 gap-2">
-                            <span class="avatar bg-white" style="color:#0C447C"><i class="ti ti-gift"></i></span>
-                            <div>
-                                <div class="fw-bold">Refer a friend</div>
-                                <div class="small text-white-50">You both earn 500 loyalty points</div>
-                            </div>
-                        </div>
-                        <div class="input-group input-group-sm mb-2">
-                            <input type="text" class="form-control" readonly
-                                   value="{{ route('portal.register', ['ref' => $customer->referral_code]) }}"
-                                   id="referralLink" style="font-size:11px">
-                            <button class="btn btn-white btn-sm" type="button" id="copyBtn"
-                                    onclick="navigator.clipboard.writeText(document.getElementById('referralLink').value);document.getElementById('copyBtn').innerHTML='<i class=\'ti ti-check\'></i> Copied!'">
-                                <i class="ti ti-copy"></i> Copy
-                            </button>
-                        </div>
-                        <div class="text-white-50 small">
-                            Your code: <strong class="text-white">{{ $customer->referral_code }}</strong>
-                            &middot; {{ $referralCount }} friend(s) referred
-                        </div>
+                    <div class="text-white-50 small mb-3" style="font-size: 12px; line-height: 1.5;">
+                        Both you and your friend receive 500 bonus loyalty points upon their first garage service.
                     </div>
-                </div>
 
-                {{-- Coming soon --}}
-                <div class="card" style="border-radius:16px;border:none;box-shadow:0 1px 8px rgba(0,0,0,.08)">
-                    <div class="card-header">
-                        <h3 class="card-title">
-                            <i class="ti ti-sparkles me-2" style="color:#f59f00"></i>Coming soon
-                        </h3>
+                    <div class="input-group mb-2">
+                        <input type="text" class="form-control font-monospace" readonly
+                               value="{{ route('portal.register', ['ref' => $customer->referral_code]) }}"
+                               id="referralLink" style="font-size: 11.5px; background: #ffffff; color: #111827; font-weight: 600;">
+                        <button class="btn btn-light" type="button" id="copyRefBtn" onclick="copyReferralLink()" style="font-weight: 600; font-size: 12px;">
+                            <i class="ti ti-copy me-1"></i> Copy
+                        </button>
                     </div>
-                    <div class="list-group list-group-flush">
-                        @foreach ([
-                            ['icon' => 'device-mobile', 'label' => 'Mobile app', 'desc' => 'iOS & Android'],
-                            ['icon' => 'discount-2', 'label' => 'Redeem loyalty rewards', 'desc' => 'Points → discounts'],
-                            ['icon' => 'brand-whatsapp', 'label' => 'WhatsApp notifications', 'desc' => 'Real-time updates'],
-                            ['icon' => 'building-store', 'label' => 'Parts marketplace', 'desc' => 'Order online'],
-                            ['icon' => 'chart-bar', 'label' => 'Vehicle analytics', 'desc' => 'Cost & health trends'],
-                        ] as $item)
-                            <div class="list-group-item d-flex align-items-center gap-3 py-2">
-                            <span class="avatar avatar-sm bg-yellow-lt text-yellow flex-shrink-0">
-                                <i class="ti ti-{{ $item['icon'] }}"></i>
-                            </span>
-                                <div class="flex-fill">
-                                    <div class="small fw-semibold">{{ $item['label'] }}</div>
-                                    <div class="text-secondary" style="font-size:11px">{{ $item['desc'] }}</div>
-                                </div>
-                                <span class="badge bg-yellow-lt text-yellow" style="font-size:10px">Soon</span>
-                            </div>
-                        @endforeach
+
+                    <div class="d-flex align-items-center justify-content-between text-white-50 small" style="font-size: 11.5px;">
+                        <span>Your Code: <strong class="text-white font-monospace">{{ $customer->referral_code }}</strong></span>
+                        <span class="text-white fw-semibold">{{ $referralCount }} joined</span>
                     </div>
                 </div>
             </div>
+
+            <!-- Digital Security & Guarantee Card -->
+            <div class="adminator-card">
+                <div class="adminator-card-header">
+                    <h2 class="adminator-card-title">
+                        <i class="ti ti-shield-lock text-primary"></i> System Guarantees
+                    </h2>
+                </div>
+                <div class="adminator-card-body p-3">
+                    <div class="d-flex flex-column gap-3">
+                        <div class="d-flex align-items-start gap-2.5">
+                            <span class="icon-holder c-blue-500 flex-shrink-0" style="width: 32px; height: 32px; font-size: 15px;">
+                                <i class="ti ti-qrcode"></i>
+                            </span>
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 13px;">Tamper-Proof QR Passports</div>
+                                <div class="text-muted small" style="font-size: 11.5px; line-height: 1.4;">Service histories are permanently anchored and verified via unique cryptographic QR tokens.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-2.5">
+                            <span class="icon-holder c-green-500 flex-shrink-0" style="width: 32px; height: 32px; font-size: 15px;">
+                                <i class="ti ti-gauge"></i>
+                            </span>
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 13px;">Odometer Integrity Verification</div>
+                                <div class="text-muted small" style="font-size: 11.5px; line-height: 1.4;">Mileage readings are monotonically audited on every workshop intake to combat rollbacks.</div>
+                            </div>
+                        </div>
+                        <div class="d-flex align-items-start gap-2.5">
+                            <span class="icon-holder c-purple-500 flex-shrink-0" style="width: 32px; height: 32px; font-size: 15px;">
+                                <i class="ti ti-certificate"></i>
+                            </span>
+                            <div>
+                                <div class="fw-bold text-dark" style="font-size: 13px;">Official Roadworthiness Certificates</div>
+                                <div class="text-muted small" style="font-size: 11.5px; line-height: 1.4;">Generate official, printable roadworthiness inspection certificates for vehicle resale.</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+    function copyReferralLink() {
+        const input = document.getElementById('referralLink');
+        navigator.clipboard.writeText(input.value).then(() => {
+            const btn = document.getElementById('copyRefBtn');
+            const originalHtml = btn.innerHTML;
+            btn.innerHTML = '<i class="ti ti-check me-1"></i> Copied!';
+            btn.classList.add('btn-success');
+            btn.classList.remove('btn-light');
+            setTimeout(() => {
+                btn.innerHTML = originalHtml;
+                btn.classList.remove('btn-success');
+                btn.classList.add('btn-light');
+            }, 2500);
+        });
+    }
+</script>
+@endpush

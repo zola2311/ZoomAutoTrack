@@ -51,10 +51,10 @@ class InspectionItemForm
                         Select::make('input_type')
                             ->label('Input Type')
                             ->options([
-                                'pass_fail' => '✅ Pass / ❌ Fail',
-                                'pass_fail_warning' => '✅ Pass / ⚠️ Warning / ❌ Fail',
-                                'numeric' => '🔢 Numeric Value',
-                                'text' => '📝 Text Note',
+                                'pass_fail' => 'Pass / Fail',
+                                'pass_fail_warning' => 'Pass / Warning / Fail',
+                                'numeric' => 'Numeric Measurement',
+                                'text' => 'Inspection Text Notes',
                             ])
                             ->required()
                             ->default('pass_fail'),

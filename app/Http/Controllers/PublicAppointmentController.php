@@ -7,9 +7,10 @@ use App\Models\Appointment;
 use App\Models\Branch;
 use App\Models\Customer;
 use App\Models\Vehicle;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Password;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 use Illuminate\View\View;
 
@@ -34,10 +35,20 @@ class PublicAppointmentController extends Controller
 
     public function store(Request $request): RedirectResponse
     {
+        $existingCustomerByPhone = Customer::where('phone', $request->input('phone'))->first();
+
         $data = $request->validate([
             'full_name' => ['required', 'string', 'max:255'],
             'phone' => ['required', 'string', 'max:30'],
-            'email' => ['nullable', 'email', 'max:255'],
+            'email' => [
+                'nullable',
+                'required_if:want_account,1',
+                'email',
+                'max:255',
+                Rule::unique('customers', 'email')
+                    ->ignore($existingCustomerByPhone?->id)
+                    ->whereNull('deleted_at'),
+            ],
 
             'plate_number' => ['required', 'string', 'max:30'],
             'make' => ['required', 'string', 'max:100'],
@@ -54,6 +65,21 @@ class PublicAppointmentController extends Controller
 
             'want_account' => ['nullable', 'boolean'],
             'password' => ['nullable', 'required_if:want_account,1', 'confirmed', PasswordRule::defaults()],
+        ], [
+            'email.unique' => 'This email address is already registered with another account. Please log in to your account or use your registered contact details.',
+            'email.required_if' => 'An email address is required to create a portal account.',
+            'email.email' => 'Please provide a valid email address (e.g. name@example.com).',
+            'phone.required' => 'A contact phone number is required.',
+            'full_name.required' => 'Your full name is required.',
+            'plate_number.required' => 'Vehicle plate number is required.',
+            'make.required' => 'Vehicle make is required (e.g. Toyota).',
+            'model.required' => 'Vehicle model is required (e.g. Corolla).',
+            'requested_date.required' => 'Please select your preferred appointment date.',
+            'requested_date.after_or_equal' => 'The appointment date cannot be in the past.',
+            'service_types.required' => 'Please select at least one service needed.',
+            'other_service.required_if' => 'Please describe the "Other" service you need.',
+            'password.required_if' => 'Please choose a password for your new account.',
+            'password.confirmed' => 'The password confirmation does not match.',
         ]);
 
         if (in_array('other', $data['service_types']) && empty($data['other_service'])) {
@@ -63,29 +89,34 @@ class PublicAppointmentController extends Controller
         // Single-branch for now — swap for a branch picker once you have more than one.
         $branch = Branch::where('is_active', true)->first() ?? Branch::first();
 
-        // Match an existing guest/customer by phone (the unique, non-nullable
-        // contact field) so repeat visitors don't get duplicate records.
+        // Match an existing guest/customer by phone so repeat visitors don't get duplicate records.
         $customer = Customer::withTrashed()->where('phone', $data['phone'])->first();
 
         if ($customer && $customer->trashed()) {
             $customer->restore();
         }
 
-        if (! $customer) {
-            $customer = Customer::create([
-                'branch_id' => $branch->id,
-                'full_name' => $data['full_name'],
-                'phone' => $data['phone'],
-                'email' => $data['email'] ?? null,
-                'type' => 'individual',
+        try {
+            if (! $customer) {
+                $customer = Customer::create([
+                    'branch_id' => $branch->id,
+                    'full_name' => $data['full_name'],
+                    'phone' => $data['phone'],
+                    'email' => $data['email'] ?? null,
+                    'type' => 'individual',
+                ]);
+            } else {
+                // Keep the record current, but never clobber an email a returning
+                // customer already has on file with a blank one.
+                $customer->fill([
+                    'full_name' => $data['full_name'],
+                    'email' => $data['email'] ?? $customer->email,
+                ])->save();
+            }
+        } catch (UniqueConstraintViolationException $e) {
+            return back()->withInput()->withErrors([
+                'email' => 'This email address or phone number is already registered to another account. Please log in or check your contact details.',
             ]);
-        } else {
-            // Keep the record current, but never clobber an email a returning
-            // customer already has on file with a blank one.
-            $customer->fill([
-                'full_name' => $data['full_name'],
-                'email' => $data['email'] ?? $customer->email,
-            ])->save();
         }
 
         $vehicle = Vehicle::withTrashed()

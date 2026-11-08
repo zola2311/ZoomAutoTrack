@@ -1,6 +1,6 @@
 @extends('layouts.site')
 
-@section('title', 'Our Services — AutoTrack Ethiopia')
+@section('title', 'Our Services — Zoom AutoTrack Ethiopia')
 @section('meta_description', 'Garage services in Addis Ababa — from basic checkups to EV diagnostics')
 
 @section('content')

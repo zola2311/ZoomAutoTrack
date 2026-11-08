@@ -37,10 +37,10 @@ class InspectionItemInfolist
                                 default => 'gray',
                             })
                             ->formatStateUsing(fn ($state) => match ($state) {
-                                'pass_fail' => '✅ Pass / ❌ Fail',
-                                'pass_fail_warning' => '✅ Pass / ⚠️ Warning / ❌ Fail',
-                                'numeric' => '🔢 Numeric Value',
-                                'text' => '📝 Text Note',
+                                'pass_fail' => 'Pass / Fail',
+                                'pass_fail_warning' => 'Pass / Warning / Fail',
+                                'numeric' => 'Numeric Measurement',
+                                'text' => 'Inspection Text Notes',
                                 default => $state,
                             }),
 
@@ -51,13 +51,13 @@ class InspectionItemInfolist
                         TextEntry::make('requires_photo')
                             ->label('Requires Photo')
                             ->badge()
-                            ->formatStateUsing(fn ($state) => $state ? '✅ Yes' : '❌ No')
+                            ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No')
                             ->color(fn ($state) => $state ? 'success' : 'danger'),
 
                         TextEntry::make('requires_voice_note')
                             ->label('Requires Voice Note')
                             ->badge()
-                            ->formatStateUsing(fn ($state) => $state ? '✅ Yes' : '❌ No')
+                            ->formatStateUsing(fn ($state) => $state ? 'Yes' : 'No')
                             ->color(fn ($state) => $state ? 'success' : 'danger'),
 
                         TextEntry::make('is_active')

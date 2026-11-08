@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\JobCard;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class VehicleReadyForPickup extends Notification
+class VehicleReadyForPickup extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -29,6 +30,6 @@ class VehicleReadyForPickup extends Notification
             ->line('Job card: **' . $this->jobCard->job_number . '**')
             ->action('View service details', $vehicle->passportUrl())
             ->line('Please collect your vehicle at your earliest convenience.')
-            ->line('Thank you for choosing AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
     }
 }

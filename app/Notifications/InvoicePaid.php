@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class InvoicePaid extends Notification
+class InvoicePaid extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -27,6 +28,6 @@ class InvoicePaid extends Notification
             ->line('Amount paid: **' . number_format($this->amountPaidNow, 2) . ' ETB**')
             ->line('Total: **' . number_format($this->invoice->total, 2) . ' ETB**')
             ->line('Your account balance is now cleared. Thank you for your business!')
-            ->line('Thank you for choosing AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
     }
 }

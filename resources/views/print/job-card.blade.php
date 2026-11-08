@@ -5,7 +5,7 @@
 @section('content')
     <div class="letterhead">
         <div>
-            <div class="brand">{{ $jobCard->branch->name ?? 'AutoTrack Ethiopia' }}</div>
+            <div class="brand">{{ $jobCard->branch->name ?? 'Zoom AutoTrack Ethiopia' }}</div>
             <div class="branch-info">
                 {{ $jobCard->branch->address ?? '' }}<br>
                 {{ $jobCard->branch->phone ?? '' }}

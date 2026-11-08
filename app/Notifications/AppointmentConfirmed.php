@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Appointment;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class AppointmentConfirmed extends Notification
+class AppointmentConfirmed extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -38,6 +39,6 @@ class AppointmentConfirmed extends Notification
             )
             ->action('View your appointments', route('portal.appointments.index'))
             ->line('Please arrive on time. If you need to reschedule, contact us as early as possible.')
-            ->line('Thank you for choosing AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
     }
 }

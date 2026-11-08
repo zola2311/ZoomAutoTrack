@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Invoice;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class PartialPaymentReceived extends Notification
+class PartialPaymentReceived extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -28,6 +29,6 @@ class PartialPaymentReceived extends Notification
             ->line('Total paid so far: **' . number_format($this->invoice->paid_amount, 2) . ' ETB**')
             ->line('Remaining balance: **' . number_format($this->invoice->balance, 2) . ' ETB**')
             ->line('Thank you for your payment. Please settle the remaining balance at your earliest convenience.')
-            ->line('Thank you for choosing AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
     }
 }

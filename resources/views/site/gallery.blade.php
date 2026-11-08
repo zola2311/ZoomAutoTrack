@@ -1,7 +1,7 @@
 @extends('layouts.site')
 
-@section('title', 'Gallery — AutoTrack Ethiopia')
-@section('meta_description', 'Photos from the AutoTrack Ethiopia workshop in Addis Ababa')
+@section('title', 'Gallery — Zoom AutoTrack Ethiopia')
+@section('meta_description', 'Photos from the Zoom AutoTrack Ethiopia workshop in Addis Ababa')
 
 @section('content')
 <div class="theme-page padding-bottom-70">

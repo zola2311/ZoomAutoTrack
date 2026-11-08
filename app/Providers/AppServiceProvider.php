@@ -4,6 +4,7 @@ namespace App\Providers;
 use App\Models\Customer;
 use App\Models\User;
 use App\Models\Vehicle;
+use App\Observers\CustomerObserver;
 use App\Observers\InvoiceObserver;
 use App\Policies\CustomerPolicy;
 use App\Policies\VehiclePolicy;
@@ -60,6 +61,7 @@ class AppServiceProvider extends ServiceProvider
         PartUsed::observe(PartsUsedObserver::class);
         Invoice::observe(InvoiceObserver::class);
         Appointment::observe(AppointmentObserver::class);
+        Customer::observe(CustomerObserver::class);
         Gate::policy(Appointment::class, AppointmentPolicy::class);
         Gate::policy(JobCard::class, JobCardPolicy::class);
         Gate::policy(Customer::class, CustomerPolicy::class);

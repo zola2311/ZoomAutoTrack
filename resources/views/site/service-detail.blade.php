@@ -1,6 +1,6 @@
 @extends('layouts.site')
 
-@section('title', $service->title . ' — AutoTrack Ethiopia')
+@section('title', $service->title . ' — Zoom AutoTrack Ethiopia')
 @section('meta_description', Str::limit(strip_tags($service->overview), 150))
 
 @section('content')

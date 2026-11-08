@@ -3,11 +3,12 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\URL;
 
-class CustomerVerifyEmail extends Notification
+class CustomerVerifyEmail extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -28,7 +29,7 @@ class CustomerVerifyEmail extends Notification
         );
 
         return (new MailMessage)
-            ->subject('Verify your AutoTrack Ethiopia account')
+            ->subject('Verify your Zoom AutoTrack Ethiopia account')
             ->greeting('Hi ' . $notifiable->full_name . ',')
             ->line('Thanks for signing up! Please verify your email address to access your vehicle history, book appointments, and earn loyalty points.')
             ->action('Verify my email', $url)

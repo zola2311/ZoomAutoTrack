@@ -7,7 +7,7 @@
                         <span style="color:#fff;font-size:20px;font-weight:700;font-family:Arial,sans-serif;">A</span>
                     </td>
                     <td style="padding-left:10px;vertical-align:middle;">
-                        <span style="font-size:18px;font-weight:700;color:#0C447C;font-family:Arial,sans-serif;">AutoTrack Ethiopia</span>
+                        <span style="font-size:18px;font-weight:700;color:#0C447C;font-family:Arial,sans-serif;">Zoom AutoTrack Ethiopia</span>
                     </td>
                 </tr>
             </table>

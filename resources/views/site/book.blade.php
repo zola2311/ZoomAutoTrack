@@ -1,6 +1,6 @@
 @extends('layouts.site')
 
-@section('title', 'Book a Service — AutoTrack Ethiopia')
+@section('title', 'Book a Service — Zoom AutoTrack Ethiopia')
 @section('meta_description', 'Book a garage service in Addis Ababa — no account required')
 
 @section('content')
@@ -50,8 +50,8 @@
                             <div style="position:absolute;top:-20px;right:-20px;width:100px;height:100px;border-radius:50%;background:rgba(255,255,255,0.06)"></div>
                             <div style="position:absolute;bottom:-30px;right:60px;width:70px;height:70px;border-radius:50%;background:rgba(255,255,255,0.04)"></div>
                             <div style="display:flex;align-items:flex-start;gap:16px;position:relative;z-index:1">
-                                <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:22px;">
-                                    ✅
+                                <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+                                    <svg style="width:24px;height:24px;color:#fff;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
                                 </div>
                                 <div>
                                     <div style="color:#fff;font-weight:700;font-size:17px;margin-bottom:4px;">Appointment request sent!</div>

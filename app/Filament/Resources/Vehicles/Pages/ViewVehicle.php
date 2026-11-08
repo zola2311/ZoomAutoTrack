@@ -15,6 +15,20 @@ class ViewVehicle extends ViewRecord
     protected function getHeaderActions(): array
     {
         return [
+            Action::make('viewPassport')
+                ->label('View Digital Passport')
+                ->icon('heroicon-o-globe-alt')
+                ->color('info')
+                ->visible(fn () => filled($this->record->qr_code))
+                ->url(fn () => route('passport.show', $this->record->qr_code))
+                ->openUrlInNewTab(),
+            Action::make('printInspectionCertificate')
+                ->label('Inspection Certificate')
+                ->icon('heroicon-o-document-check')
+                ->color('success')
+                ->visible(fn () => filled($this->record->qr_code))
+                ->url(fn () => route('passport.certificate', $this->record->qr_code))
+                ->openUrlInNewTab(),
             Action::make('printQrSticker')
                 ->label('Print QR Sticker')
                 ->icon(Heroicon::OutlinedQrCode)

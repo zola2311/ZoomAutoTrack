@@ -1,33 +1,41 @@
 @extends('layouts.portal-auth')
 
-@section('title', 'Verify your email')
+@section('title', 'Verify Your Email')
 
 @section('content')
     <div class="text-center mb-3">
-        <i class="ti ti-mail-check" style="font-size:44px;color:#0C447C"></i>
+        <span class="icon-holder c-blue-500" style="width: 48px; height: 48px; font-size: 24px;">
+            <i class="ti ti-mail-check"></i>
+        </span>
     </div>
 
-    <h2 class="h2 text-center mb-3">Verify your email</h2>
+    <h2 class="h4 fw-bold text-dark text-center mb-2">Verify Your Email</h2>
 
-    <p class="text-secondary text-center mb-4">
-        We sent a verification link to your email address. Click it to activate full access to your account.
+    <p class="text-muted small text-center mb-4">
+        We sent a verification link to your email address. Click the link in the message to activate full access to your account.
     </p>
 
     @if (session('status'))
-        <div class="alert alert-success">{{ session('status') }}</div>
+        <div class="alert alert-success alert-dismissible fade show mb-3 border-0 shadow-sm" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="ti ti-circle-check fs-5 me-2 text-success"></i>
+                <div class="small">{{ session('status') }}</div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
     @endif
 
     <form method="POST" action="{{ route('portal.verification.send') }}">
         @csrf
-        <button type="submit" class="btn btn-primary w-100 mb-3">
-            <i class="ti ti-refresh me-1"></i> Resend verification email
+        <button type="submit" class="btn-adminator-primary mb-3">
+            <i class="ti ti-refresh"></i> Resend Verification Email
         </button>
     </form>
 
     <form method="POST" action="{{ route('portal.logout') }}">
         @csrf
-        <button type="submit" class="btn btn-link w-100 text-secondary">
-            <i class="ti ti-logout me-1"></i> Logout
+        <button type="submit" class="btn btn-link w-100 text-muted small text-decoration-none">
+            <i class="ti ti-logout me-1"></i> Sign Out
         </button>
     </form>
 @endsection

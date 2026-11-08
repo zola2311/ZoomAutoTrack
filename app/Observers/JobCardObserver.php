@@ -5,19 +5,34 @@ namespace App\Observers;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use App\Models\JobCard;
+use App\Models\User;
+use App\Notifications\InvoiceGeneratedStaffAlert;
+use App\Notifications\JobCardAssignedNotification;
 use App\Notifications\VehicleReadyForPickup;
 use App\Models\Customer;
+use Filament\Actions\Action;
+use Filament\Notifications\Notification as FilamentNotification;
+use Illuminate\Support\Facades\Log;
 class JobCardObserver
 {
     public function created(JobCard $jobCard): void
     {
         $this->syncVehicleMileage($jobCard);
+
+        if ($jobCard->mechanic_id) {
+            $this->notifyMechanicAssigned($jobCard);
+        }
     }
     public function updated(JobCard $jobCard): void
     {
         if ($jobCard->wasChanged('mileage_at_checkin')) {
             $this->syncVehicleMileage($jobCard);
         }
+
+        if ($jobCard->wasChanged('mechanic_id') && $jobCard->mechanic_id) {
+            $this->notifyMechanicAssigned($jobCard);
+        }
+
         // Only trigger when status changes to completed
         if (! $jobCard->wasChanged('status')) {
             return;
@@ -94,6 +109,9 @@ class JobCardObserver
                 'invoice_id' => $invoice->id,
             ]));
         }
+
+        // Notify Cashiers & Finance staff of new invoice
+        $this->notifyCashiersOfInvoice($invoice);
     }
     protected function syncVehicleMileage(JobCard $jobCard): void
     {
@@ -137,5 +155,114 @@ class JobCardObserver
         $referrer->increment('loyalty_points', 500);
 
         $customer->update(['referral_bonus_awarded_at' => now()]);
+    }
+
+    /**
+     * Notify mechanic via Dashboard Bell Icon and Email when a work order is assigned or delegated.
+     */
+    protected function notifyMechanicAssigned(JobCard $jobCard): void
+    {
+        try {
+            $jobCard->loadMissing(['mechanic', 'vehicle', 'customer']);
+            $mechanic = $jobCard->mechanic;
+
+            if (! $mechanic) {
+                return;
+            }
+
+            $vehicle = $jobCard->vehicle;
+            $priority = strtoupper($jobCard->priority ?: 'Normal');
+
+            // 1. Dashboard Bell Icon Notification for Mechanic
+            FilamentNotification::make()
+                ->title("Work Order Assigned: #{$jobCard->job_number}")
+                ->icon('heroicon-o-wrench-screwdriver')
+                ->iconColor('warning')
+                ->body("Assigned vehicle {$vehicle?->plate_number} ({$vehicle?->make} {$vehicle?->model}). Priority: {$priority}")
+                ->actions([
+                    Action::make('view')
+                        ->button()
+                        ->url("/admin/job-cards/{$jobCard->id}"),
+                ])
+                ->sendToDatabase($mechanic);
+
+            // 2. Email Notification to Mechanic
+            if ($mechanic->email && filter_var($mechanic->email, FILTER_VALIDATE_EMAIL)) {
+                try {
+                    $mechanic->notify(new JobCardAssignedNotification($jobCard));
+                } catch (\Throwable $e) {
+                    Log::warning("Could not dispatch mechanic job email to {$mechanic->email}: " . $e->getMessage());
+                }
+            }
+
+            // 3. Notify Admin(s) that work order has been delegated
+            $admins = User::whereHas('roles', fn ($q) => $q->where('name', 'admin'))
+                ->where('id', '!=', $mechanic->id)
+                ->where('is_active', true)
+                ->get();
+
+            if ($admins->isNotEmpty()) {
+                FilamentNotification::make()
+                    ->title("Job Assigned: #{$jobCard->job_number}")
+                    ->icon('heroicon-o-user-check')
+                    ->iconColor('info')
+                    ->body("Delegated to {$mechanic->name} for vehicle {$vehicle?->plate_number}.")
+                    ->actions([
+                        Action::make('view')
+                            ->button()
+                            ->url("/admin/job-cards/{$jobCard->id}"),
+                    ])
+                    ->sendToDatabase($admins);
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error notifying mechanic of job assignment: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Notify cashiers & finance staff when a job card is completed and invoice is generated.
+     */
+    protected function notifyCashiersOfInvoice(Invoice $invoice): void
+    {
+        try {
+            $invoice->loadMissing(['jobCard.vehicle', 'customer']);
+
+            $financeUsers = User::whereHas('roles', function ($q) {
+                $q->whereIn('name', ['admin', 'manager', 'cashier']);
+            })->where('is_active', true)->get();
+
+            if ($financeUsers->isEmpty()) {
+                return;
+            }
+
+            $totalFormatted = number_format($invoice->total, 2) . ' ETB';
+            $jobRef = $invoice->jobCard?->job_number ? "#{$invoice->jobCard->job_number}" : "Job #{$invoice->job_card_id}";
+
+            // 1. Dashboard Bell Icon Notification
+            FilamentNotification::make()
+                ->title("Invoice Ready: {$invoice->invoice_number}")
+                ->icon('heroicon-o-banknotes')
+                ->iconColor('success')
+                ->body("{$jobRef} complete. Total due: {$totalFormatted}")
+                ->actions([
+                    Action::make('collect')
+                        ->button()
+                        ->url("/admin/invoices/{$invoice->id}"),
+                ])
+                ->sendToDatabase($financeUsers);
+
+            // 2. Email Notifications to Cashiers & Managers
+            foreach ($financeUsers as $fu) {
+                if ($fu->email && filter_var($fu->email, FILTER_VALIDATE_EMAIL)) {
+                    try {
+                        $fu->notify(new InvoiceGeneratedStaffAlert($invoice));
+                    } catch (\Throwable $e) {
+                        Log::warning("Could not dispatch invoice email to {$fu->email}: " . $e->getMessage());
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            Log::error('Error notifying cashiers of new invoice: ' . $e->getMessage());
+        }
     }
 }

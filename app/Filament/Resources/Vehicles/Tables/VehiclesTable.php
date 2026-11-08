@@ -72,6 +72,13 @@ class VehiclesTable
             ->actions([
                 ViewAction::make(),
                 EditAction::make(),
+                Action::make('passport')
+                    ->label('Passport')
+                    ->icon('heroicon-o-globe-alt')
+                    ->color('info')
+                    ->visible(fn ($record) => filled($record->qr_code))
+                    ->url(fn ($record) => route('passport.show', $record->qr_code))
+                    ->openUrlInNewTab(),
                 Action::make('printQrSticker')
                     ->label('QR Sticker')
                     ->icon(Heroicon::OutlinedQrCode)

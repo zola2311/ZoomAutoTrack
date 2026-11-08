@@ -2,13 +2,13 @@
 <html>
 
 <head>
-    <title>@yield('title', 'AutoTrack Ethiopia')</title>
+    <title>@yield('title', 'Zoom AutoTrack Ethiopia')</title>
     <!--meta-->
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.2" />
     <meta name="format-detection" content="telephone=no" />
     <meta name="keywords" content="Mechanic, Garage, Auto Repair, Addis Ababa" />
-    <meta name="description" content="@yield('meta_description', 'AutoTrack Ethiopia — digital garage management and vehicle service history')" />
+    <meta name="description" content="@yield('meta_description', 'Zoom AutoTrack Ethiopia — digital garage management and vehicle service history')" />
     <!--slider revolution-->
     <link rel="stylesheet" type="text/css" href="{{ asset('frontend/vendor/revolution-slider/css/settings.css') }}">
     <!--style-->
@@ -62,7 +62,7 @@
         <div class="vertical-align-table column-1-1">
             <div class="header clearfix">
                 <div class="logo vertical-align-cell">
-                    <h1><a href="{{ url('/') }}" title="AutoTrack Ethiopia">AutoTrack Ethiopia</a></h1>
+                    <h1><a href="{{ url('/') }}" title="Zoom AutoTrack Ethiopia">Zoom AutoTrack Ethiopia</a></h1>
                 </div>
                 <a href="#" class="mobile-menu-switch vertical-align-cell">
                     <span class="line"></span>
@@ -94,7 +94,7 @@
                                 </a>
                             </li>
                             <li>
-                                <a href="{{ route('portal.login') }}" title="Track My Vehicle">
+                                <a href="{{ auth('customer')->check() ? route('portal.dashboard') : route('portal.login') }}" title="Track My Vehicle">
                                     Track My Vehicle
                                 </a>
                             </li>
@@ -125,7 +125,7 @@
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="{{ route('portal.login') }}" title="Track My Vehicle">
+                                    <a href="{{ auth('customer')->check() ? route('portal.dashboard') : route('portal.login') }}" title="Track My Vehicle">
                                         Track My Vehicle
                                     </a>
                                 </li>
@@ -186,7 +186,7 @@
             <div class="column column-1-4">
                 <h6 class="box-header">RESOURCES</h6>
                 <ul class="taxonomies margin-top-30">
-                    <li><a href="{{ route('portal.login') }}" title="Track My Vehicle">Track My Vehicle</a></li>
+                    <li><a href="{{ auth('customer')->check() ? route('portal.dashboard') : route('portal.login') }}" title="Track My Vehicle">Track My Vehicle</a></li>
                     <li><a href="{{ route('booking.create') }}" title="Book a Service">Book a Service</a></li>
                 </ul>
             </div>
@@ -201,7 +201,7 @@
         </div>
     </div>
     <div class="row align-center padding-top-bottom-30">
-        <span class="copyright">© {{ date('Y') }} AutoTrack Ethiopia</span>
+        <span class="copyright">© {{ date('Y') }} Zoom AutoTrack Ethiopia</span>
     </div>
 </div>
 <a href="#top" class="scroll-top animated-element template-arrow-up" title="Scroll to top"></a>

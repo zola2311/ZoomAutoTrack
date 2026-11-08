@@ -92,10 +92,10 @@ class VehicleInspectionsRelationManager extends RelationManager
                                 Select::make('result')
                                     ->label('Result')
                                     ->options([
-                                        'pass' => '✅ Pass',
-                                        'fail' => '❌ Fail',
-                                        'warning' => '⚠️ Warning',
-                                        'n/a' => 'N/A',
+                                        'pass' => 'Pass',
+                                        'fail' => 'Fail',
+                                        'warning' => 'Warning',
+                                        'n/a' => 'Not Applicable (N/A)',
                                     ])
                                     ->required()
                                     ->columnSpan(1),

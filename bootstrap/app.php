@@ -28,6 +28,18 @@ return Application::configure(basePath: dirname(__DIR__))
             return route('filament.admin.auth.login');
         });
 
+        $middleware->redirectUsersTo(function ($request) {
+            if (auth('customer')->check()) {
+                return route('portal.dashboard');
+            }
+
+            if (auth('web')->check()) {
+                return '/admin';
+            }
+
+            return route('portal.dashboard');
+        });
+
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

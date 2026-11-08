@@ -4,10 +4,11 @@ namespace App\Notifications;
 
 use App\Models\Vehicle;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class MaintenanceDueReminder extends Notification
+class MaintenanceDueReminder extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -38,6 +39,6 @@ class MaintenanceDueReminder extends Notification
             ->line('Keeping up with regular service protects your vehicle and maintains its resale value.')
             ->action('View vehicle history', $vehicle->passportUrl())
             ->line('Book an appointment to schedule your next service.')
-            ->line('Thank you for choosing AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
     }
 }

@@ -4,7 +4,7 @@
             <tr>
                 <td class="content-cell" align="center">
                     <p style="margin:0;font-size:12px;color:#b0adb8;">
-                        &copy; {{ date('Y') }} AutoTrack Ethiopia. All rights reserved.<br>
+                        &copy; {{ date('Y') }} Zoom AutoTrack Ethiopia. All rights reserved.<br>
                         <span style="color:#ccc;">Your trusted vehicle service partner.</span>
                     </p>
                 </td>

@@ -3,10 +3,11 @@
 namespace App\Notifications;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-class CustomerPasswordReset extends Notification
+class CustomerPasswordReset extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -25,7 +26,7 @@ class CustomerPasswordReset extends Notification
         ], false));
 
         return (new MailMessage)
-            ->subject('Reset your AutoTrack Ethiopia password')
+            ->subject('Reset your Zoom AutoTrack Ethiopia password')
             ->greeting('Hi ' . $notifiable->full_name . ',')
             ->line('We received a request to reset your password.')
             ->action('Reset password', $url)
