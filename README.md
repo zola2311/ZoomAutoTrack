@@ -1,4 +1,4 @@
-# Zoom AutoTrack Ethiopia 🚗🔧
+# Zoom EV 🚗🔧
 
 **Automotive Garage Management & Digital Vehicle Passport Infrastructure**  
 *Built with Laravel 12, Filament v3, Livewire, SQLite / MySQL, and Spatie Permission.*
@@ -7,7 +7,7 @@
 
 ## 📌 Executive Overview
 
-**Zoom AutoTrack Ethiopia** is an enterprise-grade digital workshop management platform engineered specifically for automotive service centers, fleet managers, and vehicle owners in Ethiopia. 
+**Zoom EV** is an enterprise-grade digital workshop management platform engineered specifically for automotive service centers, fleet managers, and vehicle owners in Ethiopia. 
 
 The platform bridges physical workshop operations with permanent cloud-backed vehicle history records. It provides paperless multi-stage vehicle intake, digital voice notes, automated inventory stock deductions, multi-branch invoicing, and public tamper-evident **Digital Vehicle Passports** resolved via thermal QR code stickers.
 
@@ -28,7 +28,18 @@ The platform bridges physical workshop operations with permanent cloud-backed ve
   `pending` (Intake) → `in_progress` (Under Repair) → `quality_check` (Supervisor Review) → `completed` (Ready for Billing) → `cancelled`.
 * **Automated Stock Deductions:** Adding parts to a job card immediately deducts `quantity_on_hand` in inventory and logs an immutable audit trail in `stock_movements`.
 
-### 3. 👥 Staff Work Delegation & Multi-Channel Notifications
+### 3. 📝 Diagnostic Quotations & Defect Price Estimation
+* **Customer Questionnaire (`/request-a-quote`):** Vehicle owners specify their car details (or choose from registered vehicles), select diagnostic categories, check off observed symptoms (warning lights, noises, leaks, vibrations), specify drivability condition and urgency level.
+* **Photo Damage Documentation:** Customers can upload multiple high-resolution photos of defect areas, dashboard warning lights, or collision damage with instant browser previews.
+* **Workshop Admin Assessment (`/admin/quotations`):** Workshop managers and service advisors review questionnaire details and inspect uploaded defect photos in a gallery.
+* **Official Estimation Builder:** Formulate the diagnostic assessment ("what works will be done") and itemize estimated labor services and replacement spare parts with ETB pricing.
+* **Automated Multi-Channel Notifications:**
+  - Staff are notified instantly via Dashboard Bell Icon and email on new inquiries.
+  - Customers receive an immediate confirmation with reference number `#QUO-XXXXX`.
+  - Admin dispatches the official formal Quotation Report to the customer's email with 1 click.
+* **1-Click Conversion:** Approved quotations can be converted directly into active Workshop Job Cards or Appointments.
+
+### 4. 👥 Staff Work Delegation & Multi-Channel Notifications
 * **Technician Task Delegation:** When a job card is assigned or reassigned to a mechanic, the system dispatches:
   1. A queued email with complete work details (plate, model, customer symptoms, priority, direct link).
   2. An instant notification badge in the workshop dashboard bell icon (`notifications` table).
@@ -36,13 +47,13 @@ The platform bridges physical workshop operations with permanent cloud-backed ve
 * **Front-Desk Alerts:** Receptionists, service advisors, and managers receive instant notifications whenever a new customer registers or requests an appointment.
 * **Cashier Settlements:** Cashiers and managers are automatically notified the moment a job card is marked `completed` and the final invoice is ready for payment.
 
-### 4. 💻 Customer Portal (Adminator UI)
+### 5. 💻 Customer Portal (Adminator UI)
 * **Modern Dual-Theme Portal:** Beautiful light and dark mode themes tailored for Ethiopian vehicle owners.
 * **Fleet Dashboard:** View all registered vehicles, maintenance schedules, loyalty points, and upcoming bookings in one place.
 * **Self-Service Appointments (`/book-a-service` & `/portal/appointments`):** Schedule service visits with automatic slot checks and staff notifications.
 * **Digital History & Invoices:** Search and download past service records and itemized invoices.
 
-### 5. 🔐 Security & Role-Based Access Control (RBAC)
+### 6. 🔐 Security & Role-Based Access Control (RBAC)
 * **7 Tailored Staff Roles:** `admin`, `manager`, `service_advisor`, `mechanic`, `receptionist`, `cashier`, `inventory_manager`.
 * **81 Granular Permissions:** Strictly governed by Laravel Gate policies and Spatie Laravel Permission.
 * **Interactive Matrix Manager (`/admin/role-permissions`):** System administrators can toggle individual permissions or entire module groups with lockout safeguards.
@@ -67,22 +78,22 @@ Ensure your hosting server meets the following requirements:
 
 ## 🚀 Production Hosting & Deployment Guide
 
-Follow these step-by-step instructions to host **Zoom AutoTrack** on any VPS, cloud server, or shared hosting environment (e.g. cPanel, DigitalOcean, Hetzner, AWS):
+Follow these step-by-step instructions to host **Zoom EV** on any VPS, cloud server, or shared hosting environment (e.g. cPanel, DigitalOcean, Hetzner, AWS):
 
 ### Step 1: Upload / Clone the Codebase
 Extract your project files or clone the repository to your server's web root:
 ```bash
 cd /var/www
-git clone <your-repository-url> zoomautotrack
-cd /var/www/zoomautotrack
+git clone <your-repository-url> zoomev
+cd /var/www/zoomev
 ```
 
 ### Step 2: Set File Permissions
 Ensure the web server user (`www-data`, `nginx`, or `apache`) has read/write permissions to `storage` and `bootstrap/cache`:
 ```bash
-sudo chown -R www-data:www-data /var/www/zoomautotrack
-sudo chmod -R 775 /var/www/zoomautotrack/storage
-sudo chmod -R 775 /var/www/zoomautotrack/bootstrap/cache
+sudo chown -R www-data:www-data /var/www/zoomev
+sudo chmod -R 775 /var/www/zoomev/storage
+sudo chmod -R 775 /var/www/zoomev/bootstrap/cache
 ```
 
 ### Step 3: Configure Environment Variables
@@ -93,7 +104,7 @@ nano .env
 ```
 Key production variables to check:
 ```ini
-APP_NAME="Zoom AutoTrack"
+APP_NAME="Zoom EV"
 APP_ENV=production
 APP_DEBUG=false
 APP_URL=https://your-domain.et
@@ -159,13 +170,13 @@ php artisan icons:cache
 ## 🌐 Web Server Virtual Host Configuration
 
 ### Nginx Virtual Host (Recommended)
-Create `/etc/nginx/sites-available/zoomautotrack.conf`:
+Create `/etc/nginx/sites-available/zoomev.conf`:
 ```nginx
 server {
     listen 80;
     listen [::]:80;
     server_name your-domain.et www.your-domain.et;
-    root /var/www/zoomautotrack/public;
+    root /var/www/zoomev/public;
 
     add_header X-Frame-Options "SAMEORIGIN";
     add_header X-Content-Type-Options "nosniff";
@@ -203,16 +214,16 @@ Ensure `DocumentRoot` points directly to the `/public` directory:
 ```apache
 <VirtualHost *:80>
     ServerName your-domain.et
-    DocumentRoot /var/www/zoomautotrack/public
+    DocumentRoot /var/www/zoomev/public
 
-    <Directory /var/www/zoomautotrack/public>
+    <Directory /var/www/zoomev/public>
         Options -Indexes +FollowSymLinks
         AllowOverride All
         Require all granted
     </Directory>
 
-    ErrorLog ${APACHE_LOG_DIR}/zoomautotrack_error.log
-    CustomLog ${APACHE_LOG_DIR}/zoomautotrack_access.log combined
+    ErrorLog ${APACHE_LOG_DIR}/zoomev_error.log
+    CustomLog ${APACHE_LOG_DIR}/zoomev_access.log combined
 </VirtualHost>
 ```
 
@@ -223,24 +234,24 @@ Ensure `DocumentRoot` points directly to the `/public` directory:
 ### 1. Background Queue Worker (Supervisor)
 To process queued emails and notifications in the background without slowing down user interactions, configure **Supervisor**:
 
-Create `/etc/supervisor/conf.d/zoomautotrack-worker.conf`:
+Create `/etc/supervisor/conf.d/zoomev-worker.conf`:
 ```ini
-[program:zoomautotrack-worker]
+[program:zoomev-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/zoomautotrack/artisan queue:work database --sleep=3 --tries=3 --max-time=3600
+command=php /var/www/zoomev/artisan queue:work database --sleep=3 --tries=3 --max-time=3600
 autostart=true
 autorestart=true
 user=www-data
 numprocs=2
 redirect_stderr=true
-stdout_logfile=/var/www/zoomautotrack/storage/logs/worker.log
+stdout_logfile=/var/www/zoomev/storage/logs/worker.log
 stopwaitsecs=3600
 ```
 Then start the worker:
 ```bash
 sudo supervisorctl reread
 sudo supervisorctl update
-sudo supervisorctl start zoomautotrack-worker:*
+sudo supervisorctl start zoomev-worker:*
 ```
 
 ### 2. Scheduled Cron Job (Maintenance Reminders)
@@ -250,7 +261,7 @@ crontab -e -u www-data
 ```
 Add the following line:
 ```cron
-* * * * * cd /var/www/zoomautotrack && php artisan schedule:run >> /dev/null 2>&1
+* * * * * cd /var/www/zoomev && php artisan schedule:run >> /dev/null 2>&1
 ```
 This automatically runs maintenance mileage checks and overdue vehicle alerts.
 
@@ -300,5 +311,5 @@ This automatically runs maintenance mileage checks and overdue vehicle alerts.
 
 ## 📄 License & Intellectual Property
 
-Copyright &copy; 2026 **Zoom AutoTrack Ethiopia**. All rights reserved.  
+Copyright &copy; 2026 **Zoom EV**. All rights reserved.  
 Unauthorized copying, modification, distribution, or commercial deployment without prior written authorization is strictly prohibited.

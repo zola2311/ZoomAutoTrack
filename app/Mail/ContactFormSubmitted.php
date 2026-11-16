@@ -21,7 +21,7 @@ class ContactFormSubmitted extends Mailable implements ShouldQueue
     public function build(): self
     {
         return $this
-            ->subject('New contact form message — Zoom AutoTrack Ethiopia')
+            ->subject('New contact form message — Zoom EV')
             ->replyTo($this->senderEmail, $this->senderName)
             ->markdown('emails.contact-form');
     }

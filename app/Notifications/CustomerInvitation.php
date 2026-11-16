@@ -26,9 +26,9 @@ class CustomerInvitation extends Notification implements ShouldQueue
         ], false));
 
         return (new MailMessage)
-            ->subject('You\'ve been added to Zoom AutoTrack Ethiopia')
+            ->subject('You\'ve been added to Zoom EV')
             ->greeting('Hi ' . $notifiable->full_name . ',')
-            ->line('A garage account has been created for you on **Zoom AutoTrack Ethiopia**.')
+            ->line('A garage account has been created for you on **Zoom EV**.')
             ->line('You can now view your vehicle service history, book appointments, and track your loyalty points online.')
             ->action('Set your password', $url)
             ->line('This link expires in **60 minutes**.')

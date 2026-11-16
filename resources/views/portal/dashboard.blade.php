@@ -54,7 +54,7 @@
                             <span class="fw-bold text-white" style="font-size: 13px;">Online & Operational</span>
                         </div>
                         <div class="text-white-50 small" style="font-size: 11.5px;">
-                            <i class="ti ti-map-pin me-1 text-info"></i> Zoom AutoTrack Bole (HQ)
+                            <i class="ti ti-map-pin me-1 text-info"></i> Zoom EV Bole (HQ)
                         </div>
                         <div class="text-white-50 small mt-1" style="font-size: 11.5px;">
                             <i class="ti ti-calendar me-1 text-info"></i> {{ now()->format('D, M j, Y') }}
@@ -195,7 +195,7 @@
                             <i class="ti ti-car-off"></i>
                         </div>
                         <h4 class="fw-bold mb-1">No vehicles currently registered</h4>
-                        <p class="text-muted small mb-3">When you service your vehicle at Zoom AutoTrack Bole, it will automatically appear here with a full digital passport.</p>
+                        <p class="text-muted small mb-3">When you service your vehicle at Zoom EV Bole, it will automatically appear here with a full digital passport.</p>
                         <a href="{{ route('portal.appointments.create') }}" class="btn-adminator-primary">
                             <i class="ti ti-calendar-plus"></i> Schedule First Visit
                         </a>

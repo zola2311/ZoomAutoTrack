@@ -39,6 +39,6 @@ class AppointmentConfirmed extends Notification implements ShouldQueue
             )
             ->action('View your appointments', route('portal.appointments.index'))
             ->line('Please arrive on time. If you need to reschedule, contact us as early as possible.')
-            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom EV.');
     }
 }

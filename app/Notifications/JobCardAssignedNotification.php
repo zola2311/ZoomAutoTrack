@@ -29,9 +29,9 @@ class JobCardAssignedNotification extends Notification implements ShouldQueue
         $priorityLabel = strtoupper($job->priority ?: 'NORMAL');
 
         $mail = (new MailMessage)
-            ->subject("Zoom AutoTrack: New Work Order Assigned — Job #{$job->job_number} ({$vehicle?->plate_number})")
+            ->subject("Zoom EV: New Work Order Assigned — Job #{$job->job_number} ({$vehicle?->plate_number})")
             ->greeting("Hello {$mechanicName},")
-            ->line("You have been assigned as the lead mechanic for a new work order at Zoom AutoTrack.")
+            ->line("You have been assigned as the lead mechanic for a new work order at Zoom EV.")
             ->line("**Work Order Reference:** #{$job->job_number}")
             ->line("**Priority Level:** {$priorityLabel}")
             ->line("**Vehicle Details:**")

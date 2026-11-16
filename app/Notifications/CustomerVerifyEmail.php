@@ -29,7 +29,7 @@ class CustomerVerifyEmail extends Notification implements ShouldQueue
         );
 
         return (new MailMessage)
-            ->subject('Verify your Zoom AutoTrack Ethiopia account')
+            ->subject('Verify your Zoom EV account')
             ->greeting('Hi ' . $notifiable->full_name . ',')
             ->line('Thanks for signing up! Please verify your email address to access your vehicle history, book appointments, and earn loyalty points.')
             ->action('Verify my email', $url)

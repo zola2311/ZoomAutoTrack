@@ -1,7 +1,7 @@
 @extends('layouts.site')
 
-@section('title', 'About Us — Zoom AutoTrack Ethiopia')
-@section('meta_description', 'About Zoom AutoTrack Ethiopia — a digitally-tracked garage in Addis Ababa')
+@section('title', 'About Us — Zoom EV')
+@section('meta_description', 'About Zoom EV — a digitally-tracked garage in Addis Ababa')
 
 @section('content')
     <div class="theme-page">

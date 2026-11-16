@@ -28,6 +28,6 @@ class InvoicePaid extends Notification implements ShouldQueue
             ->line('Amount paid: **' . number_format($this->amountPaidNow, 2) . ' ETB**')
             ->line('Total: **' . number_format($this->invoice->total, 2) . ' ETB**')
             ->line('Your account balance is now cleared. Thank you for your business!')
-            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom EV.');
     }
 }

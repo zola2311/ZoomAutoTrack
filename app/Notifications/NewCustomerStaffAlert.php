@@ -27,9 +27,9 @@ class NewCustomerStaffAlert extends Notification implements ShouldQueue
         $code = $c->customer_code ?: 'CUST-' . str_pad($c->id, 4, '0', STR_PAD_LEFT);
 
         return (new MailMessage)
-            ->subject("Zoom AutoTrack: New Customer Registered — {$c->full_name} ({$code})")
+            ->subject("Zoom EV: New Customer Registered — {$c->full_name} ({$code})")
             ->greeting("Hello {$recipientName},")
-            ->line("A new customer profile has just registered on **Zoom AutoTrack Ethiopia**.")
+            ->line("A new customer profile has just registered on **Zoom EV**.")
             ->line("**Customer Profile:**")
             ->line("• **Full Name:** {$c->full_name}")
             ->line("• **Phone Number:** {$c->phone}")

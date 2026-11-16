@@ -36,7 +36,7 @@ class NewBookingStaffAlert extends Notification
         $mail = (new MailMessage)
             ->subject("🚗 New Service Booking: {$vehicle?->plate_number} ({$customer?->full_name})")
             ->greeting("Hello {$recipientName},")
-            ->line("A new service booking has just been requested on **Zoom AutoTrack Ethiopia**.")
+            ->line("A new service booking has just been requested on **Zoom EV**.")
             ->line("**Customer Details:**")
             ->line("• **Name:** {$customer?->full_name}")
             ->line("• **Phone:** {$customer?->phone}")

@@ -12,7 +12,7 @@ class TestUsersSeeder extends Seeder
     public function run(): void
     {
         $branchId = Branch::first()?->id ?? Branch::create([
-            'name'      => 'AutoTrack Bole',
+            'name'      => 'Zoom EV Bole',
             'phone'     => '+251 11 123 4567',
             'address'   => 'Bole Road, Addis Ababa',
             'is_active' => true,

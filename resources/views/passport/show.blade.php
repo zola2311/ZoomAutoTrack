@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{ $vehicle->year ? $vehicle->year . ' ' : '' }}{{ $vehicle->make }} {{ $vehicle->model }} ({{ $vehicle->plate_number }}) — Verified Digital Passport</title>
-    <meta name="description" content="Verified Digital Vehicle Service History, Health Score, and Odometer Passport powered by Zoom AutoTrack Ethiopia.">
+    <meta name="description" content="Verified Digital Vehicle Service History, Health Score, and Odometer Passport powered by Zoom EV.">
     <meta name="robots" content="noindex, follow">
 
     <!-- Fonts & Icons -->
@@ -718,7 +718,7 @@
         <footer style="margin-top:4rem; padding-top:2rem; border-top:1px solid var(--border); text-align:center; color:var(--text-dim); font-size:0.775rem;">
             <div style="display:flex; justify-content:center; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
                 <i class="ti ti-shield-check" style="color:var(--accent-emerald); font-size:1.1rem;"></i>
-                <strong style="color:var(--text-muted)">Zoom AutoTrack Ethiopia Trust Network</strong> &bull; Digital Vehicle Passport Infrastructure
+                <strong style="color:var(--text-muted)">Zoom EV Trust Network</strong> &bull; Digital Vehicle Passport Infrastructure
             </div>
             <p>This public document is cryptographically verified against server UUID {{ $vehicle->qr_code }}.</p>
         </footer>

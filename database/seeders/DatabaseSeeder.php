@@ -144,7 +144,7 @@ class DatabaseSeeder extends Seeder
 
         // 3. Base Branch setup
         DB::table('branches')->updateOrInsert(
-            ['name' => 'AutoTrack Bole'],
+            ['name' => 'Zoom EV Bole'],
             [
                 'phone'      => '+251 11 123 4567',
                 'address'    => 'Bole Road, Addis Ababa',
@@ -154,7 +154,7 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        $branchId = DB::table('branches')->where('name', 'AutoTrack Bole')->value('id');
+        $branchId = DB::table('branches')->where('name', 'Zoom EV Bole')->value('id');
 
         // 4. Default Admin User setup
         $admin = User::updateOrCreate(

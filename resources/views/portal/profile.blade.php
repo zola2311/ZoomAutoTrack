@@ -81,7 +81,7 @@
                     </h2>
                 </div>
                 <div class="adminator-card-body small text-muted">
-                    <div class="fw-bold text-dark mb-1">Zoom AutoTrack Bole (HQ)</div>
+                    <div class="fw-bold text-dark mb-1">Zoom EV Bole (HQ)</div>
                     <div>Bole Road, Addis Ababa, Ethiopia</div>
                     <div class="mt-2 text-dark"><i class="ti ti-phone me-1 text-primary"></i>+251 11 123 4567</div>
                 </div>

@@ -29,6 +29,6 @@ class PartialPaymentReceived extends Notification implements ShouldQueue
             ->line('Total paid so far: **' . number_format($this->invoice->paid_amount, 2) . ' ETB**')
             ->line('Remaining balance: **' . number_format($this->invoice->balance, 2) . ' ETB**')
             ->line('Thank you for your payment. Please settle the remaining balance at your earliest convenience.')
-            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom EV.');
     }
 }

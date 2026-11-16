@@ -167,7 +167,7 @@
                             </h2>
                         </div>
                         <div class="adminator-card-body">
-                            <div class="h5 fw-bold text-dark mb-1">Zoom AutoTrack Bole Workshop</div>
+                            <div class="h5 fw-bold text-dark mb-1">Zoom EV Bole Workshop</div>
                             <div class="text-muted small">Bole Road, Near Airport Roundabout, Addis Ababa</div>
                             <div class="text-muted small mt-2">
                                 <i class="ti ti-phone me-1 text-primary"></i> +251 11 123 4567

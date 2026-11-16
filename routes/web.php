@@ -8,6 +8,7 @@ use App\Http\Controllers\Portal\ProfileController;
 use App\Http\Controllers\PrintController;
 
 use App\Http\Controllers\PublicAppointmentController;
+use App\Http\Controllers\QuotationController;
 use App\Http\Controllers\VehiclePassportController;
 use App\Http\Controllers\VehicleQrStickerController;
 use App\Http\Controllers\VoiceRecordingController;
@@ -31,6 +32,14 @@ Route::get('/services/{service}', [ServiceController::class, 'show'])->name('ser
 
 Route::get('/book-a-service', [PublicAppointmentController::class, 'create'])->name('booking.create');
 Route::post('/book-a-service', [PublicAppointmentController::class, 'store'])->name('booking.store');
+
+// Quotation & Price Estimation Questionnaire
+Route::get('/request-a-quote', [QuotationController::class, 'create'])->name('quotation.create');
+Route::get('/quote', fn () => redirect()->route('quotation.create'));
+Route::get('/get-a-quote', fn () => redirect()->route('quotation.create'));
+Route::post('/request-a-quote', [QuotationController::class, 'store'])->name('quotation.store');
+Route::get('/quote-confirmation/{quotationNumber}', [QuotationController::class, 'confirmation'])->name('quotation.confirmation');
+Route::get('/quote/{quotationNumber}/pdf', [QuotationController::class, 'downloadPdf'])->name('quotation.pdf');
 
 Route::get('/contact', [ContactController::class, 'show'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');

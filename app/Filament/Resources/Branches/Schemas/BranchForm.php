@@ -22,7 +22,7 @@ class BranchForm
                             ->label('Branch Name')
                             ->required()
                             ->maxLength(150)
-                            ->placeholder('e.g. Zoom AutoTrack Bole'),
+                            ->placeholder('e.g. Zoom EV Bole'),
 
                         TextInput::make('phone')
                             ->label('Phone Number')

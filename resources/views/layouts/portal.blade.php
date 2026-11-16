@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>@yield('title', 'Customer Portal') — Zoom AutoTrack Ethiopia</title>
+    <title>@yield('title', 'Customer Portal') — Zoom EV</title>
 
     <!-- Theme State Initializer (Prevents FOUC) -->
     <script>
@@ -508,7 +508,7 @@
             <a href="{{ route('portal.dashboard') }}" class="d-flex align-items-center">
                 <span class="logo-box">AT</span>
                 <div>
-                    <div class="logo-text">Zoom AutoTrack</div>
+                    <div class="logo-text">Zoom EV</div>
                     <div class="logo-sub">Customer Portal</div>
                 </div>
             </a>
@@ -541,6 +541,14 @@
                 </a>
             </li>
             <li class="nav-item">
+                <a class="sidebar-link {{ request()->routeIs('quotation.*') ? 'active' : '' }}" href="{{ route('quotation.create') }}">
+                    <span class="icon-holder c-deep-orange-500">
+                        <i class="ti ti-calculator"></i>
+                    </span>
+                    <span class="title">Get Price Quote</span>
+                </a>
+            </li>
+            <li class="nav-item">
                 <a class="sidebar-link {{ request()->routeIs('portal.profile') ? 'active' : '' }}" href="{{ route('portal.profile') }}">
                     <span class="icon-holder c-green-500">
                         <i class="ti ti-user-cog"></i>
@@ -554,7 +562,7 @@
         <div class="sidebar-footer-card">
             <div class="d-flex align-items-center mb-1">
                 <span style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; display: inline-block; margin-right: 6px;"></span>
-                <span class="fw-bold" style="font-size: 12px; color: var(--adminator-title);">Zoom AutoTrack Bole (HQ)</span>
+                <span class="fw-bold" style="font-size: 12px; color: var(--adminator-title);">Zoom EV Bole (HQ)</span>
             </div>
             <div class="text-muted small" style="font-size: 11px;">
                 Bole Road, Addis Ababa
@@ -578,7 +586,7 @@
                     <span class="badge bg-primary-subtle text-primary border border-primary-subtle" style="font-size: 11.5px; font-weight: 600;">
                         <i class="ti ti-shield-check me-1"></i> Official Customer Portal
                     </span>
-                    <span class="text-muted small">&bull; Zoom AutoTrack Ethiopia</span>
+                    <span class="text-muted small">&bull; Zoom EV</span>
                 </div>
             </div>
 
@@ -646,7 +654,7 @@
 
         <!-- Adminator Footer -->
         <footer class="py-3 px-4 text-center border-top small" style="background-color: var(--adminator-card-bg); border-color: var(--adminator-border) !important; color: var(--adminator-muted);">
-            &copy; {{ date('Y') }} <strong style="color: var(--adminator-title);">Zoom AutoTrack Ethiopia</strong>. Digital Garage Management & Vehicle Service History System.
+            &copy; {{ date('Y') }} <strong style="color: var(--adminator-title);">Zoom EV</strong>. Digital Garage Management & Vehicle Service History System.
         </footer>
     </div>
 

@@ -23,7 +23,7 @@
                     <i class="ti ti-clipboard-off"></i>
                 </div>
                 <h4 class="fw-bold mb-1">No completed service records found</h4>
-                <p class="text-muted small mb-3">Once your vehicles are serviced and finalized at Zoom AutoTrack Bole, their full diagnostic history and invoices will appear here.</p>
+                <p class="text-muted small mb-3">Once your vehicles are serviced and finalized at Zoom EV Bole, their full diagnostic history and invoices will appear here.</p>
                 <a href="{{ route('portal.appointments.create') }}" class="btn-adminator-primary">
                     <i class="ti ti-calendar-plus"></i> Book a Service
                 </a>
@@ -86,7 +86,7 @@
                                         {{ $job->customer_complaint ?: 'Scheduled Routine Maintenance & Inspection' }}
                                     </div>
                                     <div class="text-muted small" style="font-size: 11.5px;">
-                                        Branch: {{ $job->branch ? $job->branch->name : 'Zoom AutoTrack Bole (HQ)' }}
+                                        Branch: {{ $job->branch ? $job->branch->name : 'Zoom EV Bole (HQ)' }}
                                     </div>
                                 </td>
                                 <td class="py-3">

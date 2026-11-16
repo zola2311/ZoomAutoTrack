@@ -30,6 +30,6 @@ class VehicleReadyForPickup extends Notification implements ShouldQueue
             ->line('Job card: **' . $this->jobCard->job_number . '**')
             ->action('View service details', $vehicle->passportUrl())
             ->line('Please collect your vehicle at your earliest convenience.')
-            ->line('Thank you for choosing Zoom AutoTrack Ethiopia.');
+            ->line('Thank you for choosing Zoom EV.');
     }
 }

@@ -2,11 +2,13 @@
 
 namespace App\Providers;
 use App\Models\Customer;
+use App\Models\Quotation;
 use App\Models\User;
 use App\Models\Vehicle;
 use App\Observers\CustomerObserver;
 use App\Observers\InvoiceObserver;
 use App\Policies\CustomerPolicy;
+use App\Policies\QuotationPolicy;
 use App\Policies\VehiclePolicy;
 use App\Models\PartUsed;
 use App\Models\Payment;
@@ -72,5 +74,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(User::class, UserPolicy::class);
         Gate::policy(InspectionItem::class, InspectionItemPolicy::class);
         Gate::policy(Branch::class, BranchPolicy::class);
+        Gate::policy(Quotation::class, QuotationPolicy::class);
     }
 }

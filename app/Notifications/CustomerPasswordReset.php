@@ -26,7 +26,7 @@ class CustomerPasswordReset extends Notification implements ShouldQueue
         ], false));
 
         return (new MailMessage)
-            ->subject('Reset your Zoom AutoTrack Ethiopia password')
+            ->subject('Reset your Zoom EV password')
             ->greeting('Hi ' . $notifiable->full_name . ',')
             ->line('We received a request to reset your password.')
             ->action('Reset password', $url)

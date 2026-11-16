@@ -1,0 +1,29 @@
+<VirtualHost *:80>
+    ServerName your-domain.com
+    ServerAlias www.your-domain.com
+    Redirect permanent / https://your-domain.com/
+</VirtualHost>
+
+<VirtualHost *:443>
+    ServerName your-domain.com
+    ServerAlias www.your-domain.com
+
+    DocumentRoot /var/www/zoomev/public
+
+    SSLEngine on
+    SSLCertificateFile /etc/letsencrypt/live/your-domain.com/fullchain.pem
+    SSLCertificateKeyFile /etc/letsencrypt/live/your-domain.com/privkey.pem
+
+    # Allow large uploads for defect photos and voice notes
+    LimitRequestBody 104857600
+
+    <Directory /var/www/zoomev/public>
+        Options -Indexes +FollowSymLinks
+        AllowOverride All
+        Require all granted
+    </Directory>
+
+    # Custom Error and Access Logs
+    ErrorLog ${APACHE_LOG_DIR}/zoomev_error.log
+    CustomLog ${APACHE_LOG_DIR}/zoomev_access.log combined
+</VirtualHost>

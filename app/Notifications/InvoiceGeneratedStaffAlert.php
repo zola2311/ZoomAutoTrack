@@ -31,7 +31,7 @@ class InvoiceGeneratedStaffAlert extends Notification implements ShouldQueue
         $jobRef = $inv->jobCard?->job_number ? "#{$inv->jobCard->job_number}" : "Job Card #{$inv->job_card_id}";
 
         return (new MailMessage)
-            ->subject("Zoom AutoTrack: New Invoice Ready for Collection — {$inv->invoice_number} ({$totalFormatted})")
+            ->subject("Zoom EV: New Invoice Ready for Collection — {$inv->invoice_number} ({$totalFormatted})")
             ->greeting("Hello {$recipientName},")
             ->line("A work order has been completed and an invoice is now pending collection and settlement.")
             ->line("**Invoice Reference:** {$inv->invoice_number}")

@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <title>@yield('title', 'Client Portal') — Zoom AutoTrack Ethiopia</title>
+    <title>@yield('title', 'Client Portal') — Zoom EV</title>
 
     <!-- Theme Initializer -->
     <script>
@@ -203,7 +203,7 @@
 
             <a href="{{ route('home') }}" class="d-inline-block text-decoration-none text-dark">
                 <span class="auth-logo-box">AT</span>
-                <div class="h4 fw-bold text-dark mb-0">Zoom AutoTrack Ethiopia</div>
+                <div class="h4 fw-bold text-dark mb-0">Zoom EV</div>
                 <div class="text-muted small text-uppercase" style="font-size: 11px; letter-spacing: 0.08em;">
                     Digital Vehicle Service Portal
                 </div>
@@ -216,7 +216,7 @@
         </div>
 
         <div class="text-center mt-4 text-muted small">
-            &copy; {{ date('Y') }} Zoom AutoTrack Ethiopia. All rights reserved.
+            &copy; {{ date('Y') }} Zoom EV. All rights reserved.
         </div>
     </div>
 

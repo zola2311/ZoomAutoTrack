@@ -110,7 +110,7 @@
                                     @endif
                                 </td>
                                 <td class="pe-3 py-3">
-                                    <div class="fw-semibold text-dark" style="font-size: 12.5px;">Zoom AutoTrack Bole (HQ)</div>
+                                    <div class="fw-semibold text-dark" style="font-size: 12.5px;">Zoom EV Bole (HQ)</div>
                                     <div class="text-muted small" style="font-size: 11px;">Bole Road, Addis Ababa</div>
                                 </td>
                             </tr>

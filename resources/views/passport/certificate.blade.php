@@ -180,7 +180,7 @@
 
     <div class="cert-container">
         <div class="cert-header">
-            <div class="cert-org">AutoTrack Ethiopia &bull; Certified Inspection Network</div>
+            <div class="cert-org">Zoom EV &bull; Certified Inspection Network</div>
             <h1 class="cert-title">CERTIFICATE OF VEHICLE INSPECTION</h1>
             <div class="cert-subtitle">Official Roadworthiness, Diagnostic & Verification Record</div>
         </div>
@@ -200,7 +200,7 @@
                 <div class="data-row"><span class="data-label">Certified Odometer:</span> <span class="data-val">{{ number_format($vehicle->current_mileage) }} KM</span></div>
                 <div class="data-row"><span class="data-label">Certificate Date:</span> <span class="data-val">{{ now()->format('d F Y') }}</span></div>
                 <div class="data-row"><span class="data-label">Certificate Serial:</span> <span class="data-val" style="font-family:monospace;">AT-CERT-{{ strtoupper(substr($vehicle->qr_code, 0, 8)) }}</span></div>
-                <div class="data-row"><span class="data-label">Testing Branch:</span> <span class="data-val">{{ $vehicle->branch->name ?? 'AutoTrack Central Workshop' }}</span></div>
+                <div class="data-row"><span class="data-label">Testing Branch:</span> <span class="data-val">{{ $vehicle->branch->name ?? 'Zoom EV Central Workshop' }}</span></div>
                 <div class="data-row"><span class="data-label">Inspector Name:</span> <span class="data-val">{{ $latestInspection?->inspector?->name ?? 'Lead QA Inspector' }}</span></div>
             </div>
         </div>
@@ -283,8 +283,7 @@
 
             <div class="gold-seal">
                 ★ OFFICIAL ★<br>
-                AUTOTRACK<br>
-                ETHIOPIA<br>
+                ZOOM EV<br>
                 SEAL OF TRUST
             </div>
 

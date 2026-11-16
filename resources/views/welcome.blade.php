@@ -1,7 +1,7 @@
 @extends('layouts.site')
 
-@section('title', 'Zoom AutoTrack Ethiopia — Digital Garage Management')
-@section('meta_description', 'Zoom AutoTrack Ethiopia — digital garage management and vehicle service history')
+@section('title', 'Zoom EV — Digital Garage Management')
+@section('meta_description', 'Zoom EV — digital garage management and vehicle service history')
 
 @section('content')
     <!-- Slider Revolution -->
@@ -137,26 +137,7 @@
                 </div>
             </div>
 
-            <!-- Digital Vehicle Passport Verification Lookup -->
-            <div class="row full-width" style="background: #0B0F17; padding: 40px 15px; border-top: 1px solid rgba(255,255,255,0.08); border-bottom: 1px solid rgba(255,255,255,0.08);">
-                <div class="row" style="max-width: 900px; margin: 0 auto; text-align: center;">
-                    <div style="display: inline-flex; align-items: center; gap: 6px; background: rgba(16,185,129,0.12); color: #34D399; border: 1px solid rgba(16,185,129,0.3); border-radius: 999px; padding: 4px 14px; font-size: 11px; font-weight: 700; text-transform: uppercase; margin-bottom: 12px;">
-                        ★ Official Trust Registry ★
-                    </div>
-                    <h3 style="color: #F8FAFC; margin-bottom: 8px; font-size: 24px; font-weight: 800; letter-spacing: -0.02em;">
-                        VERIFY A VEHICLE'S DIGITAL SERVICE PASSPORT
-                    </h3>
-                    <p style="color: #94A3B8; font-size: 14px; margin-bottom: 24px; max-width: 650px; margin-left: auto; margin-right: auto;">
-                        Buying a used car or checking repair history in Ethiopia? Enter any Plate Number or Chassis / VIN number to inspect its verified, tamper-evident digital maintenance record.
-                    </p>
-                    <form action="{{ route('passport.lookup') }}" method="GET" style="display: flex; justify-content: center; flex-wrap: wrap; max-width: 580px; margin: 0 auto; gap: 10px;">
-                        <input type="text" name="query" placeholder="e.g. AA 3-45678 or Chassis/VIN Number" required style="flex: 1; min-width: 260px; padding: 14px 20px; border-radius: 8px; border: 1px solid #334155; background: #182234; color: #fff; font-size: 15px; outline: none; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
-                        <button type="submit" style="background: #0284C7; color: #fff; border: 1px solid #0369A1; padding: 14px 28px; border-radius: 8px; font-weight: 700; cursor: pointer; text-transform: uppercase; font-size: 14px; letter-spacing: 0.05em; transition: all 0.2s;">
-                            Verify Passport &rarr;
-                        </button>
-                    </form>
-                </div>
-            </div>
+
             <div class="row page-margin-top-section">
                 <div class="row">
                     <h2 class="box-header">WHY CHOOSE US?</h2>
