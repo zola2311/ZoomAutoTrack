@@ -126,7 +126,11 @@ class AppointmentObserver
         $appointment->saveQuietly();
 
         if ($appointment->customer && $appointment->customer->email) {
-            $appointment->customer->notify(new AppointmentConfirmed($appointment->fresh(['vehicle', 'jobCard'])));
+            try {
+                $appointment->customer->notify(new AppointmentConfirmed($appointment->fresh(['vehicle', 'jobCard'])));
+            } catch (\Throwable $e) {
+                Log::warning("Could not dispatch appointment confirmed notification: " . $e->getMessage());
+            }
         }
     }
 }

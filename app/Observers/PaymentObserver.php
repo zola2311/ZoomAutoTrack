@@ -68,10 +68,14 @@ class PaymentObserver
             return;
         }
 
-        if ($invoice->status === 'paid') {
-            $invoice->customer->notify(new InvoicePaid($invoice, (float) $payment->amount));
-        } elseif ($invoice->status === 'partial') {
-            $invoice->customer->notify(new PartialPaymentReceived($invoice, (float) $payment->amount));
+        try {
+            if ($invoice->status === 'paid') {
+                $invoice->customer->notify(new InvoicePaid($invoice, (float) $payment->amount));
+            } elseif ($invoice->status === 'partial') {
+                $invoice->customer->notify(new PartialPaymentReceived($invoice, (float) $payment->amount));
+            }
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('Could not send payment notification to customer: ' . $e->getMessage());
         }
     }
 }

@@ -42,11 +42,19 @@ class JobCardObserver
             return;
         }
         if ($jobCard->customer && ! $jobCard->customer->password && $jobCard->customer->email) {
-            $token = \Illuminate\Support\Facades\Password::broker('customers')->createToken($jobCard->customer);
-            $jobCard->customer->sendPasswordResetNotification($token);
+            try {
+                $token = \Illuminate\Support\Facades\Password::broker('customers')->createToken($jobCard->customer);
+                $jobCard->customer->sendPasswordResetNotification($token);
+            } catch (\Throwable $e) {
+                Log::warning("Could not dispatch customer reset notification: " . $e->getMessage());
+            }
         }
         if ($jobCard->customer && $jobCard->customer->email) {
-            $jobCard->customer->notify(new VehicleReadyForPickup($jobCard));
+            try {
+                $jobCard->customer->notify(new VehicleReadyForPickup($jobCard));
+            } catch (\Throwable $e) {
+                Log::warning("Could not dispatch pickup notification to {$jobCard->customer->email}: " . $e->getMessage());
+            }
         }
         $this->maybeAwardReferralBonus($jobCard);
         // Don't create a duplicate invoice if one already exists

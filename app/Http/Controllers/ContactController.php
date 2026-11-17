@@ -24,13 +24,17 @@ class ContactController extends Controller
             'message' => ['required', 'string', 'max:2000'],
         ]);
 
-        Mail::to(config('mail.contact_address', 'info@autotrack.et'))
-            ->send(new ContactFormSubmitted(
-                $data['name'],
-                $data['email'],
-                $data['phone'] ?? null,
-                $data['message'],
-            ));
+        try {
+            Mail::to(config('mail.contact_address', env('ADMIN_NOTIFICATION_EMAIL', 'admin@zoomev.et')))
+                ->send(new ContactFormSubmitted(
+                    $data['name'],
+                    $data['email'],
+                    $data['phone'] ?? null,
+                    $data['message'],
+                ));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('Contact form email dispatch error: ' . $e->getMessage());
+        }
 
         return back()->with('status', 'Thanks — your message has been sent. We\'ll get back to you within one business day.');
     }
