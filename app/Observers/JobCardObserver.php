@@ -204,7 +204,7 @@ class JobCardObserver
             if ($admins->isNotEmpty()) {
                 FilamentNotification::make()
                     ->title("Job Assigned: #{$jobCard->job_number}")
-                    ->icon('heroicon-o-user-check')
+                    ->icon('heroicon-o-user-circle')
                     ->iconColor('info')
                     ->body("Delegated to {$mechanic->name} for vehicle {$vehicle?->plate_number}.")
                     ->actions([
